@@ -113,7 +113,8 @@ DEFINE_HOOK(6F3C56, TechnoClass_Transform_6F3AD0_TurretMultiOffset, 0)
 	LEA_STACK(Matrix3D*, mtx, 0xD8 - 0x90);
 	GET(TechnoTypeClass*, technoType, EDX);
 
-	mtx->Translate(technoType->TurretOffset, 0.0, 0.0);
+	float x = static_cast<float>(technoType->TurretOffset);
+	mtx->Translate(x, 0.0f, 0.0f);
 
 	return 0x6F3C6D;
 }
@@ -123,7 +124,8 @@ DEFINE_HOOK(6F3E6E, FootClass_firecoord_6F3D60_TurretMultiOffset, 0)
 	LEA_STACK(Matrix3D*, mtx, 0xCC - 0x90);
 	GET(TechnoTypeClass*, technoType, EBP);
 
-	mtx->Translate(technoType->TurretOffset, 0.0, 0.0);
+	float x = static_cast<float>(technoType->TurretOffset);
+	mtx->Translate(x, 0.0f, 0.0f);
 
 	return 0x6F3E85;
 }
@@ -146,11 +148,9 @@ DEFINE_HOOK(73BA4C, UnitClass_DrawVXL_MultiTurretOffset1, 0)
 
 	double& factor = *reinterpret_cast<double*>(0xB1D008);
 
-	mtx->Translate(technoType->TurretOffset * factor, 0.0, 0.0);
+	float x = static_cast<float>(technoType->TurretOffset * factor);
+	mtx->Translate(x, 0.0f, 0.0f);
 
 	return 0x73BA68;
 }
 //73C88A
-
-
-
