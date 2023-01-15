@@ -25,6 +25,7 @@ You can use the migration utility (can be found on [Phobos supplementaries repo]
 
 #### From 0.3
 
+- Phobos-introduced Warhead effects like shield modifiers, critical hits, disguise & mind control removal now require Warhead `Verses` to affect target to apply unless `EffectsRequireVerses` is set to false. Shield armor type is used if target has an active shield that cannot be penetrated by the Warhead.
 - `LaunchSW.RealLaunch=false` now checks if firing house has enough credits to satisfy SW's `Money.Amount` in order to be fired.
 - `CreateUnit` now creates the units by default at animation's height (even if `CreateUnit.ConsiderPathfinding` is enabled) instead of always at ground level. This behaviour can be restored by setting `CreateUnit.AlwaysSpawnOnGround` to true.
 - Phobos-introduced attack scripts now consider potential target's current map zone when evaluating targets. [TargetZoneScanType](Fixed-or-Improved-Logics.md#customizable-target-evaluation-map-zone-check-behaviour) can be used to customize this behaviour.
