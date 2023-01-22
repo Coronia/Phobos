@@ -205,6 +205,9 @@ This page lists all the individual contributions to the project by their author.
   - PipScale pip size & ammo pip frame customization
   - Extension class optimization
   - Additional sync logging
+  - Custom tint effects
+  - Revenge weapons
+  - AttachEffect
 - **Morton (MortonPL)**:
   - `XDrawOffset` for animations
   - Shield passthrough & absorption

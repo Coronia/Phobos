@@ -51,12 +51,12 @@
 
 #include "Savegame.h"
 #include "Debug.h"
+#include "Enum.h"
 
 class ConvertClass;
 
 template <typename T>
 using UniqueGamePtr = std::unique_ptr<T, GameDeleter>;
-
 
 class ArmorType
 {

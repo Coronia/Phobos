@@ -132,6 +132,8 @@ This page describes all ingame logics that are fixed or improved in Phobos witho
   - They can also have map lighting apply on them if `AltPalette.ApplyLighting` is set to true.
 - Fixed `DeployToFire` not considering building placement rules for `DeploysInto` buildings and as a result not working properly with `WaterBound` buildings.
 - Fixed `DeployToFire` not recalculating firer's position on land if it cannot currently deploy.
+- Tint effects are now correctly applied to SHP vehicles and all types of aircraft as well as building animations regardless of their position.
+- Iron Curtained / Force Shielded objects now always use the correct tint color.
 
 ## Fixes / interactions with other extensions
 

@@ -6,6 +6,7 @@
 #include <Utilities/TemplateDef.h>
 #include <New/Type/ShieldTypeClass.h>
 #include <Ext/Bullet/Body.h>
+#include <Ext/Techno/Body.h>
 #include <Misc/TypeConvertHelper.h>
 
 class WarheadTypeExt
@@ -108,6 +109,10 @@ public:
 
 		Valueable<bool> InflictLocomotor;
 		Valueable<bool> RemoveInflictedLocomotor;
+
+		ValueableVector<AttachEffectTypeClass*> AttachEffect_AttachTypes;
+		ValueableVector<AttachEffectTypeClass*> AttachEffect_RemoveTypes;
+		ValueableVector<int> AttachEffect_DurationOverrides;
 
 		// Ares tags
 		// http://ares-developers.github.io/Ares-docs/new/warheads/general.html
@@ -216,6 +221,10 @@ public:
 			, InflictLocomotor { false }
 			, RemoveInflictedLocomotor { false }
 
+			, AttachEffect_AttachTypes {}
+			, AttachEffect_RemoveTypes {}
+			, AttachEffect_DurationOverrides {}
+
 			, AffectsEnemies { true }
 			, AffectsOwner {}
 			, EffectsRequireVerses { true }
@@ -232,7 +241,7 @@ public:
 		void ApplyLocomotorInflictionReset(TechnoClass* pTarget);
 	public:
 		bool CanTargetHouse(HouseClass* pHouse, TechnoClass* pTechno);
-		bool CanAffectTarget(TechnoClass* pTarget);
+		bool CanAffectTarget(TechnoClass* pTarget, TechnoExt::ExtData* pTargetExt);
 		bool EligibleForFullMapDetonation(TechnoClass* pTechno, HouseClass* pOwner);
 
 		virtual ~ExtData() = default;
@@ -253,9 +262,9 @@ public:
 		void DetonateOnOneUnit(HouseClass* pHouse, TechnoClass* pTarget, TechnoClass* pOwner = nullptr, bool bulletWasIntercepted = false);
 		void ApplyRemoveDisguiseToInf(HouseClass* pHouse, TechnoClass* pTarget);
 		void ApplyRemoveMindControl(HouseClass* pHouse, TechnoClass* pTarget);
-		void ApplyCrit(HouseClass* pHouse, TechnoClass* pTarget, TechnoClass* Owner);
-		void ApplyShieldModifiers(TechnoClass* pTarget);
-
+		void ApplyCrit(HouseClass* pHouse, TechnoClass* pTarget, TechnoClass* Owner, TechnoExt::ExtData* pTargetExt);
+		void ApplyShieldModifiers(TechnoClass* pTarget, TechnoExt::ExtData* pTargetExt);
+		void ApplyAttachEffects(TechnoClass* pTarget, HouseClass* pInvokerHouse, TechnoClass* pInvoker);
 	};
 
 	class ExtContainer final : public Container<WarheadTypeExt>
