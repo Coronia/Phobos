@@ -42,6 +42,7 @@ public:
 		ValueableVector<int> ExtraWarheads_DamageOverrides;
 		ValueableVector<AttachEffectTypeClass*> AttachEffect_RequiredTypes;
 		ValueableVector<AttachEffectTypeClass*> AttachEffect_DisallowedTypes;
+		Valueable<bool> AttachEffect_IgnoreFromSameSource;
 
 		ExtData(WeaponTypeClass* OwnerObject) : Extension<WeaponTypeClass>(OwnerObject)
 			, DiskLaser_Radius { DiskLaserClass::Radius }
@@ -65,11 +66,12 @@ public:
 			, ExtraWarheads_DamageOverrides {}
 			, AttachEffect_RequiredTypes {}
 			, AttachEffect_DisallowedTypes {}
+			, AttachEffect_IgnoreFromSameSource { false }
 		{ }
 
 		int GetBurstDelay(int burstIndex);
 
-		bool HasRequiredAttachedEffects(TechnoClass* pTechno);
+		bool HasRequiredAttachedEffects(TechnoClass* pTechno, TechnoClass* pFirer);
 
 		virtual ~ExtData() = default;
 
