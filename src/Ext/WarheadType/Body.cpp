@@ -295,6 +295,10 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->DecloakDamagedTargets)
 		.Process(this->ShakeIsLocal)
 
+		.Process(this->GattlingStage)
+		.Process(this->GattlingRateUp)
+		.Process(this->ReloadAmmo)
+
 		.Process(this->Crit_Chance)
 		.Process(this->Crit_ApplyChancePerTarget)
 		.Process(this->Crit_ExtraDamage)
