@@ -25,7 +25,11 @@ You can use the migration utility (can be found on [Phobos supplementaries repo]
 
 #### From 0.3
 
+<<<<<<< HEAD
 - `Trajectory=Straight` projectiles can now snap on targets within 0.5 cells from their detonation point, this distance can be customized via `Trajectory.Straight.TargetSnapDistance`.
+=======
+- Phobos-introduced Warhead effects like shield modifiers, critical hits, disguise & mind control removal now require Warhead `Verses` to affect target to apply unless `EffectsRequireVerses` is set to false. Shield armor type is used if target has an active shield that cannot be penetrated by the Warhead.
+>>>>>>> c22b4bad3638615bd083d596e71459c9cef9218a
 - `LaunchSW.RealLaunch=false` now checks if firing house has enough credits to satisfy SW's `Money.Amount` in order to be fired.
 - `CreateUnit` now creates the units by default at animation's height (even if `CreateUnit.ConsiderPathfinding` is enabled) instead of always at ground level. This behaviour can be restored by setting `CreateUnit.AlwaysSpawnOnGround` to true.
 - Phobos-introduced attack scripts now consider potential target's current map zone when evaluating targets. [TargetZoneScanType](Fixed-or-Improved-Logics.md#customizable-target-evaluation-map-zone-check-behaviour) can be used to customize this behaviour.
@@ -330,7 +334,13 @@ New:
 - Unhardcoded timer blinking color scheme (by Starkku)
 - Customizing shield self-healing timer restart when shield is damaged (by Starkku)
 - Customizing minimum & maximum amount of damage shield can take from a single hit (by Starkku)
+<<<<<<< HEAD
 - Customizable straight trajectory detonation & snap distance and pass-through option (by Starkku)
+=======
+- Custom tint on TechnoTypes (by Starkku)
+- Revenge weapon (by Starkku)
+- AttachEffect types with new features like custom tint and weapon range modifier (by Starkku)
+>>>>>>> c22b4bad3638615bd083d596e71459c9cef9218a
 
 Vanilla fixes:
 - Allow AI to repair structures built from base nodes/trigger action 125/SW delivery in single player missions (by Trsdy)
@@ -373,8 +383,13 @@ Vanilla fixes:
 - Animations using `AltPalette` are now remapped to their owner's color scheme instead of first listed color scheme and no longer draw over shroud (by Starkku)
 - Fixed `DeployToFire` not considering building placement rules for `DeploysInto` buildings and as a result not working properly with `WaterBound` buildings (by Starkku)
 - Fixed `DeployToFire` not recalculating firer's position on land if it cannot currently deploy (by Starkku)
+<<<<<<< HEAD
 - `Arcing=true` projectile elevation inaccuracy can now be fixed by setting `Arcing.AllowElevationInaccuracy=false` (by Starkku)
 - `EMPulseCannon=yes` building weapons now respect `Floater` and Phobos-added `Gravity` setting (by Starkku)
+=======
+- Tint effects are now correctly applied to SHP vehicles and all types of aircraft as well as building animations regardless of their position (by Starkku)
+- Iron Curtained / Force Shielded objects now always use the correct tint color (by Starkku)
+>>>>>>> c22b4bad3638615bd083d596e71459c9cef9218a
 
 Phobos fixes:
 - Fixed a few errors of calling for superweapon launch by `LaunchSW` or building infiltration (by Trsdy)

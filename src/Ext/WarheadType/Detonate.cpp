@@ -8,13 +8,10 @@
 #include <AnimClass.h>
 #include <BitFont.h>
 #include <SuperClass.h>
-#include <AircraftClass.h>
 
 #include <Utilities/Helpers.Alex.h>
 #include <Ext/Bullet/Body.h>
 #include <Ext/BulletType/Body.h>
-#include <Ext/Techno/Body.h>
-#include <Ext/TechnoType/Body.h>
 #include <Ext/SWType/Body.h>
 #include <Misc/FlyingStrings.h>
 #include <Utilities/EnumFunctions.h>
@@ -100,6 +97,7 @@ void WarheadTypeExt::ExtData::Detonate(TechnoClass* pOwner, HouseClass* pHouse, 
 	if (this->PossibleCellSpreadDetonate)
 	{
 		this->HasCrit = false;
+
 		if (!this->Crit_ApplyChancePerTarget)
 			this->Crit_RandomBuffer = ScenarioClass::Instance->Random.RandomDouble();
 
@@ -124,10 +122,12 @@ void WarheadTypeExt::ExtData::DetonateOnOneUnit(HouseClass* pHouse, TechnoClass*
 	if (!pTarget || pTarget->InLimbo || !pTarget->IsAlive || !pTarget->Health || pTarget->IsSinking)
 		return;
 
-	if (!this->CanTargetHouse(pHouse, pTarget))
+	TechnoExt::ExtData* pTargetExt = nullptr;
+
+	if (!this->CanTargetHouse(pHouse, pTarget) || !this->CanAffectTarget(pTarget, pTargetExt))
 		return;
 
-	this->ApplyShieldModifiers(pTarget);
+	this->ApplyShieldModifiers(pTarget, pTargetExt);
 
 	if (this->RemoveDisguise)
 		this->ApplyRemoveDisguiseToInf(pHouse, pTarget);
@@ -136,7 +136,7 @@ void WarheadTypeExt::ExtData::DetonateOnOneUnit(HouseClass* pHouse, TechnoClass*
 		this->ApplyRemoveMindControl(pHouse, pTarget);
 
 	if (this->Crit_Chance && (!this->Crit_SuppressWhenIntercepted || !bulletWasIntercepted))
-		this->ApplyCrit(pHouse, pTarget, pOwner);
+		this->ApplyCrit(pHouse, pTarget, pOwner, pTargetExt);
 
 	if (this->Convert_Pairs.size() > 0)
 		this->ApplyConvert(pHouse, pTarget);
@@ -146,34 +146,38 @@ void WarheadTypeExt::ExtData::DetonateOnOneUnit(HouseClass* pHouse, TechnoClass*
 
 	if (this->RemoveInflictedLocomotor)
 		this->ApplyLocomotorInflictionReset(pTarget);
+
+	if (this->AttachEffect_AttachTypes.size() > 0 || this->AttachEffect_RemoveTypes.size() > 0)
+		this->ApplyAttachEffects(pTarget, pHouse, pOwner);
 }
 
-void WarheadTypeExt::ExtData::ApplyShieldModifiers(TechnoClass* pTarget)
+void WarheadTypeExt::ExtData::ApplyShieldModifiers(TechnoClass* pTarget, TechnoExt::ExtData* pTargetExt = nullptr)
 {
-	if (auto pExt = TechnoExt::ExtMap.Find(pTarget))
-	{
-		bool canAffectTarget = GeneralUtils::GetWarheadVersusArmor(this->OwnerObject(), pTarget->GetTechnoType()->Armor) != 0.0;
+	if (!pTargetExt)
+		pTargetExt = TechnoExt::ExtMap.Find(pTarget);
 
+	if (pTargetExt)
+	{
 		int shieldIndex = -1;
 		double ratio = 1.0;
 
 		// Remove shield.
-		if (pExt->Shield && canAffectTarget)
+		if (pTargetExt->Shield)
 		{
-			const auto shieldType = pExt->Shield->GetType();
+			const auto shieldType = pTargetExt->Shield->GetType();
 			shieldIndex = this->Shield_RemoveTypes.IndexOf(shieldType);
 
 			if (shieldIndex >= 0)
 			{
-				ratio = pExt->Shield->GetHealthRatio();
-				pExt->CurrentShieldType = ShieldTypeClass::FindOrAllocate(NONE_STR);
-				pExt->Shield->KillAnim();
-				pExt->Shield = nullptr;
+				ratio = pTargetExt->Shield->GetHealthRatio();
+				pTargetExt->CurrentShieldType = ShieldTypeClass::FindOrAllocate(NONE_STR);
+				pTargetExt->Shield->KillAnim();
+				pTargetExt->Shield = nullptr;
 			}
 		}
 
 		// Attach shield.
-		if (canAffectTarget && Shield_AttachTypes.size() > 0)
+		if (Shield_AttachTypes.size() > 0)
 		{
 			ShieldTypeClass* shieldType = nullptr;
 
@@ -189,62 +193,49 @@ void WarheadTypeExt::ExtData::ApplyShieldModifiers(TechnoClass* pTarget)
 
 			if (shieldType)
 			{
-				if (shieldType->Strength && (!pExt->Shield || (this->Shield_ReplaceNonRespawning && pExt->Shield->IsBrokenAndNonRespawning() &&
-					pExt->Shield->GetFramesSinceLastBroken() >= this->Shield_MinimumReplaceDelay)))
+				if (shieldType->Strength && (!pTargetExt->Shield || (this->Shield_ReplaceNonRespawning && pTargetExt->Shield->IsBrokenAndNonRespawning() &&
+					pTargetExt->Shield->GetFramesSinceLastBroken() >= this->Shield_MinimumReplaceDelay)))
 				{
-					pExt->CurrentShieldType = shieldType;
-					pExt->Shield = std::make_unique<ShieldClass>(pTarget, true);
+					pTargetExt->CurrentShieldType = shieldType;
+					pTargetExt->Shield = std::make_unique<ShieldClass>(pTarget, true);
 
 					if (this->Shield_ReplaceOnly && this->Shield_InheritStateOnReplace)
 					{
-						pExt->Shield->SetHP((int)(shieldType->Strength * ratio));
+						pTargetExt->Shield->SetHP((int)(shieldType->Strength * ratio));
 
-						if (pExt->Shield->GetHP() == 0)
-							pExt->Shield->SetRespawn(shieldType->Respawn_Rate, shieldType->Respawn, shieldType->Respawn_Rate, true);
+						if (pTargetExt->Shield->GetHP() == 0)
+							pTargetExt->Shield->SetRespawn(shieldType->Respawn_Rate, shieldType->Respawn, shieldType->Respawn_Rate, true);
 					}
 				}
 			}
 		}
 
 		// Apply other modifiers.
-		if (pExt->Shield)
+		if (pTargetExt->Shield)
 		{
-			auto isShieldTypeEligible = [pExt](Iterator<ShieldTypeClass*> elements) -> bool
+			auto isShieldTypeEligible = [pTargetExt](Iterator<ShieldTypeClass*> elements) -> bool
 			{
-				if (elements.size() > 0 && !elements.contains(pExt->Shield->GetType()))
+				if (elements.size() > 0 && !elements.contains(pTargetExt->Shield->GetType()))
 					return false;
 
 				return true;
 			};
 
-			if (this->Shield_Break && pExt->Shield->IsActive() && isShieldTypeEligible(this->Shield_Break_Types.GetElements(this->Shield_AffectTypes)))
-				pExt->Shield->BreakShield(this->Shield_BreakAnim.Get(nullptr), this->Shield_BreakWeapon.Get(nullptr));
+			if (this->Shield_Break && pTargetExt->Shield->IsActive() && isShieldTypeEligible(this->Shield_Break_Types.GetElements(this->Shield_AffectTypes)))
+				pTargetExt->Shield->BreakShield(this->Shield_BreakAnim.Get(nullptr), this->Shield_BreakWeapon.Get(nullptr));
 
 			if (this->Shield_Respawn_Duration > 0 && isShieldTypeEligible(this->Shield_Respawn_Types.GetElements(this->Shield_AffectTypes)))
-				pExt->Shield->SetRespawn(this->Shield_Respawn_Duration, this->Shield_Respawn_Amount, this->Shield_Respawn_Rate, this->Shield_Respawn_RestartTimer);
+				pTargetExt->Shield->SetRespawn(this->Shield_Respawn_Duration, this->Shield_Respawn_Amount, this->Shield_Respawn_Rate, this->Shield_Respawn_RestartTimer);
 
 			if (this->Shield_SelfHealing_Duration > 0 && isShieldTypeEligible(this->Shield_SelfHealing_Types.GetElements(this->Shield_AffectTypes)))
 			{
-				double amount = this->Shield_SelfHealing_Amount.Get(pExt->Shield->GetType()->SelfHealing);
+				double amount = this->Shield_SelfHealing_Amount.Get(pTargetExt->Shield->GetType()->SelfHealing);
 
-				pExt->Shield->SetSelfHealing(this->Shield_SelfHealing_Duration, amount, this->Shield_SelfHealing_Rate,
-					this->Shield_SelfHealing_RestartInCombat.Get(pExt->Shield->GetType()->SelfHealing_RestartInCombat),
+				pTargetExt->Shield->SetSelfHealing(this->Shield_SelfHealing_Duration, amount, this->Shield_SelfHealing_Rate,
+					this->Shield_SelfHealing_RestartInCombat.Get(pTargetExt->Shield->GetType()->SelfHealing_RestartInCombat),
 					this->Shield_SelfHealing_RestartInCombatDelay, this->Shield_SelfHealing_RestartTimer);
 			}
 		}
-	}
-
-	if (this->GattlingStage > 0) {
-		this->ApplyGattlingStage(pTarget, this->GattlingStage);
-	}
-	
-	if (this->GattlingRateUp != 0) {
-		this->ApplyGattlingRateUp(pTarget, this->GattlingRateUp);
-	}
-
-	if (this->ReloadAmmo != 0)
-	{
-		this->ApplyReloadAmmo(pTarget, this->ReloadAmmo);
 	}
 }
 
@@ -263,7 +254,7 @@ void WarheadTypeExt::ExtData::ApplyRemoveDisguiseToInf(HouseClass* pHouse, Techn
 	}
 }
 
-void WarheadTypeExt::ExtData::ApplyCrit(HouseClass* pHouse, TechnoClass* pTarget, TechnoClass* pOwner)
+void WarheadTypeExt::ExtData::ApplyCrit(HouseClass* pHouse, TechnoClass* pTarget, TechnoClass* pOwner, TechnoExt::ExtData* pTargetExt = nullptr)
 {
 	double dice;
 
@@ -272,17 +263,20 @@ void WarheadTypeExt::ExtData::ApplyCrit(HouseClass* pHouse, TechnoClass* pTarget
 	else
 		dice = this->Crit_RandomBuffer;
 
-	if (this->Crit_Chance < dice)
+	if (GetCritChance(pOwner) < dice)
 		return;
 
-	if (auto pExt = TechnoExt::ExtMap.Find(pTarget))
+	if (!pTargetExt)
+		pTargetExt = TechnoExt::ExtMap.Find(pTarget);
+
+	if (pTargetExt)
 	{
-		auto const pTypeExt = pExt->TypeExtData;
+		auto const pTypeExt = pTargetExt->TypeExtData;
 
 		if (pTypeExt->ImmuneToCrit)
 			return;
 
-		auto pSld = pExt->Shield.get();
+		auto pSld = pTargetExt->Shield.get();
 		if (pSld && pSld->IsActive() && pSld->GetType()->ImmuneToCrit)
 			return;
 
@@ -338,7 +332,7 @@ void WarheadTypeExt::ExtData::InterceptBullets(TechnoClass* pOwner, WeaponTypeCl
 	}
 	else
 	{
-		for (auto& [pBullet, pBulletExt] : BulletExt::ExtMap)
+		for (auto const& [pBullet, pBulletExt] : BulletExt::ExtMap)
 		{
 			if (pBullet->Location.DistanceFrom(coords) > cellSpread * Unsorted::LeptonsPerCell)
 				continue;
@@ -408,70 +402,47 @@ void WarheadTypeExt::ExtData::ApplyLocomotorInflictionReset(TechnoClass* pTarget
 	LocomotionClass::End_Piggyback(pTargetFoot->Locomotor);
 }
 
-void WarheadTypeExt::ExtData::ApplyGattlingStage(TechnoClass* pTarget, int Stage)
+void WarheadTypeExt::ExtData::ApplyAttachEffects(TechnoClass* pTarget, HouseClass* pInvokerHouse, TechnoClass* pInvoker)
 {
-	auto pData = pTarget->GetTechnoType();
-	if (pData->IsGattling)
+	if (!pTarget)
+		return;
+
+	std::vector<int> dummy = std::vector<int>();
+
+	AttachEffectClass::Attach(this->AttachEffect_AttachTypes, pTarget, pInvokerHouse, pInvoker, this->OwnerObject(), this->AttachEffect_DurationOverrides, dummy, dummy, dummy);
+	AttachEffectClass::Detach(this->AttachEffect_RemoveTypes, pTarget);
+}
+
+double WarheadTypeExt::ExtData::GetCritChance(TechnoClass* pFirer)
+{
+	double critChance = this->Crit_Chance;
+
+	if (critChance == 0.0 || !pFirer)
+		return critChance;
+
+	auto const pExt = TechnoExt::ExtMap.Find(pFirer);
+	double extraChance = 0.0;
+
+	for (auto& attachEffect : pExt->AttachedEffects)
 	{
-		// if exceeds, pick the largest stage
-		if (Stage > pData->WeaponStages)
-		{
-			Stage = pData->WeaponStages;
-		}
+		if (!attachEffect->IsActive())
+			continue;
 
-		pTarget->CurrentGattlingStage = Stage - 1;
-		if (Stage == 1) {
-			pTarget->GattlingValue = 0;
-			pTarget->unknown_bool_4B8 = false;
-		}
-		else {
-			pTarget->GattlingValue = pTarget->Veterancy.IsElite() ? pData->EliteStage[Stage - 2] : pData->WeaponStage[Stage - 2];
-			pTarget->unknown_bool_4B8 = true;
-		}
+		auto const pType = attachEffect->GetType();
+
+		if (pType->Crit_Multiplier == 1.0 && pType->Crit_ExtraChance == 0.0)
+			continue;
+
+		if (pType->Crit_AllowWarheads.size() > 0 && !pType->Crit_AllowWarheads.Contains(this->OwnerObject()))
+			continue;
+
+		if (pType->Crit_DisallowWarheads.size() > 0 && pType->Crit_DisallowWarheads.Contains(this->OwnerObject()))
+			continue;
+
+		critChance = critChance * Math::max(pType->Crit_Multiplier, 0);
+		extraChance += pType->Crit_ExtraChance;
 	}
+
+	return critChance + extraChance;
 }
 
-void WarheadTypeExt::ExtData::ApplyGattlingRateUp(TechnoClass* pTarget, int RateUp)
-{
-	auto pData = pTarget->GetTechnoType();
-	if (pData->IsGattling) {
-		auto curValue = pTarget->GattlingValue + RateUp;
-		auto maxValue = pTarget->Veterancy.IsElite() ? pData->EliteStage[pData->WeaponStages - 1] : pData->WeaponStage[pData->WeaponStages - 1];
-		
-		//set current weapon stage manually
-		if (curValue <= 0) {
-			pTarget->GattlingValue = 0;
-			pTarget->CurrentGattlingStage = 0;
-			pTarget->unknown_bool_4B8 = false;
-		}
-		else if (curValue >= maxValue) {
-			pTarget->GattlingValue = maxValue;
-			pTarget->CurrentGattlingStage = pData->WeaponStages - 1;
-			pTarget->unknown_bool_4B8 = true;
-		}
-		else {
-			pTarget->GattlingValue = curValue;
-			pTarget->unknown_bool_4B8 = true;
-			for (int i = 0; i < pData->WeaponStages; i++) {
-				if (pTarget->Veterancy.IsElite() && curValue < pData->EliteStage[i]) {
-					pTarget->CurrentGattlingStage = i;
-					break;
-				}
-				else if (curValue < pData->WeaponStage[i]) {
-					pTarget->CurrentGattlingStage = i;
-					break;
-				}
-			}
-		}
-	}
-}
-
-void WarheadTypeExt::ExtData::ApplyReloadAmmo(TechnoClass* pTarget, int ReloadAmount)
-{
-	auto pData = pTarget->GetTechnoType();
-	if (pData->Ammo > 0)
-	{
-		auto const ammo = pTarget->Ammo + ReloadAmount;
-		pTarget->Ammo = Math::clamp(ammo, 0, pData->Ammo);
-	}
-}
