@@ -115,6 +115,13 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->TransactMoney_Display_Offset.Read(exINI, pSection, "TransactMoney.Display.Offset");
 	this->SplashList.Read(exINI, pSection, "SplashList");
 	this->SplashList_PickRandom.Read(exINI, pSection, "SplashList.PickRandom");
+	this->SplashList_CreateAll.Read(exINI, pSection, "SplashList.CreateAll");
+	this->SplashList_CreationInterval.Read(exINI, pSection, "SplashList.CreationInterval");
+	this->AnimList_PickRandom.Read(exINI, pSection, "AnimList.PickRandom");
+	this->AnimList_CreateAll.Read(exINI, pSection, "AnimList.CreateAll");
+	this->AnimList_CreationInterval.Read(exINI, pSection, "AnimList.CreationInterval");
+	this->CreateAnimsOnZeroDamage.Read(exINI, pSection, "CreateAnimsOnZeroDamage");
+	this->Conventional_IgnoreUnits.Read(exINI, pSection, "Conventional.IgnoreUnits");
 	this->RemoveDisguise.Read(exINI, pSection, "RemoveDisguise");
 	this->RemoveMindControl.Read(exINI, pSection, "RemoveMindControl");
 	this->GattlingStage.Read(exINI, pSection, "TargetGattlingStage");
@@ -124,6 +131,7 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->AnimList_ShowOnZeroDamage.Read(exINI, pSection, "AnimList.ShowOnZeroDamage");
 	this->DecloakDamagedTargets.Read(exINI, pSection, "DecloakDamagedTargets");
 	this->ShakeIsLocal.Read(exINI, pSection, "ShakeIsLocal");
+	this->ApplyModifiersOnNegativeDamage.Read(exINI, pSection, "ApplyModifiersOnNegativeDamage");
 
 	// Crits
 	this->Crit_Chance.Read(exINI, pSection, "Crit.Chance");
@@ -145,7 +153,7 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->Shield_Break.Read(exINI, pSection, "Shield.Break");
 	this->Shield_BreakAnim.Read(exINI, pSection, "Shield.BreakAnim");
 	this->Shield_HitAnim.Read(exINI, pSection, "Shield.HitAnim");
-	this->Shield_BreakWeapon.Read(exINI, pSection, "Shield.BreakWeapon", true);
+	this->Shield_BreakWeapon.Read<true>(exINI, pSection, "Shield.BreakWeapon");
 	this->Shield_AbsorbPercent.Read(exINI, pSection, "Shield.AbsorbPercent");
 	this->Shield_PassPercent.Read(exINI, pSection, "Shield.PassPercent");
 	this->Shield_ReceivedDamage_Minimum.Read(exINI, pSection, "Shield.ReceivedDamage.Minimum");
@@ -194,44 +202,8 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->DetonateOnAllMapObjects_AffectTypes.Read(exINI, pSection, "DetonateOnAllMapObjects.AffectTypes");
 	this->DetonateOnAllMapObjects_IgnoreTypes.Read(exINI, pSection, "DetonateOnAllMapObjects.IgnoreTypes");
 
-	char tempBuffer[32];
 	// Convert.From & Convert.To
-	for (size_t i = 0; ; ++i)
-	{
-		ValueableVector<TechnoTypeClass*> convertFrom;
-		Nullable<TechnoTypeClass*> convertTo;
-		Nullable<AffectedHouse> convertAffectedHouses;
-		_snprintf_s(tempBuffer, sizeof(tempBuffer), "Convert%d.From", i);
-		convertFrom.Read(exINI, pSection, tempBuffer);
-		_snprintf_s(tempBuffer, sizeof(tempBuffer), "Convert%d.To", i);
-		convertTo.Read(exINI, pSection, tempBuffer);
-		_snprintf_s(tempBuffer, sizeof(tempBuffer), "Convert%d.AffectedHouses", i);
-		convertAffectedHouses.Read(exINI, pSection, tempBuffer);
-
-		if (!convertTo.isset())
-			break;
-
-		if (!convertAffectedHouses.isset())
-			convertAffectedHouses = AffectedHouse::All;
-
-		this->Convert_Pairs.push_back({ convertFrom, convertTo, convertAffectedHouses });
-	}
-	ValueableVector<TechnoTypeClass*> convertFrom;
-	Nullable<TechnoTypeClass*> convertTo;
-	Nullable<AffectedHouse> convertAffectedHouses;
-	convertFrom.Read(exINI, pSection, "Convert.From");
-	convertTo.Read(exINI, pSection, "Convert.To");
-	convertAffectedHouses.Read(exINI, pSection, "Convert.AffectedHouses");
-	if (convertTo.isset())
-	{
-		if (!convertAffectedHouses.isset())
-			convertAffectedHouses = AffectedHouse::All;
-
-		if (this->Convert_Pairs.size())
-			this->Convert_Pairs[0] = { convertFrom, convertTo, convertAffectedHouses };
-		else
-			this->Convert_Pairs.push_back({ convertFrom, convertTo, convertAffectedHouses });
-	}
+	TypeConvertGroup::Parse(this->Convert_Pairs, exINI, pSection, AffectedHouse::All);
 
 #ifdef LOCO_TEST_WARHEADS // Enable warheads parsing
 	this->InflictLocomotor.Read(exINI, pSection, "InflictLocomotor");
@@ -291,12 +263,18 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->TransactMoney_Display_Offset)
 		.Process(this->SplashList)
 		.Process(this->SplashList_PickRandom)
+		.Process(this->SplashList_CreateAll)
+		.Process(this->SplashList_CreationInterval)
+		.Process(this->AnimList_PickRandom)
+		.Process(this->AnimList_CreateAll)
+		.Process(this->AnimList_CreationInterval)
+		.Process(this->CreateAnimsOnZeroDamage)
+		.Process(this->Conventional_IgnoreUnits)
 		.Process(this->RemoveDisguise)
 		.Process(this->RemoveMindControl)
-		.Process(this->AnimList_PickRandom)
-		.Process(this->AnimList_ShowOnZeroDamage)
 		.Process(this->DecloakDamagedTargets)
 		.Process(this->ShakeIsLocal)
+		.Process(this->ApplyModifiersOnNegativeDamage)
 
 		.Process(this->GattlingStage)
 		.Process(this->GattlingRateUp)
@@ -377,6 +355,7 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->AffectsOwner)
 
 		.Process(this->WasDetonatedOnAllMapObjects)
+		.Process(this->RemainingAnimCreationInterval)
 		.Process(this->PossibleCellSpreadDetonate)
 		;
 }

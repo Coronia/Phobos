@@ -150,7 +150,16 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	if (this->InitialStrength.isset())
 		this->InitialStrength = Math::clamp(this->InitialStrength, 1, pThis->Strength);
 
-	this->ShieldType.Read(exINI, pSection, "ShieldType", true);
+	this->ReloadInTransport.Read(exINI, pSection, "ReloadInTransport");
+	this->ShieldType.Read<true>(exINI, pSection, "ShieldType");
+
+	this->Ammo_AddOnDeploy.Read(exINI, pSection, "Ammo.AddOnDeploy");
+	this->Ammo_AutoDeployMinimumAmount.Read(exINI, pSection, "Ammo.AutoDeployMinimumAmount");
+	this->Ammo_AutoDeployMaximumAmount.Read(exINI, pSection, "Ammo.AutoDeployMaximumAmount");
+	this->Ammo_DeployUnlockMinimumAmount.Read(exINI, pSection, "Ammo.DeployUnlockMinimumAmount");
+	this->Ammo_DeployUnlockMaximumAmount.Read(exINI, pSection, "Ammo.DeployUnlockMaximumAmount");
+
+	this->VoiceCantDeploy.Read(exINI, pSection, "VoiceCantDeploy");
 
 	this->AutoDeath_Behavior.Read(exINI, pSection, "AutoDeath.Behavior");
 	this->AutoDeath_VanishAnimation.Read(exINI, pSection, "AutoDeath.VanishAnimation");
@@ -170,6 +179,7 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->SellSound.Read(exINI, pSection, "SellSound");
 	this->EVA_Sold.Read(exINI, pSection, "EVA.Sold");
 
+	this->VoiceCreated.Read(exINI, pSection, "VoiceCreated");
 	this->CameoPriority.Read(exINI, pSection, "CameoPriority");
 
 	this->WarpOut.Read(exINI, pSection, "WarpOut");
@@ -181,9 +191,9 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->ChronoRangeMinimum.Read(exINI, pSection, "ChronoRangeMinimum");
 	this->ChronoDelay.Read(exINI, pSection, "ChronoDelay");
 
-	this->WarpInWeapon.Read(exINI, pSection, "WarpInWeapon", true);
-	this->WarpInMinRangeWeapon.Read(exINI, pSection, "WarpInMinRangeWeapon", true);
-	this->WarpOutWeapon.Read(exINI, pSection, "WarpOutWeapon", true);
+	this->WarpInWeapon.Read<true>(exINI, pSection, "WarpInWeapon");
+	this->WarpInMinRangeWeapon.Read<true>(exINI, pSection, "WarpInMinRangeWeapon");
+	this->WarpOutWeapon.Read<true>(exINI, pSection, "WarpOutWeapon");
 	this->WarpInWeapon_UseDistanceAsDamage.Read(exINI, pSection, "WarpInWeapon.UseDistanceAsDamage");
 
 	this->OreGathering_Anims.Read(exINI, pSection, "OreGathering.Anims");
@@ -248,10 +258,21 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->DigitalDisplay_Disable.Read(exINI, pSection, "DigitalDisplay.Disable");
 	this->DigitalDisplayTypes.Read(exINI, pSection, "DigitalDisplayTypes");
 
-	this->AmmoPip.Read(exINI, pSection, "AmmoPip");
-	this->EmptyAmmoPip.Read(exINI, pSection, "EmptyAmmoPip");
-	this->PipWrapAmmoPip.Read(exINI, pSection, "PipWrapAmmoPip");
+	this->AmmoPipFrame.Read(exINI, pSection, "AmmoPipFrame");
+	this->EmptyAmmoPipFrame.Read(exINI, pSection, "EmptyAmmoPipFrame");
+	this->AmmoPipWrapStartFrame.Read(exINI, pSection, "AmmoPipWrapStartFrame");
 	this->AmmoPipSize.Read(exINI, pSection, "AmmoPipSize");
+	this->AmmoPipOffset.Read(exINI, pSection, "AmmoPipOffset");
+
+	this->ShowSpawnsPips.Read(exINI, pSection, "ShowSpawnsPips");
+	this->SpawnsPipFrame.Read(exINI, pSection, "SpawnsPipFrame");
+	this->EmptySpawnsPipFrame.Read(exINI, pSection, "EmptySpawnsPipFrame");
+	this->SpawnsPipSize.Read(exINI, pSection, "SpawnsPipSize");
+	this->SpawnsPipOffset.Read(exINI, pSection, "SpawnsPipOffset");
+
+	this->SpawnDistanceFromTarget.Read(exINI, pSection, "SpawnDistanceFromTarget");
+	this->SpawnHeight.Read(exINI, pSection, "SpawnHeight");
+	this->LandingDir.Read(exINI, pSection, "LandingDir");
 
 	// Ares 0.2
 	this->RadarJamRadius.Read(exINI, pSection, "RadarJamRadius");
@@ -304,6 +325,7 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->TurretShadow.Read(exArtINI, pArtSection, "TurretShadow");
 	this->ShadowIndices.Read(exArtINI, pArtSection, "ShadowIndices");
 
+	this->LaserTrailData.clear();
 	for (size_t i = 0; ; ++i)
 	{
 		NullableIdx<LaserTrailTypeClass> trail;
@@ -354,8 +376,7 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 
 	// Parasitic types
 
-	bool resetValue = false;
-	bool canParse = PassengerDeletionTypeClass::CanParse(exINI, pSection, resetValue);
+	auto [canParse, resetValue] = PassengerDeletionTypeClass::CanParse(exINI, pSection);
 
 	if (canParse)
 	{
@@ -383,6 +404,17 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	else if (isInterceptor.isset())
 	{
 		this->InterceptorType.reset();
+	}
+
+	if (this->OwnerObject()->WhatAmI() == AbstractType::InfantryType)
+	{
+		if (this->DroppodType == nullptr)
+			this->DroppodType = std::make_unique<DroppodTypeClass>();
+		this->DroppodType->LoadFromINI(pINI, pSection);
+	}
+	else
+	{
+		this->DroppodType.reset();
 	}
 }
 
@@ -414,8 +446,16 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->CameoPriority)
 		.Process(this->NoManualMove)
 		.Process(this->InitialStrength)
+		.Process(this->ReloadInTransport)
 		.Process(this->ShieldType)
 		.Process(this->PassengerDeletionType)
+
+		.Process(this->Ammo_AddOnDeploy)
+		.Process(this->Ammo_AutoDeployMinimumAmount)
+		.Process(this->Ammo_AutoDeployMaximumAmount)
+		.Process(this->Ammo_DeployUnlockMinimumAmount)
+		.Process(this->Ammo_DeployUnlockMaximumAmount)
+		.Process(this->VoiceCantDeploy)
 
 		.Process(this->AutoDeath_Behavior)
 		.Process(this->AutoDeath_VanishAnimation)
@@ -434,6 +474,8 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->SlavesFreeSound)
 		.Process(this->SellSound)
 		.Process(this->EVA_Sold)
+
+		.Process(this->VoiceCreated)
 
 		.Process(this->WarpOut)
 		.Process(this->WarpIn)
@@ -525,10 +567,22 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->DigitalDisplay_Disable)
 		.Process(this->DigitalDisplayTypes)
 
-		.Process(this->AmmoPip)
-		.Process(this->EmptyAmmoPip)
-		.Process(this->PipWrapAmmoPip)
+		.Process(this->AmmoPipFrame)
+		.Process(this->EmptyAmmoPipFrame)
+		.Process(this->AmmoPipWrapStartFrame)
 		.Process(this->AmmoPipSize)
+		.Process(this->AmmoPipOffset)
+
+		.Process(this->ShowSpawnsPips)
+		.Process(this->SpawnsPipFrame)
+		.Process(this->EmptySpawnsPipFrame)
+		.Process(this->SpawnsPipSize)
+		.Process(this->SpawnsPipOffset)
+
+		.Process(this->SpawnDistanceFromTarget)
+		.Process(this->SpawnHeight)
+		.Process(this->LandingDir)
+		.Process(this->DroppodType)
 		;
 }
 void TechnoTypeExt::ExtData::LoadFromStream(PhobosStreamReader& Stm)

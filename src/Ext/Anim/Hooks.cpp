@@ -136,12 +136,21 @@ DEFINE_HOOK(0x4242E1, AnimClass_AI_TrailerAnim, 0x5)
 	{
 		auto const pTrailerAnimExt = AnimExt::ExtMap.Find(pTrailerAnim);
 		auto const pExt = AnimExt::ExtMap.Find(pThis);
-		pTrailerAnim->Owner = pThis->Owner;
-		pTrailerAnimExt->Invoker = pExt->Invoker;
-		pTrailerAnimExt->InvokerHouse = pExt->InvokerHouse;
+		AnimExt::SetAnimOwnerHouseKind(pTrailerAnim, pThis->Owner, nullptr, false, true);
+		pTrailerAnimExt->SetInvoker(pExt->Invoker, pExt->InvokerHouse);
 	}
 
 	return SkipGameCode;
+}
+
+// Deferred creation of attached particle systems for debris anims.
+DEFINE_HOOK(0x423939, AnimClass_BounceAI_AttachedSystem, 0x6)
+{
+	GET(AnimClass*, pThis, EBP);
+
+	AnimExt::ExtMap.Find(pThis)->CreateAttachedSystem();
+
+	return 0;
 }
 
 DEFINE_HOOK(0x423CC7, AnimClass_AI_HasExtras_Expired, 0x6)
@@ -182,13 +191,25 @@ DEFINE_HOOK(0x424807, AnimClass_AI_Next, 0x6)
 	return 0;
 }
 
+DEFINE_HOOK(0x424CF1, AnimClass_Start_DetachedReport, 0x6)
+{
+	GET(AnimClass*, pThis, ESI);
+
+	auto const pTypeExt = AnimTypeExt::ExtMap.Find(pThis->Type);
+
+	if (pTypeExt->DetachedReport.isset())
+		VocClass::PlayAt(pTypeExt->DetachedReport.Get(), pThis->GetCoords());
+
+	return 0;
+}
+
 DEFINE_HOOK(0x422CAB, AnimClass_DrawIt_XDrawOffset, 0x5)
 {
 	GET(AnimClass* const, pThis, ECX);
 	GET_STACK(Point2D*, pCoord, STACK_OFFSET(0x100, 0x4));
 
-	if (auto const pThisTypeExt = AnimTypeExt::ExtMap.Find(pThis->Type))
-		pCoord->X += pThisTypeExt->XDrawOffset;
+	if (auto const pTypeExt = AnimTypeExt::ExtMap.Find(pThis->Type))
+		pCoord->X += pTypeExt->XDrawOffset;
 
 	return 0;
 }
@@ -245,6 +266,23 @@ DEFINE_HOOK(0x4236F0, AnimClass_DrawIt_Tiled_Palette, 0x6)
 	R->EDX(pTypeExt->Palette.GetOrDefaultConvert(FileSystem::ANIM_PAL));
 
 	return 0x4236F6;
+}
+
+DEFINE_HOOK(0x423365, AnimClass_DrawIt_ExtraShadow, 0x8)
+{
+	enum { DrawExtraShadow = 0x42336D, SkipExtraShadow = 0x4233EE };
+
+	GET(AnimClass*, pThis, ESI);
+
+	if (pThis->HasExtras)
+	{
+		const auto pTypeExt = AnimTypeExt::ExtMap.Find(pThis->Type);
+
+		if (!pTypeExt->ExtraShadow)
+			return SkipExtraShadow;
+	}
+
+	return SkipExtraShadow;
 }
 
 #pragma region AltPalette

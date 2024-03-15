@@ -7,13 +7,17 @@
 #include <UnitClass.h>
 #include <OverlayTypeClass.h>
 #include <ScenarioClass.h>
+#include <SpawnManagerClass.h>
 #include <VoxelAnimClass.h>
 #include <BulletClass.h>
 #include <HouseClass.h>
 #include <FlyLocomotionClass.h>
 #include <JumpjetLocomotionClass.h>
 #include <BombClass.h>
+#include <ParticleSystemClass.h>
 #include <WarheadTypeClass.h>
+#include <HashTable.h>
+
 #include <Ext/Rules/Body.h>
 #include <Ext/BuildingType/Body.h>
 #include <Ext/Techno/Body.h>
@@ -24,15 +28,6 @@
 #include <Utilities/Macro.h>
 #include <Utilities/Debug.h>
 #include <Utilities/TemplateDef.h>
-
-//Replace: checking of HasExtras = > checking of (HasExtras && Shadow)
-DEFINE_HOOK(0x423365, Phobos_BugFixes_SHPShadowCheck, 0x8)
-{
-	GET(AnimClass*, pAnim, ESI);
-	return (pAnim->Type->Shadow && pAnim->HasExtras) ?
-		0x42336D :
-		0x4233EE;
-}
 
 /*
 	Allow usage of TileSet of 255 and above without making NE-SW broken bridges unrepairable
@@ -490,12 +485,10 @@ static DamageAreaResult __fastcall _BombClass_Detonate_DamageArea
 	{
 		if (auto pAnim = GameCreate<AnimClass>(pAnimType, nCoord, 0, 1, 0x2600, -15, false))
 		{
-			if (AnimTypeExt::ExtMap.Find(pAnim->Type)->CreateUnit.Get())
-			{
-				AnimExt::SetAnimOwnerHouseKind(pAnim, pThisBomb->OwnerHouse,
-					pThisBomb->Target ? pThisBomb->Target->GetOwningHouse() : nullptr, false);
-			}
-			else
+			AnimExt::SetAnimOwnerHouseKind(pAnim, pThisBomb->OwnerHouse,
+				pThisBomb->Target ? pThisBomb->Target->GetOwningHouse() : nullptr, false);
+
+			if (!pAnim->Owner)
 			{
 				pAnim->Owner = pThisBomb->OwnerHouse;
 			}
@@ -542,23 +535,6 @@ DEFINE_HOOK(0x43D874, BuildingClass_Draw_BuildupBibShape, 0x6)
 
 	return 0;
 }
-
-// Fix railgun target coordinates potentially differing from actual target coords.
-DEFINE_HOOK(0x70C6B5, TechnoClass_Railgun_TargetCoords, 0x5)
-{
-	GET(AbstractClass*, pTarget, EBX);
-
-	auto coords = pTarget->GetCenterCoords();
-
-	if (const auto pBuilding = abstract_cast<BuildingClass*>(pTarget))
-		coords = pBuilding->GetTargetCoords();
-	else if (const auto pCell = abstract_cast<CellClass*>(pTarget))
-		coords = pCell->GetCoordsWithBridge();
-
-	R->EAX(&coords);
-	return 0;
-}
-
 // Fix techno target coordinates (used for fire angle calculations, target lines etc) to take building target coordinate offsets into accord.
 // This, for an example, fixes a vanilla bug where Destroyer has trouble targeting Naval Yards with its cannon weapon from certain angles.
 DEFINE_HOOK(0x70BCE6, TechnoClass_GetTargetCoords_BuildingFix, 0x6)
@@ -603,16 +579,6 @@ DEFINE_HOOK(0x56BD8B, MapClass_PlaceRandomCrate_Sampling, 0x5)
 	R->EAX(&cell);
 
 	return SpawnCrate;
-}
-
-// Enable sorted add for Air/Top layers to fix issues with attached anims etc.
-DEFINE_HOOK(0x4A9750, DisplayClass_Submit_LayerSort, 0x9)
-{
-	GET(Layer, layer, EDI);
-
-	R->ECX(layer != Layer::Surface && layer != Layer::Underground);
-
-	return 0;
 }
 
 // Fixes C4=no amphibious infantry being killed in water if Chronoshifted/Paradropped there.
@@ -695,14 +661,37 @@ DEFINE_HOOK(0x451033, BuildingClass_AnimationAI_SuperAnim, 0x6)
 // Stops INI parsing for Anim/BuildingTypeClass on game startup, will only be read on scenario load later like everything else.
 DEFINE_JUMP(LJMP, 0x52C9C4, 0x52CA37);
 
-// Only first half of the colorschemes array gets adjusted thanks to the count being wrong, quick and dirty fix.
-DEFINE_HOOK(0x53AD97, IonStormClass_AdjustLighting_ColorCount, 0x6)
+// Fixes second half of Colors list not getting retinted correctly by map triggers, superweapons etc.
+DEFINE_HOOK(0x53AD85, IonStormClass_AdjustLighting_ColorSchemes, 0x5)
 {
-	GET(int, colorSchemesCount, EAX);
+	enum { SkipGameCode = 0x53ADD6 };
 
-	R->EAX(colorSchemesCount * 2);
+	GET_STACK(bool, tint, STACK_OFFSET(0x20, 0x8));
+	GET(HashIterator*, it, ECX);
+	GET(int, red, EBP);
+	GET(int, green, EDI);
+	GET(int, blue, EBX);
 
-	return 0;
+	int paletteCount = 0;
+
+	for (auto pSchemes = ColorScheme::GetPaletteSchemesFromIterator(it); pSchemes; pSchemes = ColorScheme::GetPaletteSchemesFromIterator(it))
+	{
+		for (int i = 1; i < pSchemes->Count; i += 2)
+		{
+			auto pScheme = pSchemes->GetItem(i);
+			pScheme->LightConvert->UpdateColors(red, green, blue, tint);
+		}
+
+		paletteCount++;
+	}
+
+	if (paletteCount > 0)
+	{
+		int schemeCount = ColorScheme::GetNumberOfSchemes();
+		Debug::Log("Recalculated %d extra palettes across %d color schemes (total: %d).\n", paletteCount, schemeCount, schemeCount* paletteCount);
+	}
+
+	return SkipGameCode;
 }
 
 // Fixes a literal edge-case in passability checks to cover cells with bridges that are not accessible when moving on the bridge and
@@ -753,7 +742,8 @@ DEFINE_HOOK(0x741050, UnitClass_CanFire_DeployToFire, 0x6)
 #pragma region DrawInfoTipAndSpiedSelection
 
 // skip call DrawInfoTipAndSpiedSelection
-DEFINE_JUMP(LJMP, 0x6D9427, 0x6D95A1); // Tactical_RenderLayers
+// Note that Ares have the TacticalClass_DrawUnits_ParticleSystems hook at 0x6D9427
+DEFINE_JUMP(LJMP, 0x6D9430, 0x6D95A1); // Tactical_RenderLayers
 
 // Call DrawInfoTipAndSpiedSelection in new location
 DEFINE_HOOK(0x6D9781, Tactical_RenderLayers_DrawInfoTipAndSpiedSelection, 0x5)
@@ -774,3 +764,48 @@ DEFINE_HOOK(0x6D9781, Tactical_RenderLayers_DrawInfoTipAndSpiedSelection, 0x5)
 	return 0;
 }
 #pragma endregion DrawInfoTipAndSpiedSelection
+
+
+bool __fastcall BuildingClass_SetOwningHouse_Wrapper(BuildingClass* pThis, void*, HouseClass* pHouse, bool announce)
+{
+	// Fix : Suppress capture EVA event if ConsideredVehicle=yes
+	announce = announce && !pThis->Type->IsVehicle();
+
+	using this_func_sig = bool(__thiscall*)(BuildingClass*, HouseClass*, bool);
+	bool res = reinterpret_cast<this_func_sig>(0x448260)(pThis, pHouse, announce);
+
+	// Fix : update powered anims
+	if (res && (pThis->Type->Powered || pThis->Type->PoweredSpecial))
+		reinterpret_cast<void(__thiscall*)(BuildingClass*)>(0x4549B0)(pThis);
+	return res;
+}
+
+DEFINE_JUMP(VTABLE, 0x7E4290, GET_OFFSET(BuildingClass_SetOwningHouse_Wrapper));
+DEFINE_JUMP(LJMP, 0x6E0BD4, 0x6E0BFE);
+DEFINE_JUMP(LJMP, 0x6E0C1D, 0x6E0C8B);//Simplify TAction 36
+
+// Fix a glitch related to incorrect target setting for missiles
+// Author: Belonit
+DEFINE_HOOK(0x6B75AC, SpawnManagerClass_AI_SetDestinationForMissiles, 0x5)
+{
+	GET(SpawnManagerClass*, pSpawnManager, ESI);
+	GET(TechnoClass*, pSpawnTechno, EDI);
+
+	CoordStruct coord = pSpawnManager->Target->GetCenterCoords();
+	CellClass* pCellDestination = MapClass::Instance->TryGetCellAt(coord);
+
+	pSpawnTechno->SetDestination(pCellDestination, true);
+
+	return 0x6B75BC;
+}
+
+DEFINE_HOOK(0x689EB0, ScenarioClass_ReadMap_SkipHeaderInCampaign, 0x6)
+{
+	return SessionClass::IsCampaign() ? 0x689FC0 : 0;
+}
+
+//Skip incorrect load ctor call in various LocomotionClass_Load
+DEFINE_JUMP(LJMP, 0x719CBC, 0x719CD8);//Teleport, notorious CLEG frozen state removal on loading game
+DEFINE_JUMP(LJMP, 0x72A16A, 0x72A186);//Tunnel, not a big deal
+DEFINE_JUMP(LJMP, 0x663428, 0x663445);//Rocket, not a big deal
+DEFINE_JUMP(LJMP, 0x5170CE, 0x5170E0);//Hover, not a big deal

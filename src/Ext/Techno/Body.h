@@ -32,10 +32,12 @@ public:
 		int LastWarpDistance;
 		CDTimerClass AutoDeathTimer;
 		AnimTypeClass* MindControlRingAnimType;
-		OptionalStruct<int, false> DamageNumberOffset;
+		int DamageNumberOffset;
 		bool IsInTunnel;
+		bool HasBeenPlacedOnMap; // Set to true on first Unlimbo() call.
 		CDTimerClass DeployFireTimer;
 		bool ForceFullRearmDelay;
+		int WHAnimRemainingCreationInterval;
 
 		// Used for Passengers.SyncOwner.RevertOnExit instead of TechnoClass::InitialOwner / OriginallyOwnedByHouse,
 		// as neither is guaranteed to point to the house the TechnoClass had prior to entering transport and cannot be safely overridden.
@@ -52,15 +54,20 @@ public:
 			, LastWarpDistance {}
 			, AutoDeathTimer {}
 			, MindControlRingAnimType { nullptr }
-			, DamageNumberOffset {}
+			, DamageNumberOffset { INT32_MIN }
 			, OriginalPassengerOwner {}
 			, IsInTunnel { false }
+			, HasBeenPlacedOnMap { false }
 			, DeployFireTimer {}
 			, ForceFullRearmDelay { false }
+			, WHAnimRemainingCreationInterval { 0 }
 		{ }
 
+		void OnEarlyUpdate();
+
 		void ApplyInterceptor();
-		bool CheckDeathConditions();
+		bool CheckDeathConditions(bool isInLimbo = false);
+		void DepletedAmmoActions();
 		void EatPassengers();
 		void UpdateShield();
 		void UpdateOnTunnelEnter();
@@ -121,13 +128,12 @@ public:
 	static CoordStruct GetSimpleFLH(InfantryClass* pThis, int weaponIndex, bool& FLHFound);
 
 	static void ChangeOwnerMissionFix(FootClass* pThis);
-	static void KillSelf(TechnoClass* pThis, AutoDeathBehavior deathOption, AnimTypeClass* pVanishAnimation);
+	static void KillSelf(TechnoClass* pThis, AutoDeathBehavior deathOption, AnimTypeClass* pVanishAnimation, bool isInLimbo = false);
 	static void TransferMindControlOnDeploy(TechnoClass* pTechnoFrom, TechnoClass* pTechnoTo);
 	static void ApplyMindControlRangeLimit(TechnoClass* pThis);
 	static void ObjectKilledBy(TechnoClass* pThis, TechnoClass* pKiller);
 	static void UpdateSharedAmmo(TechnoClass* pThis);
 	static double GetCurrentSpeedMultiplier(FootClass* pThis);
-	static void DisplayDamageNumberString(TechnoClass* pThis, int damage, bool isShieldDamage);
 	static void DrawSelfHealPips(TechnoClass* pThis, Point2D* pLocation, RectangleStruct* pBounds);
 	static void DrawInsignia(TechnoClass* pThis, Point2D* pLocation, RectangleStruct* pBounds);
 	static void ApplyGainedSelfHeal(TechnoClass* pThis);
@@ -137,6 +143,7 @@ public:
 	static void UpdateAttachedAnimLayers(TechnoClass* pThis);
 	static bool ConvertToType(FootClass* pThis, TechnoTypeClass* toType);
 	static bool CanDeployIntoBuilding(UnitClass* pThis, bool noDeploysIntoDefaultValue = false);
+	static bool IsTypeImmune(TechnoClass* pThis, TechnoClass* pSource);
 
 	// WeaponHelpers.cpp
 	static int PickWeaponIndex(TechnoClass* pThis, TechnoClass* pTargetTechno, AbstractClass* pTarget, int weaponIndexOne, int weaponIndexTwo, bool allowFallback = true, bool allowAAFallback = true);

@@ -10,6 +10,7 @@
 #include <New/Type/Affiliated/InterceptorTypeClass.h>
 #include <New/Type/Affiliated/PassengerDeletionTypeClass.h>
 #include <New/Type/DigitalDisplayTypeClass.h>
+#include <New/Type/Affiliated/DroppodTypeClass.h>
 
 class Matrix3D;
 
@@ -48,9 +49,18 @@ public:
 		Valueable<int> CameoPriority;
 		Valueable<bool> NoManualMove;
 		Nullable<int> InitialStrength;
+		Valueable<bool> ReloadInTransport;
 
 		Valueable<ShieldTypeClass*> ShieldType;
 		std::unique_ptr<PassengerDeletionTypeClass> PassengerDeletionType;
+		std::unique_ptr<DroppodTypeClass> DroppodType;
+
+		Nullable<int> Ammo_AddOnDeploy;
+		Valueable<int> Ammo_AutoDeployMinimumAmount;
+		Valueable<int> Ammo_AutoDeployMaximumAmount;
+		Valueable<int> Ammo_DeployUnlockMinimumAmount;
+		Valueable<int> Ammo_DeployUnlockMaximumAmount;
+		NullableIdx<VocClass> VoiceCantDeploy;
 
 		Nullable<AutoDeathBehavior> AutoDeath_Behavior;
 		Nullable<AnimTypeClass*> AutoDeath_VanishAnimation;
@@ -69,6 +79,8 @@ public:
 		NullableIdx<VocClass> SlavesFreeSound;
 		NullableIdx<VocClass> SellSound;
 		NullableIdx<VoxClass> EVA_Sold;
+
+		NullableIdx<VocClass> VoiceCreated;
 
 		Nullable<AnimTypeClass*> WarpOut;
 		Nullable<AnimTypeClass*> WarpIn;
@@ -157,10 +169,21 @@ public:
 		Valueable<bool> DigitalDisplay_Disable;
 		ValueableVector<DigitalDisplayTypeClass*> DigitalDisplayTypes;
 
-		Valueable<int> AmmoPip;
-		Valueable<int> EmptyAmmoPip;
-		Valueable<int> PipWrapAmmoPip;
+		Valueable<int> AmmoPipFrame;
+		Valueable<int> EmptyAmmoPipFrame;
+		Valueable<int> AmmoPipWrapStartFrame;
 		Nullable<Point2D> AmmoPipSize;
+		Valueable<Point2D> AmmoPipOffset;
+
+		Valueable<bool> ShowSpawnsPips;
+		Valueable<int> SpawnsPipFrame;
+		Valueable<int> EmptySpawnsPipFrame;
+		Nullable<Point2D> SpawnsPipSize;
+		Valueable<Point2D> SpawnsPipOffset;
+
+		Nullable<Leptons> SpawnDistanceFromTarget;
+		Nullable<int> SpawnHeight;
+		Nullable<int> LandingDir;
 
 		struct LaserTrailDataEntry
 		{
@@ -176,7 +199,7 @@ public:
 			bool Serialize(T& stm);
 		};
 
-		ValueableVector<LaserTrailDataEntry> LaserTrailData;
+		std::vector<LaserTrailDataEntry> LaserTrailData;
 
 		Nullable<CoordStruct> PronePrimaryFireFLH;
 		Nullable<CoordStruct> ProneSecondaryFireFLH;
@@ -212,8 +235,9 @@ public:
 			, CameoPriority { 0 }
 			, NoManualMove { false }
 			, InitialStrength {}
+			, ReloadInTransport { false }
 			, ShieldType {}
-			, PassengerDeletionType { nullptr}
+			, PassengerDeletionType { nullptr }
 
 			, WarpOut {}
 			, WarpIn {}
@@ -257,6 +281,12 @@ public:
 			, DeployingAnim_KeepUnitVisible { false }
 			, DeployingAnim_ReverseForUndeploy { true }
 			, DeployingAnim_UseUnitDrawer { true }
+
+			, Ammo_AddOnDeploy { }
+			, Ammo_AutoDeployMinimumAmount { -1 }
+			, Ammo_AutoDeployMaximumAmount { -1 }
+			, Ammo_DeployUnlockMinimumAmount { -1 }
+			, Ammo_DeployUnlockMaximumAmount { -1 }
 
 			, AutoDeath_Behavior { }
 			, AutoDeath_VanishAnimation {}
@@ -318,10 +348,22 @@ public:
 			, DigitalDisplay_Disable { false }
 			, DigitalDisplayTypes {}
 
-			, AmmoPip { 13 }
-			, EmptyAmmoPip { -1 }
-			, PipWrapAmmoPip { 14 }
+			, AmmoPipFrame { 13 }
+			, EmptyAmmoPipFrame { -1 }
+			, AmmoPipWrapStartFrame { 14 }
 			, AmmoPipSize {}
+			, AmmoPipOffset {{ 0,0 }}
+
+			, ShowSpawnsPips { true }
+			, SpawnsPipFrame { 1 }
+			, EmptySpawnsPipFrame { 0 }
+			, SpawnsPipSize {}
+			, SpawnsPipOffset {{ 0,0 }}
+
+			, SpawnDistanceFromTarget {}
+			, SpawnHeight {}
+			, LandingDir {}
+			, DroppodType {}
 		{ }
 
 		virtual ~ExtData() = default;

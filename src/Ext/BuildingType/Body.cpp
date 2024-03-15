@@ -48,7 +48,7 @@ int BuildingTypeExt::GetEnhancedPower(BuildingClass* pBuilding, HouseClass* pHou
 
 	auto const pHouseExt = HouseExt::ExtMap.Find(pHouse);
 
-	for (const auto& [pExt, nCount] : pHouseExt->BuildingCounter)
+	for (const auto& [pExt, nCount] : pHouseExt->PowerPlantEnhancers)
 	{
 		if (pExt->PowerPlantEnhancer_Buildings.Contains(pBuilding->Type))
 		{
@@ -138,7 +138,7 @@ void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->Grinding_DisallowTypes.Read(exINI, pSection, "Grinding.DisallowTypes");
 	this->Grinding_Sound.Read(exINI, pSection, "Grinding.Sound");
 	this->Grinding_PlayDieSound.Read(exINI, pSection, "Grinding.PlayDieSound");
-	this->Grinding_Weapon.Read(exINI, pSection, "Grinding.Weapon", true);
+	this->Grinding_Weapon.Read<true>(exINI, pSection, "Grinding.Weapon");
 
 	this->DisplayIncome.Read(exINI, pSection, "DisplayIncome");
 	this->DisplayIncome_Houses.Read(exINI, pSection, "DisplayIncome.Houses");
@@ -146,6 +146,28 @@ void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->ConsideredVehicle.Read(exINI, pSection, "ConsideredVehicle");
 	this->SellBuildupLength.Read(exINI, pSection, "SellBuildupLength");
+
+	if (pThis->NumberOfDocks > 0)
+	{
+		this->AircraftDockingDirs.clear();
+		this->AircraftDockingDirs.resize(pThis->NumberOfDocks);
+
+		Nullable<DirType> nLandingDir;
+		nLandingDir.Read(exINI, pSection, "AircraftDockingDir");
+
+		if (nLandingDir.isset())
+			this->AircraftDockingDirs[0] = nLandingDir.Get();
+
+		for (int i = 0; i < pThis->NumberOfDocks; ++i)
+		{
+			char tempBuffer[32];
+			_snprintf_s(tempBuffer, sizeof(tempBuffer), "AircraftDockingDir%d", i);
+			nLandingDir.Read(exINI, pSection, tempBuffer);
+
+			if (nLandingDir.isset())
+				this->AircraftDockingDirs[i] = nLandingDir.Get();
+		}
+	}
 
 	// Ares tag
 	this->SpyEffect_Custom.Read(exINI, pSection, "SpyEffect.Custom");
@@ -176,6 +198,7 @@ void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 
 	// PlacementPreview
 	{
+		this->PlacementPreview.Read(exINI, pSection, "PlacementPreview");
 		this->PlacementPreview_Shape.Read(exINI, pSection, "PlacementPreview.Shape");
 		this->PlacementPreview_ShapeFrame.Read(exINI, pSection, "PlacementPreview.ShapeFrame");
 		this->PlacementPreview_Offset.Read(exINI, pSection, "PlacementPreview.Offset");
@@ -233,6 +256,7 @@ void BuildingTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->ConsideredVehicle)
 		.Process(this->ZShapePointMove_OnBuildup)
 		.Process(this->SellBuildupLength)
+		.Process(this->AircraftDockingDirs)
 		;
 }
 
