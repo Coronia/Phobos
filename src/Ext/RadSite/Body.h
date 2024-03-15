@@ -1,56 +1,89 @@
 #pragma once
+
 #include <RadSiteClass.h>
 
 #include <Helpers/Macro.h>
-#include "../_Container.hpp"
-#include "../../Utilities/TemplateDef.h"
+#include <Utilities/Container.h>
+#include <Utilities/TemplateDef.h>
 
-#include "../WeaponType/Body.h"
+#include <Ext/WeaponType/Body.h>
 
-class RadType;
+class RadTypeClass;
 
-class RadSiteExt {
+class RadSiteExt
+{
 public:
 	using base_type = RadSiteClass;
 
-	class ExtData final : public Extension<RadSiteClass> 
+	static constexpr DWORD Canary = 0x87654321;
+	static constexpr size_t ExtPointerOffset = 0x18;
+
+	class ExtData final : public Extension<RadSiteClass>
 	{
 	public:
 		WeaponTypeClass* Weapon;
-		RadType* Type;
+		RadTypeClass* Type;
 		HouseClass* RadHouse;
+		TechnoClass* RadInvoker;
 
-		ExtData(RadSiteClass* OwnerObject) : Extension<RadSiteClass>(OwnerObject),
-			RadHouse(nullptr)
-		{ };
+		ExtData(RadSiteClass* OwnerObject) : Extension<RadSiteClass>(OwnerObject)
+			, RadHouse { nullptr }
+			, RadInvoker { nullptr }
+			, Type {}
+			, Weapon { nullptr }
+		{ }
 
-		virtual ~ExtData() { }
+		virtual ~ExtData() = default;
 
-		virtual size_t Size() const { return sizeof(*this); };
+		virtual size_t Size() const
+		{
+			return sizeof(*this);
+		}
 
-		virtual void InvalidatePointer(void *ptr, bool bRemoved) { }
+		bool ApplyRadiationDamage(TechnoClass* pTarget, int& damage, int distance);
+		void Add(int amount);
+		void SetRadLevel(int amount);
+		const double GetRadLevelAt(CellStruct const& cell);
+		void CreateLight();
 
 		virtual void LoadFromStream(PhobosStreamReader& Stm) override;
-
 		virtual void SaveToStream(PhobosStreamWriter& Stm) override;
-        
-		virtual void Add(int amount);
-		virtual void SetRadLevel(int amount);
-		virtual double GetRadLevelAt(CellStruct const& cell);
-        
+		virtual void Initialize() override;
+
+		virtual void InvalidatePointer(void* ptr, bool bRemoved) override
+		{
+			AnnounceInvalidPointer(RadHouse, ptr);
+			AnnounceInvalidPointer(RadInvoker, ptr);
+		}
+
 	private:
 		template <typename T>
 		void Serialize(T& Stm);
 	};
 
-	static DynamicVectorClass<RadSiteExt::ExtData*> RadSiteInstance;
+	static void CreateInstance(CellStruct location, int spread, int amount, WeaponTypeExt::ExtData* pWeaponExt, HouseClass* const pOwner, TechnoClass* const pInvoker);
 
-	static void CreateInstance(CellStruct location, int spread, int amount, WeaponTypeExt::ExtData *pWeaponExt, HouseClass* const pOwner);
-
-	class ExtContainer final : public Container<RadSiteExt> {
+	class ExtContainer final : public Container<RadSiteExt>
+	{
 	public:
 		ExtContainer();
 		~ExtContainer();
+
+		virtual bool InvalidateExtDataIgnorable(void* const ptr) const override
+		{
+			auto const abs = static_cast<AbstractClass*>(ptr)->WhatAmI();
+			switch (abs)
+			{
+			case AbstractType::Aircraft:
+			case AbstractType::Building:
+			case AbstractType::Infantry:
+			case AbstractType::Unit:
+			case AbstractType::House:
+				return false;
+			default:
+				return true;
+			}
+		}
 	};
 
 	static ExtContainer ExtMap;

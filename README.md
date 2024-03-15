@@ -1,83 +1,106 @@
-# ![Phobos YR Engine Extension](logo.png)
+![Phobos YR Engine Extension](logo.png)
 
 [![Github All Releases](https://img.shields.io/github/downloads/Phobos-developers/Phobos/total.svg)](https://github.com/Phobos-developers/Phobos/releases)
 [![Docs status](https://readthedocs.org/projects/phobos/badge/?version=latest)](https://phobos.readthedocs.io/en/latest/?badge=latest)
-[![Workflow](https://img.shields.io/github/workflow/status/Phobos-developers/Phobos/Nightly%20Build.svg)](https://github.com/Phobos-developers/Phobos/actions)
+[![Workflow](https://img.shields.io/github/actions/workflow/status/Phobos-developers/Phobos/nightly.yml?branch=develop)](https://github.com/Phobos-developers/Phobos/actions)
+[![EditorConfig](https://github.com/Phobos-developers/Phobos/workflows/EditorConfig/badge.svg)](https://github.com/Phobos-developers/Phobos/actions?query=workflow%3AEditorConfig)
 [![license](https://img.shields.io/github/license/Phobos-developers/Phobos.svg)](https://www.gnu.org/licenses/lgpl-3.0.en.html)
 
-**Phobos** is a WIP community project providing a set of new features and fixes for Yuri's Revenge based on [modified YRpp](https://github.com/Metadorius/YRpp) and [Syringe](https://github.com/Ares-Developers/Syringe) to allow injecting code. It's meant to accompany [Ares](https://github.com/Ares-Developers/Ares) rather than replace it, thus it won't introduce incompatibilities.
+> **Warning**
+> The project is currently not maintained actively enough and thus we are looking for active maintainers at the moment. Please message us [in Discord channel](https://discord.gg/sZeMzz6qVg) (or PM Kerbiter directly).
 
-For now you can discuss the project at a dedicated [channel on C&C Mod Haven](https://discord.gg/sZeMzz6qVg) (which is my C&C modding server).
+# Phobos
+...is a community engine extension project providing a set of new features and fixes for Yuri's Revenge based on [modified YRpp](https://github.com/Metadorius/YRpp) and [Syringe](https://github.com/Ares-Developers/Syringe) to allow injecting code. It's meant to accompany [Ares](https://github.com/Ares-Developers/Ares) rather than replace it, thus it won't introduce incompatibilities.
 
+While Phobos is independent of Ares and does NOT require Ares specifically to function, Phobos complements some of the features found in Ares and vice versa.
 
-Building and Usage (Windows)
-----------------------------
+You can discuss the project at a dedicated [channel on C&C Mod Haven](https://discord.gg/sZeMzz6qVg).
 
-0. Install Visual Studio with "Desktop development with C++" workload and "C++ Windows XP Support for VS 2017 (v141) tools" individual component and clone this repo recursively (that will also clone YRpp).
-1. Open the solution file in VS and build it (`DevBuild` build config is recommended).
-2. Upon build completion place the resulting `Phobos.dll` from folder named identical to the used build config in your YR directory and launch Syringe targeting your YR executable (usually `gamemd.exe`).
+Downloads
+---------
 
-You can also get a nightly build for those who want to help testing Phobos features as soon as they are done. Those versions are bleeding edge (don't redistribute them outside of testing!) and have build information (commit and branch/tag) in them which is displayed ingame and can't be turned off. There are two ways get a nightly build.
-- **Get an artifact via nightly.link**. This is a service that allows guests to download automatic builds from GitHub. You can get a build for the latest successful (marked with a green tick) `develop` branch commit via [this link](https://nightly.link/Phobos-developers/Phobos/blob/develop/.github/workflows/nightly.yml), or get a build for any up-to-date pull request via an automatic comment that would appear in it. 
-- **Get an artifact manually from GitHub Actions runs**. You can get an artifact for a specific commit which is built automatically with a GitHub Actions workflow, just press on a green tick, open the workflow, find and download the build artifact. This is limited to authorized users only.
+You can choose one of the following:
+- [Latest stable branch build](https://github.com/Phobos-developers/Phobos/releases/latest) (most bug-free release but very slow on new features)
+- [Latest development branch builds](https://github.com/Phobos-developers/Phobos/releases) (a bit less bug-free releases, devbuilds get new features when they are finished)
+- [Latest development branch nightly](https://nightly.link/Phobos-developers/Phobos/blob/develop/.github/workflows/nightly.yml) (added unreleased features that will be in next devbuild)
+- Individual new feature nightly builds for testing can be found in [pull requests](https://github.com/Phobos-developers/Phobos/pulls)
+
+### Note on nightly builds
+
+Last two listed versions are bleeding edge (don't redistribute them outside of testing!) and have build information (commit and branch/tag) in them which is displayed ingame and can't be turned off. You can get a build for development branch (link above) any up-to-date pull request via an automatic bot comment that would appear in it and would contain the most recent successfully compiled version of Phobos for that feature branch. Please note that the build is  produced *only if the PR has no merge conflicts*. Alternatively, you can get an artifact manually from GitHub Actions runs. You can get an artifact for a specific commit which is built automatically with a GitHub Actions workflow, just press on a green tick, open the workflow, find and download the build artifact. This is limited to authorized users only.
+
+Installation and Usage
+----------------------
+
+0. If you don't have Syringe installed into your mod already, you can download it together with the [latest Ares package](https://launchpad.net/ares/+download). To install simply drop `Syringe.exe` into your game folder (where your `gamemd.exe` is located). It's highly recommended to **install Ares** too to get full Phobos feature set, just drop all the files from the archive except documentation folder into your game folder.
+1. Obtain a Phobos "package" (official builds can be found on [releases page](https://github.com/Phobos-developers/Phobos/releases); read below to learn how to get nightly builds). You should end up with two files: `Phobos.dll` and `Phobos.pdb`.
+2. Place those files in the game folder (where your `gamemd.exe` is located).
+3. To launch the game with Phobos (and all other installed Syringe-compatible engine extensions including Ares) you need to execute `Syringe.exe "gamemd.exe" [command line arguments for gamemd.exe]` in command line (omit arguments if you don't need any). `RunAres.bat` from Ares package does the same so you may use that as well.
+
+If you already use Ares in your mod, you just need to drop Phobos files mentioned above in your game folder, Syringe will load Phobos automatically. This also applies to mods using XNA client with Syringe; if your mod doesn't use Syringe and Ares (or you just haven't set up the client) yet we recommend to use [CnCNet client mod base by Starkku](https://github.com/Starkku/cncnet-client-mod-base) which is compatible with Ares and Phobos out of the box.
+
+Additional files and tools that you may need are located at [Phobos supplementaries repo](https://github.com/Phobos-developers/PhobosSupplementaries).
+
+By default Phobos doesn't do any very noticeable changes except a few bugfixes. To learn how to use Phobos features head over to official documentation.
 
 Documentation
 -------------
 
-The documentation can be found at [here @ Read the Docs](https://phobos.readthedocs.io) and is split by a few major categories (similiar to Ares docs), each represented with a page on the sidebar. Each page has it's contents grouped into multiple subcategories, be it buildings, technotypes, infantry, superweapons or something else.
+- [Official docs](https://phobos.readthedocs.io) (also available in [Chinese](https://phobos.readthedocs.io/zh_CN/latest))
 
-You can switch between versions in the bottom left corner, as well as download a PDF version.
+You can switch between versions (displays latest develop nightly version by default) in the bottom left corner, as well as download a PDF version.
 
-How to read code snippets
--------------------------
+The documentation is split by a few major categories, each represented with a page on the sidebar. Each page has its contents grouped into multiple subcategories, be it buildings, technotypes, infantries, superweapons or something else.
+
+### How to read code snippets
 
 ```ini
-; which section the params should be in
+; which section the entries should be in
 ; can be a freeform name - in this case the comment would explain what it is
 ; if no comment to be found - then it's a precise name
-[SOMENAME] ; BuildingType
+[SOMENAME]           ; BuildingType
 ; KeyName=DefaultValue ; accepted type with optional explanation
 ; if there's nothing to the right of equals sign - the default value is empty/absent
+; if the default value is not static - it's written and explained in a comment
 UIDescription=<none> ; CSF entry key
 ```
+
+Building manually
+-----------------
+
+0. Install **Visual Studio** (2022 is recommended, 2019 is minimum) with the dependencies listed in `.vsconfig` (it will prompt you to install missing dependences when you open the project, or you can run VS installer and import the config). If you prefer to use **Visual Studio Code** you may install **VS Build Tools** with the dependencies from `.vsconfig` instead. Not using a code editor or IDE and building via **command line scripts** included with the project is also an option.
+1. Clone this repo recursively via your favorite git client (that will also clone YRpp).
+2. To build the extension:
+   - in Visual Studio: open the solution file in VS and build it (`Debug` build config is recommended);
+   - in VSCode: open the project folder and hit `Run Build Task...` (`Ctrl + Shift + B`);
+   - barebones: run `scripts/build_debug.bat`.
+3. Upon build completion the resulting `Phobos.dll` and `Phobos.pdb` would be placed in the subfolder identical to the name of the buildconfig executed.
 
 Credits
 -------
 
-**Developers**
-- Belonit (Gluk-v48), Metadorius (Kerbiter) - project authors
-- Thrifinesma (Uranusian), SEC-SOME (secsome) - co-developers
+### Developers
+- **Belonit (Gluk-v48)** - project author
+- **Kerbiter (Metadorius)** - project co-author, BDFL, maintainer (semi-active for the time being; [Patreon](https://www.patreon.com/kerbiter), PM me for PayPal to avoid fees)
+- **Starkku** - co-maintainer, developer ([Patreon](https://www.patreon.com/Starkku))
+- **Uranusian (Thrifinesma)** - retired developer, CN community ambassador ([Patreon](https://www.patreon.com/uranusian), [AliPay](http://tiebapic.baidu.com/forum/w%3D580/sign=4b04b953307f9e2f70351d002f31e962/b3f89909b3de9c823bd7f23a7b81800a18d84371.jpg))
+- **secsome (SEC-SOME)** - developer
+- **Otamaa (Fahroni, BoredEXE)** - developer ([PayPal](https://paypal.me/GeneralOtama))
+- **FS-21** - developer
+- **Morton (MortonPL)** - co-maintainer, developer
+- **Trsdy (chaserli)** - co-maintainer, developer
 
-**Contribution**
-- Belonit (Gluk-v48) - project creator, disable empty spawn positions, custom gamemd icon with Command Line, full-color non-paletted PCX, SpySat, BigGap, TransactMoney, PCX Loading Screen, custom DiskLaser radius, extended tooltips, building upgrades enhancement, hide health bar, Sidebar.GDIPosition, help with CellSpread, Blowfish.dll-related errors fix, zero size map previews
-- Metadorius (Kerbiter) - SHP debris respect Shadow, building upgrades enhancement, extended tooltips, selection priority filtering, TurretOffset enhancement, customizable ore spawners, select next idle harvester hotkey, interceptor enhancement, zero size map previews, nightly build workflow, overhauled Unicode font, docs maintainer, organisational, maintenance and public relations work
-- misha135n2 - YRpp edits
-- tomsons26 - all-around help, assistance and guidance in reverse-engineering, YR binary mappings
-- CCHyper - all-around help, current project logo, assistance and guidance in reverse-engineering, YR binary mappings
-- Ares developers - YRpp and Syringe which are used, save/load, project foundation and generally useful code from Ares, unfinished RadTypes code 
-- DCoder - unused deployer fixes that are now included in Phobos
-- ZΞPHYɌUS - win/lose themes code
-- ayylmao - help with docs
-- SMxReaver - help with docs
-- 4SG - help with docs
-- wiktorderelf - overhauled Unicode font
-- Thrifinesma (Uranusian) - Mind Control enhancement, custom warhead splash list, harvesters counter, promoted spawns, shields, overhauled Unicode font, help with docs
-- SEC-SOME (secsome) - debug info dump hotkey, refactoring & porting of Ares helper code, introducing more Ares-derived stuff, disguise removal warhead, Mind Control removal warhead, Mind Control enhancement, shields
-- Otamaa (BoredEXE) - help with CellSpread, ported and fixed custom RadType code , Disable spesific ElectricBolt bolt
-- E1 Elite - TileSet 255 and above bridge repair fix
-- FS-21 - Dump Object Info enhancements, Powered.KillSpawns, Spawner.LimitRange, ScriptType Actions 71, 72 & 73, MC deployer fixes, help with docs
-- AutoGavy - interceptor logic, warhead critical damage system
-- Xkein - general assistance, YRpp edits
-- thomassneddon - general assistance
-- Starkku - Warhead shield penetration & breaking, strafing aircraft weapon customization
+For all contributions see [full credits list](CREDITS.md).
 
-Thanks to everyone who uses Phobos, tests changes and reports bugs! You can show your appreciation and help project by displaying the logo (monochrome version can be found [here](https://github.com/Phobos-developers/Phobos/logo-mono.png)) in your client/launcher, contributing or donating to us via links on the right and the `Sponsor` button on top of the repo.
+Thanks to everyone who uses Phobos, tests changes and reports bugs! You can show your appreciation and help project by displaying the logo (monochrome version can be found [here](https://github.com/Phobos-developers/Phobos/blob/develop/logo-mono.png)) in your client/launcher (make it open Phobos GitHub page for extra fanciness), linking to Phobos repository, contributing or donating to us via the links above.
 
 Legal and License
 -----
+
 [![LGPL v3](https://www.gnu.org/graphics/lgplv3-147x51.png)](https://opensource.org/licenses/LGPL-3.0)
 
 The Phobos project is an unofficial open-source community collaboration project to extend the Red Alert 2 Yuri's Revenge engine for modding and compatibility purposes.
 
-This project has no direct affiliation with Electronic Arts Inc. Command & Conquer, Command & Conquer Red Alert 2, Command & Conquer Yuri's Revenge are registered trademarks of Electronic Arts Inc. All Rights Reserved.
+As a modification, the project complies with [EA C&C modding guidelines](https://www.ea.com/games/command-and-conquer/command-and-conquer-remastered/modding-faq); should there be conflict between the project's license and modding guidelines - the rules imposed by guidelines shall take precedence (for example, the project should not be commercial or used to make money).
 
+This project has no direct affiliation with Electronic Arts Inc. Command & Conquer, Command & Conquer Red Alert 2, Command & Conquer Yuri's Revenge are registered trademarks of Electronic Arts Inc. All Rights Reserved.

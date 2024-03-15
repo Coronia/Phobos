@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'Phobos'
-copyright = '2021, The Phobos Contributors'
+copyright = '2023, The Phobos Contributors'
 author = 'The Phobos Contributors'
 
 
@@ -38,6 +38,8 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
+locale_dirs = ['locale/']
+gettext_compact = False
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -53,7 +55,7 @@ html_static_path = ['_static']
 
 myst_heading_anchors = 3
 
-myst_enable_extensions = ["colon_fence"]
+myst_enable_extensions = []
 
 html_theme_options = {
     'navigation_depth': 4,

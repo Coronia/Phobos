@@ -32,9 +32,9 @@
 
 #pragma once
 
-#include "..\Phobos.h"
 #include "Parser.h"
 
+#include <Phobos.h>
 #include <CCINIClass.h>
 
 class INI_EX {
@@ -43,6 +43,10 @@ class INI_EX {
 public:
 	explicit INI_EX(CCINIClass* pIniFile)
 		: IniFile(pIniFile)
+	{ }
+
+	explicit INI_EX(CCINIClass& iniFile)
+		: IniFile(&iniFile)
 	{ }
 
 	char* value() const {
@@ -95,11 +99,36 @@ public:
 		return Read<int, 4>(pSection, pKey, nBuffer);
 	}
 
+	size_t ReadMultipleIntegers(const char* pSection, const char* pKey, int* nBuffer, size_t maxCount = UINT32_MAX)
+	{
+		if (this->ReadString(pSection, pKey))
+			return MultiParser<int>::Parse(this->value(), nBuffer, maxCount);
+
+		return 0;
+	}
+
 	bool Read3Bytes(const char* pSection, const char* pKey, byte* nBuffer) {
 		return Read<byte, 3>(pSection, pKey, nBuffer);
 	}
 
 	bool ReadDouble(const char* pSection, const char* pKey, double* nBuffer) {
 		return Read<double, 1>(pSection, pKey, nBuffer);
+	}
+
+	bool Read2Doubles(const char* pSection, const char* pKey, double* nBuffer) {
+		return Read<double, 2>(pSection, pKey, nBuffer);
+	}
+
+	size_t ReadMultipleDoubles(const char* pSection, const char* pKey, double* nBuffer, size_t maxCount = UINT32_MAX)
+	{
+		if (this->ReadString(pSection, pKey))
+			return MultiParser<double>::Parse(this->value(), nBuffer, maxCount);
+
+		return 0;
+	}
+
+	bool ReadArmor(const char* pSection, const char* pKey, int *nBuffer) {
+		*nBuffer = IniFile->ReadArmorType(pSection, pKey, *nBuffer);
+		return (*nBuffer != -1);
 	}
 };

@@ -32,24 +32,23 @@
 
 #pragma once
 
-#include "./../Phobos.h"
+#include <Phobos.h>
+#include <GeneralDefinitions.h>
 
-enum class AirAttackStatus
+enum class AttachedAnimFlag
 {
-	ValidateAZ = 0,
-	PickAttackLocation = 1,
-	TakeOff = 2,
-	FlyToPosition = 3,
-	FireAtTarget = 4,
-	FireAtTarget2 = 5,
-	FireAtTarget2_Strafe = 6,
-	FireAtTarget3_Strafe = 7,
-	FireAtTarget4_Strafe = 8,
-	FireAtTarget5_Strafe = 9,
-	ReturnToBase = 10
+	None = 0x0,
+	Hides = 0x1,
+	Temporal = 0x2,
+	Paused = 0x4,
+
+	PausedTemporal = Paused | Temporal
 };
 
-enum class SuperWeaponAITargetingMode {
+MAKE_ENUM_FLAGS(AttachedAnimFlag);
+
+enum class SuperWeaponAITargetingMode
+{
 	None = 0,
 	Nuke = 1,
 	LightningStorm = 2,
@@ -67,7 +66,8 @@ enum class SuperWeaponAITargetingMode {
 	EnemyBase = 14
 };
 
-enum class AffectedTarget : unsigned char {
+enum class AffectedTarget : unsigned char
+{
 	None = 0x0,
 	Land = 0x1,
 	Water = 0x2,
@@ -75,16 +75,18 @@ enum class AffectedTarget : unsigned char {
 	Infantry = 0x8,
 	Unit = 0x10,
 	Building = 0x20,
+	Aircraft = 0x40,
 
 	All = 0xFF,
 	AllCells = Land | Water,
-	AllTechnos = Infantry | Unit | Building,
+	AllTechnos = Infantry | Unit | Building | Aircraft,
 	AllContents = NoContent | AllTechnos
 };
 
 MAKE_ENUM_FLAGS(AffectedTarget);
 
-enum class AffectedHouse : unsigned char {
+enum class AffectedHouse : unsigned char
+{
 	None = 0x0,
 	Owner = 0x1,
 	Allies = 0x2,
@@ -98,7 +100,8 @@ enum class AffectedHouse : unsigned char {
 
 MAKE_ENUM_FLAGS(AffectedHouse);
 
-enum class OwnerHouseKind : int {
+enum class OwnerHouseKind : int
+{
 	Default,
 	Invoker,
 	Killer,
@@ -109,7 +112,8 @@ enum class OwnerHouseKind : int {
 	Random
 };
 
-enum class SuperWeaponFlags : unsigned short {
+enum class SuperWeaponFlags : unsigned short
+{
 	None = 0x0,
 	NoAnim = 0x1,
 	NoSound = 0x2,
@@ -124,28 +128,147 @@ enum class SuperWeaponFlags : unsigned short {
 
 MAKE_ENUM_FLAGS(SuperWeaponFlags);
 
-enum class PhobosAction {
+enum class AreaFireTarget
+{
+	Base = 0,
+	Self = 1,
+	Random = 2
+};
+
+enum class SlaveChangeOwnerType
+{
+	Killer = 0, // default
+	Master = 1,
+	Suicide = 2,
+	Neutral = 4,
+};
+
+enum class AutoDeathBehavior
+{
+	Kill = 0,     // default death option
+	Vanish = 1,
+	Sell = 2,     // buildings only
+};
+
+enum class SelfHealGainType
+{
+	None = 0,
+	Infantry = 1,
+	Units = 2
+};
+
+enum class InterceptedStatus
+{
+	None = 0,
+	Targeted = 1,
+	Intercepted = 2
+};
+
+enum class PhobosAction
+{
 	None = 0,
 	Hijack = 1,
 	Drive = 2
 };
 
-class MouseCursorHotSpotX {
+enum class TextAlign : int
+{
+	None = 0xFFF,
+	Left = 0x000,
+	Center = 0x100,
+	Right = 0x200,
+};
+
+MAKE_ENUM_FLAGS(TextAlign);
+
+enum class IronCurtainEffect : BYTE
+{
+	Kill = 0,
+	Invulnerable = 1,
+	Ignore = 2
+};
+
+enum class TargetZoneScanType
+{
+	Same = 0,
+	Any = 1,
+	InRange = 2
+};
+
+enum class ChronoSparkleDisplayPosition : unsigned char
+{
+	None = 0x0,
+	Building= 0x1,
+	Occupants = 0x2,
+	OccupantSlots = 0x4,
+
+	All = 0xFF,
+};
+
+MAKE_ENUM_FLAGS(ChronoSparkleDisplayPosition);
+
+enum class HorizontalPosition : BYTE
+{
+	Left = 0,
+	Center = 1,
+	Right = 2
+};
+
+enum class VerticalPosition : BYTE
+{
+	Top = 0,
+	Center = 1,
+	Bottom = 2
+};
+
+//hexagon
+enum class BuildingSelectBracketPosition :BYTE
+{
+	Top = 0,
+	LeftTop = 1,
+	LeftBottom = 2,
+	Bottom = 3,
+	RightBottom = 4,
+	RightTop = 5
+};
+
+enum class DisplayInfoType : BYTE
+{
+	Health = 0,
+	Shield = 1,
+	Ammo = 2,
+	MindControl = 3,
+	Spawns = 4,
+	Passengers = 5,
+	Tiberium = 6,
+	Experience = 7,
+	Occupants = 8,
+	GattlingStage = 9
+};
+
+class MouseCursorHotSpotX
+{
 public:
 	typedef MouseHotSpotX Value;
 
-	static bool Parse(char* key, Value* value) {
-		if (key && value) {
-			if (!_strcmpi(key, "left")) {
+	static bool Parse(char* key, Value* value)
+	{
+		if (key && value)
+		{
+			if (!_strcmpi(key, "left"))
+			{
 				*value = MouseHotSpotX::Left;
 			}
-			else if (!_strcmpi(key, "right")) {
+			else if (!_strcmpi(key, "right"))
+			{
 				*value = MouseHotSpotX::Right;
 			}
-			else if (!_strcmpi(key, "center")) {
+			else if (!_strcmpi(key, "center"))
+			{
 				*value = MouseHotSpotX::Center;
 			}
-			else {
+			else
+			{
 				return false;
 			}
 			return true;
@@ -154,22 +277,29 @@ public:
 	}
 };
 
-class MouseCursorHotSpotY {
+class MouseCursorHotSpotY
+{
 public:
 	typedef MouseHotSpotY Value;
 
-	static bool Parse(char* key, Value* value) {
-		if (key && value) {
-			if (!_strcmpi(key, "top")) {
+	static bool Parse(char* key, Value* value)
+	{
+		if (key && value)
+		{
+			if (!_strcmpi(key, "top"))
+			{
 				*value = MouseHotSpotY::Top;
 			}
-			else if (!_strcmpi(key, "bottom")) {
+			else if (!_strcmpi(key, "bottom"))
+			{
 				*value = MouseHotSpotY::Bottom;
 			}
-			else if (!_strcmpi(key, "middle")) {
+			else if (!_strcmpi(key, "middle"))
+			{
 				*value = MouseHotSpotY::Middle;
 			}
-			else {
+			else
+			{
 				return false;
 			}
 			return true;
