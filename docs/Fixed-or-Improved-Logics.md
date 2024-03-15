@@ -925,6 +925,19 @@ In `rulesmd.ini`:
 ShakeIsLocal=false  ; boolean
 ```
 
+### Change Gatling stage and reload Ammo
+
+- You can now allow warhead to change the Stage and Rate value of a unit that use Gatling weapons.
+- You can now allow warhead to change the ammo amount of a techno with its Ammo>0.
+
+In `rulesmd.ini`:
+```ini
+[SOMEWARHEAD]       ; WarheadType
+TargetGattlingStage=0   ; integer
+TargetGattlingRateUp=0  ; integer
+TargetReloadAmmo=0      ; integer
+```
+
 ## Weapons
 
 ### AmbientDamage customizations
