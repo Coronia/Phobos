@@ -31,16 +31,13 @@ public:
 		Valueable<bool> SplashList_PickRandom;
 		Valueable<bool> RemoveDisguise;
 		Valueable<bool> RemoveMindControl;
-<<<<<<< HEAD
 		Valueable<int> GattlingStage;
 		Valueable<int> GattlingRateUp;
 		Valueable<int> ReloadAmmo;
-=======
 		Valueable<bool> AnimList_PickRandom;
 		Valueable<bool> AnimList_ShowOnZeroDamage;
 		Valueable<bool> DecloakDamagedTargets;
 		Valueable<bool> ShakeIsLocal;
->>>>>>> develop
 
 		Valueable<double> Crit_Chance;
 		Valueable<bool> Crit_ApplyChancePerTarget;
@@ -124,7 +121,6 @@ public:
 		bool HasCrit;
 		bool WasDetonatedOnAllMapObjects;
 
-<<<<<<< HEAD
 		ExtData(WarheadTypeClass* OwnerObject) : Extension<WarheadTypeClass>(OwnerObject),
 			SpySat(false),
 			BigGap(false),
@@ -136,9 +132,7 @@ public:
 			GattlingStage(0),
 			GattlingRateUp(0),
 			ReloadAmmo(0),
-=======
 		bool PossibleCellSpreadDetonate;
->>>>>>> develop
 
 	private:
 		Valueable<double> Shield_Respawn_Rate_InMinutes;
@@ -251,19 +245,16 @@ public:
 		void ApplyRemoveDisguiseToInf(HouseClass* pHouse, TechnoClass* pTarget);
 		void ApplyRemoveMindControl(HouseClass* pHouse, TechnoClass* pTarget);
 		void ApplyCrit(HouseClass* pHouse, TechnoClass* pTarget, TechnoClass* Owner);
-<<<<<<< HEAD
 		void ApplyGattlingStage(TechnoClass* pTarget, int Stage);
 		void ApplyGattlingRateUp(TechnoClass* pTarget, int RateUp);
 		void ApplyReloadAmmo(TechnoClass* pTarget, int ReloadAmount);
 	public:
 		void Detonate(TechnoClass* pOwner, HouseClass* pHouse, BulletClass* pBullet, CoordStruct coords);
 		bool CanTargetHouse(HouseClass* pHouse, TechnoClass* pTechno);
-=======
 		void ApplyShieldModifiers(TechnoClass* pTarget);
 		void ApplyConvert(HouseClass* pHouse, TechnoClass* pTarget);
 		void ApplyLocomotorInfliction(TechnoClass* pTarget);
 		void ApplyLocomotorInflictionReset(TechnoClass* pTarget);
->>>>>>> develop
 
 	public:
 		void Detonate(TechnoClass* pOwner, HouseClass* pHouse, BulletExt::ExtData* pBullet, CoordStruct coords);

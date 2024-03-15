@@ -103,7 +103,6 @@ void WarheadTypeExt::ExtData::Detonate(TechnoClass* pOwner, HouseClass* pHouse, 
 		if (!this->Crit_ApplyChancePerTarget)
 			this->Crit_RandomBuffer = ScenarioClass::Instance->Random.RandomDouble();
 
-<<<<<<< HEAD
 	// List all Warheads here that respect CellSpread
 	const bool isCellSpreadWarhead =
 		this->RemoveDisguise ||
@@ -112,10 +111,8 @@ void WarheadTypeExt::ExtData::Detonate(TechnoClass* pOwner, HouseClass* pHouse, 
 		this->GattlingStage > 0 ||
 		this->GattlingRateUp != 0 ||
 		this->ReloadAmmo != 0;
-=======
 		bool bulletWasIntercepted = pBulletExt && pBulletExt->InterceptedStatus == InterceptedStatus::Intercepted;
 		const float cellSpread = this->OwnerObject()->CellSpread;
->>>>>>> develop
 
 		if (cellSpread)
 		{
@@ -248,7 +245,7 @@ void WarheadTypeExt::ExtData::ApplyShieldModifiers(TechnoClass* pTarget)
 	if (this->GattlingStage > 0) {
 		this->ApplyGattlingStage(pTarget, this->GattlingStage);
 	}
-	
+
 	if (this->GattlingRateUp != 0) {
 		this->ApplyGattlingRateUp(pTarget, this->GattlingRateUp);
 	}
@@ -448,7 +445,7 @@ void WarheadTypeExt::ExtData::ApplyGattlingRateUp(TechnoClass* pTarget, int Rate
 	if (pData->IsGattling) {
 		auto curValue = pTarget->GattlingValue + RateUp;
 		auto maxValue = pTarget->Veterancy.IsElite() ? pData->EliteStage[pData->WeaponStages - 1] : pData->WeaponStage[pData->WeaponStages - 1];
-		
+
 		//set current weapon stage manually
 		if (curValue <= 0) {
 			pTarget->GattlingValue = 0;

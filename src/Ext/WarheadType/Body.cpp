@@ -117,16 +117,13 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->SplashList_PickRandom.Read(exINI, pSection, "SplashList.PickRandom");
 	this->RemoveDisguise.Read(exINI, pSection, "RemoveDisguise");
 	this->RemoveMindControl.Read(exINI, pSection, "RemoveMindControl");
-<<<<<<< HEAD
 	this->GattlingStage.Read(exINI, pSection, "TargetGattlingStage");
 	this->GattlingRateUp.Read(exINI, pSection, "TargetGattlingRateUp");
 	this->ReloadAmmo.Read(exINI, pSection, "TargetReloadAmmo");
-=======
 	this->AnimList_PickRandom.Read(exINI, pSection, "AnimList.PickRandom");
 	this->AnimList_ShowOnZeroDamage.Read(exINI, pSection, "AnimList.ShowOnZeroDamage");
 	this->DecloakDamagedTargets.Read(exINI, pSection, "DecloakDamagedTargets");
 	this->ShakeIsLocal.Read(exINI, pSection, "ShakeIsLocal");
->>>>>>> develop
 
 	// Crits
 	this->Crit_Chance.Read(exINI, pSection, "Crit.Chance");
