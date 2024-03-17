@@ -330,7 +330,7 @@ This page lists all the individual contributions to the project by their author.
 - **ststl, FlyStar, Saigyouji, JunJacobYoung** - Digital Display
 - **SukaHati (Erzoid)** - Minimum interceptor guard range
 - **E1 Elite** - TileSet 255 and above bridge repair fix
-- **AutoGavy** - interceptor logic, Warhead critical hit log
+- **AutoGavy** - interceptor logic, Warhead critical hit logic
 - **Ollerus** - change Gatling value and reload Ammo by warhead
 - **Chasheen (Chasheenburg)** - CN docs help
 - **tomsons26** - all-around help, assistance and guidance in reverse-engineering, YR binary mappings
