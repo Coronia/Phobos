@@ -197,6 +197,15 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->DetonateOnAllMapObjects_AffectTypes.Read(exINI, pSection, "DetonateOnAllMapObjects.AffectTypes");
 	this->DetonateOnAllMapObjects_IgnoreTypes.Read(exINI, pSection, "DetonateOnAllMapObjects.IgnoreTypes");
 
+	this->ReduceSWTimer.Read(exINI, pSection, "ReduceSWTimer");
+	this->ReduceSWTimer_Reset.Read(exINI, pSection, "ReduceSWTimer.Reset");
+	this->ReduceSWTimer_Frames.Read(exINI, pSection, "ReduceSWTimer.Frames");
+	this->ReduceSWTimer_Percent.Read(exINI, pSection, "ReduceSWTimer.Percent");
+	this->ReduceSWTimer_SWTypes.Read(exINI, pSection, "ReduceSWTimer.SWTypes");
+	this->ReduceSWTimer_AffectHouses.Read(exINI, pSection, "ReduceSWTimer.AffectHouses");
+	this->ReduceSWTimer_MaxAffect.Read(exINI, pSection, "ReduceSWTimer.MaxAffect");
+	this->ReduceSWTimer_ExceedRechargeTime.Read(exINI, pSection, "ReduceSWTimer.ExceedRechargeTime");
+
 	// Convert.From & Convert.To
 	TypeConvertGroup::Parse(this->Convert_Pairs, exINI, pSection, AffectedHouse::All);
 
@@ -335,6 +344,15 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->DetonateOnAllMapObjects_AffectHouses)
 		.Process(this->DetonateOnAllMapObjects_AffectTypes)
 		.Process(this->DetonateOnAllMapObjects_IgnoreTypes)
+
+		.Process(this->ReduceSWTimer)
+		.Process(this->ReduceSWTimer_Reset)
+		.Process(this->ReduceSWTimer_Frames)
+		.Process(this->ReduceSWTimer_Percent)
+		.Process(this->ReduceSWTimer_SWTypes)
+		.Process(this->ReduceSWTimer_AffectHouses)
+		.Process(this->ReduceSWTimer_MaxAffect)
+		.Process(this->ReduceSWTimer_ExceedRechargeTime)
 
 		.Process(this->Convert_Pairs)
 

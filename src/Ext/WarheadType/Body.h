@@ -110,6 +110,15 @@ public:
 		ValueableVector<TechnoTypeClass*> DetonateOnAllMapObjects_AffectTypes;
 		ValueableVector<TechnoTypeClass*> DetonateOnAllMapObjects_IgnoreTypes;
 
+		Valueable<bool> ReduceSWTimer;
+		ValueableVector<bool> ReduceSWTimer_Reset;
+		ValueableVector<int> ReduceSWTimer_Frames;
+		ValueableVector<double> ReduceSWTimer_Percent;
+		ValueableIdxVector<SuperWeaponTypeClass> ReduceSWTimer_SWTypes;
+		Valueable<AffectedHouse> ReduceSWTimer_AffectHouses;
+		Valueable<int> ReduceSWTimer_MaxAffect;
+		ValueableVector<bool> ReduceSWTimer_ExceedRechargeTime;
+
 		std::vector<TypeConvertGroup> Convert_Pairs;
 
 		Valueable<bool> InflictLocomotor;
@@ -127,6 +136,7 @@ public:
 		bool Splashed;
 		int RemainingAnimCreationInterval;
 		bool PossibleCellSpreadDetonate;
+		int ReduceSWTimer_Counter;
 
 	private:
 		Valueable<double> Shield_Respawn_Rate_InMinutes;
@@ -224,6 +234,15 @@ public:
 			, DetonateOnAllMapObjects_AffectTypes {}
 			, DetonateOnAllMapObjects_IgnoreTypes {}
 
+			, ReduceSWTimer { false }
+			, ReduceSWTimer_Reset {}
+			, ReduceSWTimer_Frames {}
+			, ReduceSWTimer_Percent {}
+			, ReduceSWTimer_SWTypes {}
+			, ReduceSWTimer_AffectHouses { AffectedHouse::All }
+			, ReduceSWTimer_MaxAffect { -1 }
+			, ReduceSWTimer_ExceedRechargeTime {}
+
 			, Convert_Pairs {}
 
 			, InflictLocomotor { false }
@@ -238,6 +257,7 @@ public:
 			, Splashed { false }
 			, RemainingAnimCreationInterval { 0 }
 			, PossibleCellSpreadDetonate {false}
+			, ReduceSWTimer_Counter { 0 }
 		{ }
 
 	private:
@@ -250,6 +270,7 @@ public:
 		void ApplyConvert(HouseClass* pHouse, TechnoClass* pTarget);
 		void ApplyLocomotorInfliction(TechnoClass* pTarget);
 		void ApplyLocomotorInflictionReset(TechnoClass* pTarget);
+		bool ApplyReduceSWTimer(HouseClass* pHouse, HouseClass* pTargetHouse)
 
 	public:
 		void Detonate(TechnoClass* pOwner, HouseClass* pHouse, BulletExt::ExtData* pBullet, CoordStruct coords);

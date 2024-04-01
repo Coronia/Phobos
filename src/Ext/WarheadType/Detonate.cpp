@@ -146,6 +146,9 @@ void WarheadTypeExt::ExtData::DetonateOnOneUnit(HouseClass* pHouse, TechnoClass*
 
 	if (this->RemoveInflictedLocomotor)
 		this->ApplyLocomotorInflictionReset(pTarget);
+
+	if (this->ReduceSWTimer && (this->ReduceSWTimer_MaxAffect < 0 || this->ReduceSWTimer_Counter < this->ReduceSWTimer_MaxAffect))
+		this->ReduceSWTimer_Counter += this->ApplyReduceSWTimer(pHouse, pTarget->Owner);
 }
 
 void WarheadTypeExt::ExtData::ApplyShieldModifiers(TechnoClass* pTarget)
@@ -395,4 +398,106 @@ void WarheadTypeExt::ExtData::ApplyLocomotorInflictionReset(TechnoClass* pTarget
 	// 	return;
 
 	LocomotionClass::End_Piggyback(pTargetFoot->Locomotor);
+}
+
+bool WarheadTypeExt::ExtData::ApplyReduceSWTimer(HouseClass* pHouse, HouseClass* pTargetHouse)
+{
+	if (pHouse && !EnumFunctions::CanTargetHouse(this->ReduceSWTimer_AffectHouses, pHouse, pTargetHouse))
+		return false;
+
+	int swCount = this->ReduceSWTimer_SWTypes.size();
+	bool affected = false;
+
+	for (int i = 0; i < swCount; i ++)
+	{
+		SuperClass* pSuper = pTargetHouse->Supers[this->ReduceSWTimer_SWTypes[i]];
+
+		if (pSuper->Granted && pSuper->Type->RechargeTime > 0)
+		{
+			if (this->ReduceSWTimer_Reset.size() == 1 && this->ReduceSWTimer_Reset[0])
+			{
+				pSuper.Reset();
+				affected = true;
+				continue;
+			}
+			else if (this->ReduceSWTimer_Reset.size() == swCount && this->ReduceSWTimer_Reset[i])
+			{
+				pSuper.Reset();
+				affected = true;
+				continue;
+			}
+
+			if (this->ReduceSWTimer_Frames.size() == 1 && this->ReduceSWTimer_Frames[0])
+			{
+				int timeLeft = pSuper->RechargeTimer.TimeLeft - Math::min(pSuper->RechargeTimer.TimeLeft, this->ReduceSWTimer_Frames[0]);
+				if (this->ReduceSWTimer_ExceedRechargeTime.size() == 1 && this->ReduceSWTimer_ExceedRechargeTime[0])
+				{
+					pSuper->RechargeTimer.TimeLeft = timeLeft;
+				}
+				else if (this->ReduceSWTimer_ExceedRechargeTime.size() == swCount && this->ReduceSWTimer_ExceedRechargeTime[i])
+				{
+					pSuper->RechargeTimer.TimeLeft = timeLeft;
+				}
+				else
+				{
+					pSuper->RechargeTimer.TimeLeft = Math::min(timeLeft, pSuper->Type->RechargeTime);
+				}
+				affected = true;
+			}
+			else if (this->ReduceSWTimer_Frames.size() == swCount && this->ReduceSWTimer_Frames[i])
+			{
+				int timeLeft = pSuper->RechargeTimer.TimeLeft - Math::min(pSuper->RechargeTimer.TimeLeft, this->ReduceSWTimer_Frames[0]);
+				if (this->ReduceSWTimer_ExceedRechargeTime.size() == 1 && this->ReduceSWTimer_ExceedRechargeTime[0])
+				{
+					pSuper->RechargeTimer.TimeLeft = timeLeft;
+				}
+				else if (this->ReduceSWTimer_ExceedRechargeTime.size() == swCount && this->ReduceSWTimer_ExceedRechargeTime[i])
+				{
+					pSuper->RechargeTimer.TimeLeft = timeLeft;
+				}
+				else
+				{
+					pSuper->RechargeTimer.TimeLeft = Math::min(timeLeft, pSuper->Type->RechargeTime);
+				}
+				affected = true;
+			}
+
+			if (this->ReduceSWTimer_Percent.size() == 1 && this->ReduceSWTimer_Percent[0])
+			{
+				int timeLeft = pSuper->RechargeTimer.TimeLeft - Game::F2I(pSuper->Type->RechargeTime * this->ReduceSWTimer_Percent[0]);
+				if (this->ReduceSWTimer_ExceedRechargeTime.size() == 1 && this->ReduceSWTimer_ExceedRechargeTime[0])
+				{
+					pSuper->RechargeTimer.TimeLeft = timeLeft;
+				}
+				else if (this->ReduceSWTimer_ExceedRechargeTime.size() == swCount && this->ReduceSWTimer_ExceedRechargeTime[i])
+				{
+					pSuper->RechargeTimer.TimeLeft = timeLeft;
+				}
+				else
+				{
+					pSuper->RechargeTimer.TimeLeft = Math::min(timeLeft, pSuper->Type->RechargeTime);
+				}
+				affected = true;
+			}
+			else if (this->ReduceSWTimer_Percent.size() == swCount && this->ReduceSWTimer_Percent[i])
+			{
+				int timeLeft = pSuper->RechargeTimer.TimeLeft - Game::F2I(pSuper->Type->RechargeTime * this->ReduceSWTimer_Percent[0]);
+				if (this->ReduceSWTimer_ExceedRechargeTime.size() == 1 && this->ReduceSWTimer_ExceedRechargeTime[0])
+				{
+					pSuper->RechargeTimer.TimeLeft = timeLeft;
+				}
+				else if (this->ReduceSWTimer_ExceedRechargeTime.size() == swCount && this->ReduceSWTimer_ExceedRechargeTime[i])
+				{
+					pSuper->RechargeTimer.TimeLeft = timeLeft;
+				}
+				else
+				{
+					pSuper->RechargeTimer.TimeLeft = Math::min(timeLeft, pSuper->Type->RechargeTime);
+				}
+				affected = true;
+			}
+		}
+	}
+
+	return affected;
 }

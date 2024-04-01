@@ -1029,6 +1029,30 @@ In `rulesmd.ini`:
 RemoveMindControl=false  ; boolean
 ```
 
+### Change superweapons' timer by warheads
+- Set `ReduceSWTimer` to true allows a warhead to change superweapons' current timer.
+  - `ReduceSWTimer.SWTypes` determines the superweapons that can be affected
+  - `ReduceSWTimer.Reset` determines whether the timer should be reset like a spy infiltration does. Can either be set to a single value for all superweapons in the list, or a list for these superweapons one by one.
+  - `ReduceSWTimer.Frames` determines the value of reduced timer in frames. Set it to negative value for an increment. Can either be set to a single value for all superweapons in the list, or a list for these superweapons one by one. The effect will be overriden by `ReduceSWTimer.Reset`.
+  - `ReduceSWTimer.Percent` determines the value of reduced timer based on a percentage of its `RechargeTime`. Set it to negative value for an increment. Can either be set to a single value for all superweapons in the list, or a list for these superweapons one by one. The effect will be overriden by `ReduceSWTimer.Reset`. However, it's compatible with `ReduceSWTimer.Frames`, which will be calculated forward.
+  - `ReduceSWTimer.AffectHouses` determines which houses targets can belong to be considered valid.
+  - `ReduceSWTimer.MaxAffect` determines the maximum amount of timer change for each detonation.
+  - `ReduceSWTimer.ExceedRechargeTime` determines whether the timer could exceed its `RechargeTime` after the detonation. Can either be set to a single value for all superweapons in the list, or a list for these superweapons one by one.
+
+In `rulesmd.ini`:
+```ini
+[SOMEWARHEAD]                     ; Warhead
+ReduceSWTimer=                    ; boolean
+ReduceSWTimer.Reset=              ; list of boolean, could also be a single boolean
+ReduceSWTimer.Frames=             ; list of integer, could also be a single integer
+ReduceSWTimer.Percent=            ; list of floating point value, percents or absolute (0.0-1.0), could also be a single floating point value
+ReduceSWTimer.SWTypes=            ; list of superweapons
+ReduceSWTimer.AffectHouses=       ; list of Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
+ReduceSWTimer.MaxAffect=          ; integer
+ReduceSWTimer.ExceedRechargeTime= ; list of boolean, could also be a single boolean
+```
+
+
 ### Chance-based extra damage or Warhead detonation / 'critical hits'
 
 - Warheads can now apply additional chance-based damage or Warhead detonation ('critical hits') with the ability to customize chance, damage, affected targets, affected target HP threshold and animations of critical hit.
