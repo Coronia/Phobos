@@ -147,8 +147,11 @@ void WarheadTypeExt::ExtData::DetonateOnOneUnit(HouseClass* pHouse, TechnoClass*
 	if (this->RemoveInflictedLocomotor)
 		this->ApplyLocomotorInflictionReset(pTarget);
 
+	if (this->SetSWTimer && (this->SetSWTimer_MaxAffect < 0 || this->SetSWTimer_Counter < this->SetSWTimer_MaxAffect))
+		this->SetSWTimer_Counter += this->ApplySWTimer(pHouse, pTarget, true);
+
 	if (this->ReduceSWTimer && (this->ReduceSWTimer_MaxAffect < 0 || this->ReduceSWTimer_Counter < this->ReduceSWTimer_MaxAffect))
-		this->ReduceSWTimer_Counter += this->ApplyReduceSWTimer(pHouse, pTarget->Owner);
+		this->ReduceSWTimer_Counter += this->ApplySWTimer(pHouse, pTarget, false);
 }
 
 void WarheadTypeExt::ExtData::ApplyShieldModifiers(TechnoClass* pTarget)
@@ -400,104 +403,135 @@ void WarheadTypeExt::ExtData::ApplyLocomotorInflictionReset(TechnoClass* pTarget
 	LocomotionClass::End_Piggyback(pTargetFoot->Locomotor);
 }
 
-bool WarheadTypeExt::ExtData::ApplyReduceSWTimer(HouseClass* pHouse, HouseClass* pTargetHouse)
+bool WarheadTypeExt::ExtData::ApplySWTimer(HouseClass* pHouse, TechnoClass* pTarget, bool flag)
 {
-	if (pHouse && !EnumFunctions::CanTargetHouse(this->ReduceSWTimer_AffectHouses, pHouse, pTargetHouse))
+	if (flag)
+	{
+		if (pHouse && !EnumFunctions::CanTargetHouse(this->SetSWTimer_AffectHouses, pHouse, pTarget->Owner))
 		return false;
 
-	int swCount = this->ReduceSWTimer_SWTypes.size();
-	bool affected = false;
-
-	for (int i = 0; i < swCount; i ++)
-	{
-		SuperClass* pSuper = pTargetHouse->Supers[this->ReduceSWTimer_SWTypes[i]];
-
-		if (pSuper->Granted && pSuper->Type->RechargeTime > 0)
+		if ((this->SetSWTimer_AffectTypes.size() > 0 &&
+			!this->SetSWTimer_AffectTypes.Contains(pTarget->GetTechnoType())) ||
+			this->SetSWTimer_IgnoreTypes.Contains(pTarget->GetTechnoType()))
 		{
-			if (this->ReduceSWTimer_Reset.size() == 1 && this->ReduceSWTimer_Reset[0])
-			{
-				pSuper.Reset();
-				affected = true;
-				continue;
-			}
-			else if (this->ReduceSWTimer_Reset.size() == swCount && this->ReduceSWTimer_Reset[i])
-			{
-				pSuper.Reset();
-				affected = true;
-				continue;
-			}
+			return false;
+		}
+	}
+	else
+	{
+		if (pHouse && !EnumFunctions::CanTargetHouse(this->ReduceSWTimer_AffectHouses, pHouse, pTarget->Owner))
+		return false;
 
-			if (this->ReduceSWTimer_Frames.size() == 1 && this->ReduceSWTimer_Frames[0])
-			{
-				int timeLeft = pSuper->RechargeTimer.TimeLeft - Math::min(pSuper->RechargeTimer.TimeLeft, this->ReduceSWTimer_Frames[0]);
-				if (this->ReduceSWTimer_ExceedRechargeTime.size() == 1 && this->ReduceSWTimer_ExceedRechargeTime[0])
-				{
-					pSuper->RechargeTimer.TimeLeft = timeLeft;
-				}
-				else if (this->ReduceSWTimer_ExceedRechargeTime.size() == swCount && this->ReduceSWTimer_ExceedRechargeTime[i])
-				{
-					pSuper->RechargeTimer.TimeLeft = timeLeft;
-				}
-				else
-				{
-					pSuper->RechargeTimer.TimeLeft = Math::min(timeLeft, pSuper->Type->RechargeTime);
-				}
-				affected = true;
-			}
-			else if (this->ReduceSWTimer_Frames.size() == swCount && this->ReduceSWTimer_Frames[i])
-			{
-				int timeLeft = pSuper->RechargeTimer.TimeLeft - Math::min(pSuper->RechargeTimer.TimeLeft, this->ReduceSWTimer_Frames[0]);
-				if (this->ReduceSWTimer_ExceedRechargeTime.size() == 1 && this->ReduceSWTimer_ExceedRechargeTime[0])
-				{
-					pSuper->RechargeTimer.TimeLeft = timeLeft;
-				}
-				else if (this->ReduceSWTimer_ExceedRechargeTime.size() == swCount && this->ReduceSWTimer_ExceedRechargeTime[i])
-				{
-					pSuper->RechargeTimer.TimeLeft = timeLeft;
-				}
-				else
-				{
-					pSuper->RechargeTimer.TimeLeft = Math::min(timeLeft, pSuper->Type->RechargeTime);
-				}
-				affected = true;
-			}
-
-			if (this->ReduceSWTimer_Percent.size() == 1 && this->ReduceSWTimer_Percent[0])
-			{
-				int timeLeft = pSuper->RechargeTimer.TimeLeft - Game::F2I(pSuper->Type->RechargeTime * this->ReduceSWTimer_Percent[0]);
-				if (this->ReduceSWTimer_ExceedRechargeTime.size() == 1 && this->ReduceSWTimer_ExceedRechargeTime[0])
-				{
-					pSuper->RechargeTimer.TimeLeft = timeLeft;
-				}
-				else if (this->ReduceSWTimer_ExceedRechargeTime.size() == swCount && this->ReduceSWTimer_ExceedRechargeTime[i])
-				{
-					pSuper->RechargeTimer.TimeLeft = timeLeft;
-				}
-				else
-				{
-					pSuper->RechargeTimer.TimeLeft = Math::min(timeLeft, pSuper->Type->RechargeTime);
-				}
-				affected = true;
-			}
-			else if (this->ReduceSWTimer_Percent.size() == swCount && this->ReduceSWTimer_Percent[i])
-			{
-				int timeLeft = pSuper->RechargeTimer.TimeLeft - Game::F2I(pSuper->Type->RechargeTime * this->ReduceSWTimer_Percent[0]);
-				if (this->ReduceSWTimer_ExceedRechargeTime.size() == 1 && this->ReduceSWTimer_ExceedRechargeTime[0])
-				{
-					pSuper->RechargeTimer.TimeLeft = timeLeft;
-				}
-				else if (this->ReduceSWTimer_ExceedRechargeTime.size() == swCount && this->ReduceSWTimer_ExceedRechargeTime[i])
-				{
-					pSuper->RechargeTimer.TimeLeft = timeLeft;
-				}
-				else
-				{
-					pSuper->RechargeTimer.TimeLeft = Math::min(timeLeft, pSuper->Type->RechargeTime);
-				}
-				affected = true;
-			}
+		if ((this->ReduceSWTimer_AffectTypes.size() > 0 &&
+			!this->ReduceSWTimer_AffectTypes.Contains(pTarget->GetTechnoType())) ||
+			this->ReduceSWTimer_IgnoreTypes.Contains(pTarget->GetTechnoType()))
+		{
+			return false;
 		}
 	}
 
+	bool affected = false;
+
+	if (flag && EnumFunctions::CanTargetHouse(this->SetSWTimer_AffectHouses_SW, pHouse, pTarget->Owner))
+	{
+		for (int i = 0; i < this->SetSWTimer_SWTypes.size(); i ++)
+		{
+			this->ApplySetSWTimer(pTarget->Owner->Supers[this->SetSWTimer_SWTypes[i]]);
+		}
+		affected = true;
+	}
+	else if (EnumFunctions::CanTargetHouse(this->ReduceSWTimer_AffectHouses_SW, pHouse, pTarget->Owner))
+	{
+		for (int i = 0; i < this->ReduceSWTimer_SWTypes.size(); i ++)
+		{
+			this->ApplyReduceSWTimer(pTarget->Owner->Supers[this->ReduceSWTimer_SWTypes[i]]);
+		}
+		affected = true;
+	}
+
+	if (flag && pTarget->Owner != pHouse && EnumFunctions::CanTargetHouse(this->SetSWTimer_AffectHouses_SW, pHouse, pHouse))
+	{
+		for (int i = 0; i < this->SetSWTimer_SWTypes.size(); i ++)
+		{
+			this->ApplySetSWTimer(pHouse->Supers[this->SetSWTimer_SWTypes[i]]);
+		}
+		affected = true;
+	}
+	else if (pTarget->Owner != pHouse && EnumFunctions::CanTargetHouse(this->ReduceSWTimer_AffectHouses_SW, pHouse, pHouse))
+	{
+		for (int i = 0; i < this->ReduceSWTimer_SWTypes.size(); i ++)
+		{
+			this->ApplyReduceSWTimer(pHouse->Supers[this->ReduceSWTimer_SWTypes[i]]);
+		}
+		affected = true;
+	}
+
 	return affected;
+}
+
+void WarheadTypeExt::ExtData::ApplySetSWTimer(SuperClass* pSuper)
+{
+	if (pSuper->Granted && pSuper->Type->RechargeTime > 0)
+	{
+		if (this->SetSWTimer_Reset)
+		{
+			pSuper->Reset();
+		}
+		else if (this->SetSWTimer_Frames >= 0)
+		{
+			pSuper->RechargeTimer.TimeLeft = this->SetSWTimer_Frames;
+		}
+		else if (this->SetSWTimer_Percent >= 0.0)
+		{
+			if (!this->SetSWTimer_Percent_Relative)
+			{
+				pSuper->RechargeTimer.TimeLeft = Game::F2I(pSuper->Type->RechargeTime * this->SetSWTimer_Percent);
+			}
+			else
+			{
+				pSuper->RechargeTimer.TimeLeft = Game::F2I(pSuper->RechargeTimer.TimeLeft * this->SetSWTimer_Percent);
+			}
+		}
+	}
+}
+
+void WarheadTypeExt::ExtData::ApplyReduceSWTimer(SuperClass* pSuper)
+{
+	if (pSuper->Granted && pSuper->Type->RechargeTime > 0)
+	{
+		int timeLeft = pSuper->RechargeTimer.TimeLeft;
+
+		if (this->ReduceSWTimer_Frames)
+		{
+			timeLeft -= this->ReduceSWTimer_Frames;
+		}
+
+		if (this->ReduceSWTimer_Percent)
+		{
+			timeLeft -= Game::F2I(pSuper->Type->RechargeTime * this->ReduceSWTimer_Percent);
+		}
+
+		int minValue = Math::max(0, this->ReduceSWTimer_Min_Frames);
+		minValue = Math::max(minValue, Game::F2I(pSuper->Type->RechargeTime * this->ReduceSWTimer_Min_Percent));
+		timeLeft = Math::max(minValue, timeLeft);
+
+		if (this->ReduceSWTimer_Max_UseRechargeTime)
+		{
+			timeLeft = Math::min(timeLeft, pSuper->Type->RechargeTime);
+		}
+		else
+		{
+			if (this->ReduceSWTimer_Max_Frames >= 0)
+			{
+				timeLeft = Math::min(timeLeft, this->ReduceSWTimer_Max_Frames);
+			}
+
+			if (this->ReduceSWTimer_Max_Percent >= 0.0)
+			{
+				timeLeft = Math::min(timeLeft, Game::F2I(pSuper->Type->RechargeTime * this->ReduceSWTimer_Max_Percent));
+			}
+		}
+
+		pSuper->RechargeTimer.TimeLeft = timeLeft;
+	}
 }

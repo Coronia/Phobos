@@ -110,14 +110,32 @@ public:
 		ValueableVector<TechnoTypeClass*> DetonateOnAllMapObjects_AffectTypes;
 		ValueableVector<TechnoTypeClass*> DetonateOnAllMapObjects_IgnoreTypes;
 
+		Valueable<bool> SetSWTimer;
+		Valueable<bool> SetSWTimer_Reset;
+		Valueable<int> SetSWTimer_Frames;
+		Valueable<double> SetSWTimer_Percent;
+		Valueable<bool> SetSWTimer_Percent_Relative;
+		ValueableIdxVector<SuperWeaponTypeClass> SetSWTimer_SWTypes;
+		Valueable<AffectedHouse> SetSWTimer_AffectHouses;
+		Valueable<AffectedHouse> SetSWTimer_AffectHouses_SW;
+		ValueableVector<TechnoTypeClass*> SetSWTimer_AffectTypes;
+		ValueableVector<TechnoTypeClass*> SetSWTimer_IgnoreTypes;
+		Valueable<int> SetSWTimer_MaxAffect;
+
 		Valueable<bool> ReduceSWTimer;
-		ValueableVector<bool> ReduceSWTimer_Reset;
-		ValueableVector<int> ReduceSWTimer_Frames;
-		ValueableVector<double> ReduceSWTimer_Percent;
+		Valueable<int> ReduceSWTimer_Frames;
+		Valueable<double> ReduceSWTimer_Percent;
 		ValueableIdxVector<SuperWeaponTypeClass> ReduceSWTimer_SWTypes;
 		Valueable<AffectedHouse> ReduceSWTimer_AffectHouses;
+		Valueable<AffectedHouse> ReduceSWTimer_AffectHouses_SW;
+		ValueableVector<TechnoTypeClass*> ReduceSWTimer_AffectTypes;
+		ValueableVector<TechnoTypeClass*> ReduceSWTimer_IgnoreTypes;
 		Valueable<int> ReduceSWTimer_MaxAffect;
-		ValueableVector<bool> ReduceSWTimer_ExceedRechargeTime;
+		Valueable<int> ReduceSWTimer_Max_Frames;
+		Valueable<double> ReduceSWTimer_Max_Percent;
+		Valueable<bool> ReduceSWTimer_Max_UseRechargeTime;
+		Valueable<int> ReduceSWTimer_Min_Frames;
+		Valueable<double> ReduceSWTimer_Min_Percent;
 
 		std::vector<TypeConvertGroup> Convert_Pairs;
 
@@ -136,6 +154,7 @@ public:
 		bool Splashed;
 		int RemainingAnimCreationInterval;
 		bool PossibleCellSpreadDetonate;
+		int SetSWTimer_Counter;
 		int ReduceSWTimer_Counter;
 
 	private:
@@ -234,14 +253,32 @@ public:
 			, DetonateOnAllMapObjects_AffectTypes {}
 			, DetonateOnAllMapObjects_IgnoreTypes {}
 
+			, SetSWTimer { false }
+			, SetSWTimer_Reset { false }
+			, SetSWTimer_Frames { -1 }
+			, SetSWTimer_Percent { -0.0 }
+			, SetSWTimer_Percent_Relative { false }
+			, SetSWTimer_SWTypes {}
+			, SetSWTimer_AffectHouses { AffectedHouse::All }
+			, SetSWTimer_AffectHouses_SW { AffectedHouse::All }
+			, SetSWTimer_AffectTypes {}
+			, SetSWTimer_IgnoreTypes {}
+			, SetSWTimer_MaxAffect { -1 }
+
 			, ReduceSWTimer { false }
-			, ReduceSWTimer_Reset {}
-			, ReduceSWTimer_Frames {}
-			, ReduceSWTimer_Percent {}
+			, ReduceSWTimer_Frames { 0 }
+			, ReduceSWTimer_Percent { 0.0 }
 			, ReduceSWTimer_SWTypes {}
 			, ReduceSWTimer_AffectHouses { AffectedHouse::All }
+			, ReduceSWTimer_AffectHouses_SW { AffectedHouse::All }
+			, ReduceSWTimer_AffectTypes {}
+			, ReduceSWTimer_IgnoreTypes {}
 			, ReduceSWTimer_MaxAffect { -1 }
-			, ReduceSWTimer_ExceedRechargeTime {}
+			, ReduceSWTimer_Max_Frames { -1 }
+			, ReduceSWTimer_Max_Percent { -1.0 }
+			, ReduceSWTimer_Max_UseRechargeTime { true }
+			, ReduceSWTimer_Min_Frames { 0 }
+			, ReduceSWTimer_Min_Percent { 0.0 }
 
 			, Convert_Pairs {}
 
@@ -257,6 +294,7 @@ public:
 			, Splashed { false }
 			, RemainingAnimCreationInterval { 0 }
 			, PossibleCellSpreadDetonate {false}
+			, SetSWTimer_Counter { 0 }
 			, ReduceSWTimer_Counter { 0 }
 		{ }
 
@@ -270,7 +308,9 @@ public:
 		void ApplyConvert(HouseClass* pHouse, TechnoClass* pTarget);
 		void ApplyLocomotorInfliction(TechnoClass* pTarget);
 		void ApplyLocomotorInflictionReset(TechnoClass* pTarget);
-		bool ApplyReduceSWTimer(HouseClass* pHouse, HouseClass* pTargetHouse)
+		bool ApplySWTimer(HouseClass* pHouse, TechnoClass* pTarget, bool flag);
+		void ApplySetSWTimer(SuperClass* pSuper);
+		void ApplyReduceSWTimer(SuperClass* pSuper);
 
 	public:
 		void Detonate(TechnoClass* pOwner, HouseClass* pHouse, BulletExt::ExtData* pBullet, CoordStruct coords);
