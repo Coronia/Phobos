@@ -408,7 +408,7 @@ bool WarheadTypeExt::ExtData::ApplySWTimer(HouseClass* pHouse, TechnoClass* pTar
 	if (flag)
 	{
 		if (pHouse && !EnumFunctions::CanTargetHouse(this->SetSWTimer_AffectHouses, pHouse, pTarget->Owner))
-		return false;
+			return false;
 
 		if ((this->SetSWTimer_AffectTypes.size() > 0 &&
 			!this->SetSWTimer_AffectTypes.Contains(pTarget->GetTechnoType())) ||
@@ -420,7 +420,7 @@ bool WarheadTypeExt::ExtData::ApplySWTimer(HouseClass* pHouse, TechnoClass* pTar
 	else
 	{
 		if (pHouse && !EnumFunctions::CanTargetHouse(this->ReduceSWTimer_AffectHouses, pHouse, pTarget->Owner))
-		return false;
+			return false;
 
 		if ((this->ReduceSWTimer_AffectTypes.size() > 0 &&
 			!this->ReduceSWTimer_AffectTypes.Contains(pTarget->GetTechnoType())) ||
@@ -430,43 +430,37 @@ bool WarheadTypeExt::ExtData::ApplySWTimer(HouseClass* pHouse, TechnoClass* pTar
 		}
 	}
 
-	bool affected = false;
-
 	if (flag && EnumFunctions::CanTargetHouse(this->SetSWTimer_AffectHouses_SW, pHouse, pTarget->Owner))
 	{
-		for (int i = 0; i < this->SetSWTimer_SWTypes.size(); i ++)
+		for (int swIdx : this->SetSWTimer_SWTypes)
 		{
-			this->ApplySetSWTimer(pTarget->Owner->Supers[this->SetSWTimer_SWTypes[i]]);
+			this->ApplySetSWTimer(pTarget->Owner->Supers[swIdx]);
 		}
-		affected = true;
 	}
 	else if (EnumFunctions::CanTargetHouse(this->ReduceSWTimer_AffectHouses_SW, pHouse, pTarget->Owner))
 	{
-		for (int i = 0; i < this->ReduceSWTimer_SWTypes.size(); i ++)
+		for (int swIdx : this->ReduceSWTimer_SWTypes)
 		{
-			this->ApplyReduceSWTimer(pTarget->Owner->Supers[this->ReduceSWTimer_SWTypes[i]]);
+			this->ApplyReduceSWTimer(pTarget->Owner->Supers[swIdx]);
 		}
-		affected = true;
 	}
 
 	if (flag && pTarget->Owner != pHouse && EnumFunctions::CanTargetHouse(this->SetSWTimer_AffectHouses_SW, pHouse, pHouse))
 	{
-		for (int i = 0; i < this->SetSWTimer_SWTypes.size(); i ++)
+		for (int swIdx : this->SetSWTimer_SWTypes)
 		{
-			this->ApplySetSWTimer(pHouse->Supers[this->SetSWTimer_SWTypes[i]]);
+			this->ApplySetSWTimer(pHouse->Supers[swIdx]);
 		}
-		affected = true;
 	}
 	else if (pTarget->Owner != pHouse && EnumFunctions::CanTargetHouse(this->ReduceSWTimer_AffectHouses_SW, pHouse, pHouse))
 	{
-		for (int i = 0; i < this->ReduceSWTimer_SWTypes.size(); i ++)
+		for (int swIdx : this->ReduceSWTimer_SWTypes)
 		{
-			this->ApplyReduceSWTimer(pHouse->Supers[this->ReduceSWTimer_SWTypes[i]]);
+			this->ApplyReduceSWTimer(pHouse->Supers[swIdx]);
 		}
-		affected = true;
 	}
 
-	return affected;
+	return true;
 }
 
 void WarheadTypeExt::ExtData::ApplySetSWTimer(SuperClass* pSuper)

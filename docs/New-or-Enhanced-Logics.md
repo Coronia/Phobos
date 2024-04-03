@@ -1038,20 +1038,24 @@ RemoveMindControl=false  ; boolean
     - `SetSWTimer.Percent.Relative` allows it to set the new value of timer based on a percentage of its current timer value instead.
   - `SetSWTimer.AffectHouses.Target` determines which houses' targets could be considered valid.
   - `SetSWTimer.AffectHouses.SW` determines which houses' superweapons could be changed.
+  - `SetSWTimer.AffectTypes` determines specific TechnoTypes to be considered as valid targets. If any valid TechnoTypes are listed, then only matching objects will be targeted.
+  - `SetSWTimer.IgnoreTypes` determines specific TechnoTypes to be never considered as valid targets.
   - `SetSWTimer.MaxAffect` determines the maximum amount of timer change for each detonation.
 
 In `rulesmd.ini`:
 ```ini
-[SOMEWARHEAD]                     ; Warhead
-SetSWTimer=                       ; boolean
-SetSWTimer.Reset=                 ; boolean
-SetSWTimer.Frames=                ; integer
-SetSWTimer.Percent=               ; floating point value, percents or absolute
-SetSWTimer.Percent.Relative=      ; boolean
-SetSWTimer.SWTypes=               ; list of superweapons
-SetSWTimer.AffectHouses.Target=   ; list of Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
-SetSWTimer.AffectHouses.SW=       ; list of Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
-SetSWTimer.MaxAffect=             ; integer
+[SOMEWARHEAD]                        ; Warhead
+SetSWTimer=false                     ; boolean
+SetSWTimer.Reset=false               ; boolean
+SetSWTimer.Frames=0                  ; integer
+SetSWTimer.Percent=0.0               ; floating point value, percents or absolute
+SetSWTimer.Percent.Relative=false    ; boolean
+SetSWTimer.SWTypes=                  ; list of superweapons
+SetSWTimer.AffectHouses.Target=all   ; list of Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
+SetSWTimer.AffectHouses.SW=all       ; list of Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
+SetSWTimer.AffectTypes=              ; list of TechnoType names
+SetSWTimer.IgnoreTypes=              ; list of TechnoType names
+SetSWTimer.MaxAffect=-1              ; integer
 ```
 
 - Set `ReduceSWTimer` to true allows a warhead to reduce superweapons' current timer.
@@ -1060,6 +1064,8 @@ SetSWTimer.MaxAffect=             ; integer
   - `ReduceSWTimer.Percent` determines the value of reduced timer based on a percentage of its `RechargeTime`. Set it to negative value for an increment. The effect is calculated with `ReduceSWTimer.Frames` together.
   - `ReduceSWTimer.AffectHouses.Target` determines which houses' targets could be considered valid.
   - `ReduceSWTimer.AffectHouses.SW` determines which houses' superweapons could be changed.
+  - `ReduceSWTimer.AffectTypes` determines specific TechnoTypes to be considered as valid targets. If any valid TechnoTypes are listed, then only matching objects will be targeted.
+  - `ReduceSWTimer.IgnoreTypes` determines specific TechnoTypes to be never considered as valid targets.
   - `ReduceSWTimer.MaxAffect` determines the maximum amount of timer change for each detonation.
   - `ReduceSWTimer.Max.UseRechargeTime` determines whether the timer could exceed its `RechargeTime` after detonation.
   - `ReduceSWTimer.Max.Frames` determines the maximum values of the timer after detonation in frames. The effect will be overriden by `ReduceSWTimer.Max.UseRechargeTime`.
@@ -1069,19 +1075,21 @@ SetSWTimer.MaxAffect=             ; integer
 
 In `rulesmd.ini`:
 ```ini
-[SOMEWARHEAD]                        ; Warhead
-ReduceSWTimer=                       ; boolean
-ReduceSWTimer.Frames=                ; integer
-ReduceSWTimer.Percent=               ; floating point value, percents or absolute
-ReduceSWTimer.SWTypes=               ; list of superweapons
-ReduceSWTimer.AffectHouses.Target=   ; list of Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
-ReduceSWTimer.AffectHouses.SW=       ; list of Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
-ReduceSWTimer.MaxAffect=             ; integer
-ReduceSWTimer.Max.UseRechargeTime=   ; boolean
-ReduceSWTimer.Max.Frames=            ; integer
-ReduceSWTimer.Max.Percent=           ; floating point value, percents or absolute
-ReduceSWTimer.Min.Frames=            ; integer
-ReduceSWTimer.Min.Percent=           ; floating point value, percents or absolute
+[SOMEWARHEAD]                            ; Warhead
+ReduceSWTimer=false                      ; boolean
+ReduceSWTimer.Frames=0                   ; integer
+ReduceSWTimer.Percent=0.0                ; floating point value, percents or absolute
+ReduceSWTimer.SWTypes=                   ; list of superweapons
+ReduceSWTimer.AffectHouses.Target=all    ; list of Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
+ReduceSWTimer.AffectHouses.SW=all        ; list of Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
+ReduceSWTimer.AffectTypes=               ; list of TechnoType names
+ReduceSWTimer.IgnoreTypes=               ; list of TechnoType names
+ReduceSWTimer.MaxAffect=-1               ; integer
+ReduceSWTimer.Max.UseRechargeTime=true   ; boolean
+ReduceSWTimer.Max.Frames=-1              ; integer
+ReduceSWTimer.Max.Percent=-1.0           ; floating point value, percents or absolute
+ReduceSWTimer.Min.Frames=0               ; integer
+ReduceSWTimer.Min.Percent=-0.0           ; floating point value, percents or absolute
 ```
 
 
