@@ -465,7 +465,7 @@ bool WarheadTypeExt::ExtData::ApplySWTimer(HouseClass* pHouse, TechnoClass* pTar
 
 void WarheadTypeExt::ExtData::ApplySetSWTimer(SuperClass* pSuper)
 {
-	if (pSuper->Granted && pSuper->Type->RechargeTime > 0)
+	if (pSuper->IsPresent && pSuper->Type->RechargeTime > 0)
 	{
 		if (this->SetSWTimer_Reset)
 		{
@@ -491,7 +491,7 @@ void WarheadTypeExt::ExtData::ApplySetSWTimer(SuperClass* pSuper)
 
 void WarheadTypeExt::ExtData::ApplyReduceSWTimer(SuperClass* pSuper)
 {
-	if (pSuper->Granted && pSuper->Type->RechargeTime > 0)
+	if (pSuper->IsPresent && pSuper->Type->RechargeTime > 0)
 	{
 		int timeLeft = pSuper->RechargeTimer.TimeLeft;
 
