@@ -33,6 +33,9 @@
 #include <New/Type/LaserTrailTypeClass.h>
 #include <New/Type/DigitalDisplayTypeClass.h>
 
+#include <New/Type/BannerTypeClass.h>
+#include <New/Entity/BannerClass.h>
+
 #include <utility>
 
 #pragma region Implementation details
@@ -222,7 +225,9 @@ using PhobosTypeRegistry = TypeRegistry<
 	LaserTrailTypeClass,
 	RadTypeClass,
 	ShieldClass,
-	DigitalDisplayTypeClass
+	DigitalDisplayTypeClass,
+	BannerTypeClass,
+	BannerClass
 	// other classes
 >;
 

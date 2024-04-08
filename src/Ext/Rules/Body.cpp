@@ -4,6 +4,7 @@
 #include <FPSCounter.h>
 #include <GameOptionsClass.h>
 
+#include <New/Type/BannerTypeClass.h>
 #include <New/Type/RadTypeClass.h>
 #include <New/Type/ShieldTypeClass.h>
 #include <New/Type/LaserTrailTypeClass.h>
@@ -28,6 +29,7 @@ void RulesExt::LoadFromINIFile(RulesClass* pThis, CCINIClass* pINI)
 
 void RulesExt::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 {
+	BannerTypeClass::LoadFromINIList(pINI);
 	DigitalDisplayTypeClass::LoadFromINIList(pINI);
 	RadTypeClass::LoadFromINIList(pINI);
 	ShieldTypeClass::LoadFromINIList(pINI);
