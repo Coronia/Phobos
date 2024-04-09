@@ -279,6 +279,9 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->Convert_HumanToComputer.Read(exINI, pSection, "Convert.HumanToComputer");
 	this->Convert_ComputerToHuman.Read(exINI, pSection, "Convert.ComputerToHuman");
 
+	this->HugeBar.Read(exINI, pSection, "HugeHealthBar");
+	this->HugeBar_Priority.Read(exINI, pSection, "HugeHealthBar.Priority");
+
 	// Ares 0.2
 	this->RadarJamRadius.Read(exINI, pSection, "RadarJamRadius");
 
@@ -605,6 +608,9 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->DroppodType)
 		.Process(this->Convert_HumanToComputer)
 		.Process(this->Convert_ComputerToHuman)
+
+		.Process(this->HugeBar)
+		.Process(this->HugeBar_Priority)
 		;
 }
 void TechnoTypeExt::ExtData::LoadFromStream(PhobosStreamReader& Stm)

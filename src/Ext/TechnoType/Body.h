@@ -191,6 +191,9 @@ public:
 		Valueable<TechnoTypeClass*> Convert_HumanToComputer;
 		Valueable<TechnoTypeClass*> Convert_ComputerToHuman;
 
+		Valueable<bool> HugeBar;
+		Valueable<int> HugeBar_Priority;
+
 		struct LaserTrailDataEntry
 		{
 			ValueableIdx<LaserTrailTypeClass> idxType;
@@ -377,6 +380,9 @@ public:
 			, DroppodType {}
 			, Convert_HumanToComputer { }
 			, Convert_ComputerToHuman { }
+
+			, HugeBar { false }
+			, HugeBar_Priority { -1 }
 		{ }
 
 		virtual ~ExtData() = default;

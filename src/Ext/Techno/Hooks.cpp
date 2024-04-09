@@ -58,6 +58,24 @@ DEFINE_HOOK(0x6F42F7, TechnoClass_Init, 0x2)
 	pExt->CurrentShieldType = pExt->TypeExtData->ShieldType;
 	pExt->InitializeLaserTrails();
 
+	TechnoExt::InitializeHugeBar(pThis);
+
+	return 0;
+}
+
+DEFINE_HOOK(0x6F6F20, TechnoClass_InitHugeBar, 0x6)
+{
+	GET(TechnoClass*, pThis, ESI);
+
+	TechnoExt::InitializeHugeBar(pThis);
+
+	return 0;
+}
+
+DEFINE_HOOK(0x4F4583, Techno_HugeBar, 0x6)
+{
+	TechnoExt::ProcessHugeBar();
+
 	return 0;
 }
 
