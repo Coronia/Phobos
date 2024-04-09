@@ -362,6 +362,45 @@ bool TechnoExt::IsTypeImmune(TechnoClass* pThis, TechnoClass* pSource)
 	return false;
 }
 
+void TechnoExt::InitializeJJConvert(TechnoClass* pThis)
+{
+	if (pThis->WhatAmI() != AbstractType::Unit)
+		return;
+
+	auto pExt = ExtMap.Find(pThis);
+	TechnoTypeClass* pType = pThis->GetTechnoType();
+	auto pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
+
+	if (pTypeExt->JJConvert_Unload != nullptr)
+	{
+		pExt->NeedConvertWhenLanding = true;
+		pExt->LandingType = pTypeExt->JJConvert_Unload;
+		pExt->FloatingType = static_cast<UnitTypeClass*>(pType);
+	}
+}
+
+void TechnoExt::ExtData::CheckJJConvertConditions()
+{
+	TechnoClass* pThis = OwnerObject();
+
+	if (!JJ_Landed)
+	{
+		if (pThis->CurrentMission == Mission::Unload)
+		{
+			Convert(pThis, LandingType);
+			JJ_Landed = true;
+		}
+	}
+	else
+	{
+		if (pThis->CurrentMission == Mission::Move)
+		{
+			Convert(pThis, FloatingType);
+			JJ_Landed = false;
+		}
+	}
+}
+
 // =============================
 // load / save
 
@@ -384,6 +423,11 @@ void TechnoExt::ExtData::Serialize(T& Stm)
 		.Process(this->DeployFireTimer)
 		.Process(this->ForceFullRearmDelay)
 		.Process(this->WHAnimRemainingCreationInterval)
+		.Process(this->NeedConvertWhenLanding)
+		.Process(this->JJ_Landed)
+		.Process(this->FloatingType)
+		.Process(this->LandingType)
+
 		;
 }
 

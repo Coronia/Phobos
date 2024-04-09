@@ -38,6 +38,10 @@ public:
 		CDTimerClass DeployFireTimer;
 		bool ForceFullRearmDelay;
 		int WHAnimRemainingCreationInterval;
+		bool NeedConvertWhenLanding;
+		bool JJ_Landed;
+		UnitTypeClass* FloatingType;
+		UnitTypeClass* LandingType;
 
 		// Used for Passengers.SyncOwner.RevertOnExit instead of TechnoClass::InitialOwner / OriginallyOwnedByHouse,
 		// as neither is guaranteed to point to the house the TechnoClass had prior to entering transport and cannot be safely overridden.
@@ -61,6 +65,10 @@ public:
 			, DeployFireTimer {}
 			, ForceFullRearmDelay { false }
 			, WHAnimRemainingCreationInterval { 0 }
+			, NeedConvertWhenLanding { false }
+			, JJ_Landed { false }
+			, FloatingType { nullptr }
+			, LandingType { nullptr }
 		{ }
 
 		void OnEarlyUpdate();
@@ -76,6 +84,7 @@ public:
 		void UpdateLaserTrails();
 		void InitializeLaserTrails();
 		void UpdateMindControlAnim();
+		void CheckJJConvertConditions();
 
 		virtual ~ExtData() override;
 

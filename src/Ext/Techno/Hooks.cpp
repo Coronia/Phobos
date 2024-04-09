@@ -16,6 +16,9 @@ DEFINE_HOOK(0x6F9E50, TechnoClass_AI, 0x5)
 	auto pExt = TechnoExt::ExtMap.Find(pThis);
 	pExt->OnEarlyUpdate();
 
+	if (pExt->NeedConvertWhenLanding)
+		pExt->CheckJJConvertConditions();
+
 	TechnoExt::ApplyMindControlRangeLimit(pThis);
 
 	return 0;
@@ -57,6 +60,8 @@ DEFINE_HOOK(0x6F42F7, TechnoClass_Init, 0x2)
 
 	pExt->CurrentShieldType = pExt->TypeExtData->ShieldType;
 	pExt->InitializeLaserTrails();
+
+	TechnoExt::InitializeJJConvert(pThis);
 
 	return 0;
 }

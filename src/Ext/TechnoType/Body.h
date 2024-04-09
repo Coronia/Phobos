@@ -190,6 +190,7 @@ public:
 
 		Valueable<TechnoTypeClass*> Convert_HumanToComputer;
 		Valueable<TechnoTypeClass*> Convert_ComputerToHuman;
+		Valueable<UnitTypeClass*> JJConvert_Unload;
 
 		struct LaserTrailDataEntry
 		{
@@ -377,6 +378,7 @@ public:
 			, DroppodType {}
 			, Convert_HumanToComputer { }
 			, Convert_ComputerToHuman { }
+			, JJConvert_Unload {}
 		{ }
 
 		virtual ~ExtData() = default;
