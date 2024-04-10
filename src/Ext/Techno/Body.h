@@ -84,6 +84,7 @@ public:
 		void UpdateLaserTrails();
 		void InitializeLaserTrails();
 		void UpdateMindControlAnim();
+		void InitializeJJConvert();
 		void CheckJJConvertConditions();
 
 		virtual ~ExtData() override;

@@ -362,41 +362,45 @@ bool TechnoExt::IsTypeImmune(TechnoClass* pThis, TechnoClass* pSource)
 	return false;
 }
 
-void TechnoExt::InitializeJJConvert(TechnoClass* pThis)
+void TechnoExt::ExtData::InitializeJJConvert()
 {
+	TechnoClass* pThis = OwnerObject();
 	if (pThis->WhatAmI() != AbstractType::Unit)
 		return;
 
-	auto pExt = ExtMap.Find(pThis);
 	TechnoTypeClass* pType = pThis->GetTechnoType();
-	auto pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
 
-	if (pTypeExt->JJConvert_Unload != nullptr)
+	if (auto pTypeExt = this->TypeExtData)
 	{
-		pExt->NeedConvertWhenLanding = true;
-		pExt->LandingType = pTypeExt->JJConvert_Unload;
-		pExt->FloatingType = static_cast<UnitTypeClass*>(pType);
+		if (pTypeExt->JJConvert_Unload != nullptr)
+		{
+			this->NeedConvertWhenLanding = true;
+			this->LandingType = pTypeExt->JJConvert_Unload;
+			this->FloatingType = static_cast<UnitTypeClass*>(pType);
+		}
 	}
 }
 
 void TechnoExt::ExtData::CheckJJConvertConditions()
 {
 	TechnoClass* pThis = OwnerObject();
-
-	if (!JJ_Landed)
+	if (auto pMe = generic_cast<FootClass*>(pThis))
 	{
-		if (pThis->CurrentMission == Mission::Unload)
+		if (!JJ_Landed)
 		{
-			Convert(pThis, LandingType);
-			JJ_Landed = true;
+			if (pThis->CurrentMission == Mission::Unload)
+			{
+				ConvertToType(pMe, LandingType);
+				JJ_Landed = true;
+			}
 		}
-	}
-	else
-	{
-		if (pThis->CurrentMission == Mission::Move)
+		else
 		{
-			Convert(pThis, FloatingType);
-			JJ_Landed = false;
+			if (pThis->CurrentMission == Mission::Move)
+			{
+				ConvertToType(pMe, FloatingType);
+				JJ_Landed = false;
+			}
 		}
 	}
 }
