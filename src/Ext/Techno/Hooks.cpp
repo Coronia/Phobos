@@ -60,8 +60,7 @@ DEFINE_HOOK(0x6F42F7, TechnoClass_Init, 0x2)
 
 	pExt->CurrentShieldType = pExt->TypeExtData->ShieldType;
 	pExt->InitializeLaserTrails();
-
-	TechnoExt::InitializeJJConvert(pThis);
+	pExt->InitializeJJConvert();
 
 	return 0;
 }

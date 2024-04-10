@@ -3,6 +3,7 @@
 #include <AircraftClass.h>
 #include <HouseClass.h>
 #include <ScenarioClass.h>
+#include <JumpjetLocomotionClass.h>
 
 #include <Ext/House/Body.h>
 
@@ -386,21 +387,16 @@ void TechnoExt::ExtData::CheckJJConvertConditions()
 	TechnoClass* pThis = OwnerObject();
 	if (auto pMe = generic_cast<FootClass*>(pThis))
 	{
-		if (!JJ_Landed)
+		bool JJ_Landed = pThis->GetTechnoType() == LandingType;
+
+		if (!JJ_Landed && pThis->CurrentMission == Mission::Unload && pThis->IsInAir())
 		{
-			if (pThis->CurrentMission == Mission::Unload)
-			{
-				ConvertToType(pMe, LandingType);
-				JJ_Landed = true;
-			}
+			ConvertToType(pMe, LandingType);
 		}
-		else
+		else if (auto const pJJLoco = locomotion_cast<JumpjetLocomotionClass*>(pMe->Locomotor))
 		{
-			if (pThis->CurrentMission == Mission::Move)
-			{
+			if (pJJLoco->Is_Really_Moving_Now())
 				ConvertToType(pMe, FloatingType);
-				JJ_Landed = false;
-			}
 		}
 	}
 }
@@ -428,7 +424,6 @@ void TechnoExt::ExtData::Serialize(T& Stm)
 		.Process(this->ForceFullRearmDelay)
 		.Process(this->WHAnimRemainingCreationInterval)
 		.Process(this->NeedConvertWhenLanding)
-		.Process(this->JJ_Landed)
 		.Process(this->FloatingType)
 		.Process(this->LandingType)
 

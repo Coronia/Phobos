@@ -39,7 +39,6 @@ public:
 		bool ForceFullRearmDelay;
 		int WHAnimRemainingCreationInterval;
 		bool NeedConvertWhenLanding;
-		bool JJ_Landed;
 		UnitTypeClass* FloatingType;
 		UnitTypeClass* LandingType;
 
@@ -66,7 +65,6 @@ public:
 			, ForceFullRearmDelay { false }
 			, WHAnimRemainingCreationInterval { 0 }
 			, NeedConvertWhenLanding { false }
-			, JJ_Landed { false }
 			, FloatingType { nullptr }
 			, LandingType { nullptr }
 		{ }
