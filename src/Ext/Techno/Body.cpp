@@ -6,7 +6,10 @@
 
 #include <Ext/House/Body.h>
 
+#include <Misc/PhobosGlobal.h>
+
 #include <Utilities/AresFunctions.h>
+#include <Utilities/ShapeTextPrinter.h>
 
 TechnoExt::ExtContainer TechnoExt::ExtMap;
 
