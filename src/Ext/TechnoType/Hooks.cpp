@@ -739,3 +739,21 @@ DEFINE_HOOK(0x7072A1, suka707280_ChooseTheGoddamnMatrix, 0x7)
 
 	return 0x707331;
 }
+
+DEFINE_HOOK_AGAIN(0x69FEDC, Locomotion_Process_Wake, 0x6)
+DEFINE_HOOK_AGAIN(0x4B0814, Locomotion_Process_Wake, 0x6)
+DEFINE_HOOK(0x514AB4, Locomotion_Process_Wake, 0x6)
+{
+	GET(ILocomotion*, pILoco, ESI);
+
+	const auto pLoco = static_cast<LocomotionClass*>(pILoco);
+	if (!pLoco)
+		return 0;
+
+	const auto pAnim = TechnoTypeExt::GetWakeAnim(pLoco);
+	if (!pAnim)
+		return 0;
+
+	R->EDX(pAnim);
+	return R->Origin() + 0xC;
+}

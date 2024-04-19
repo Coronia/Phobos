@@ -389,6 +389,9 @@ New:
 - Allow upgrade animations to use `Powered` & `PoweredLight/Effect/Special` keys (by Starkku)
 - Toggle for `Explodes=true` BuildingTypes to not explode during buildup or being sold (by Starkku)
 - Toggleable height-based shadow scaling for voxel air units (by Trsdy & Starkku)
+- Flash when hitting a shield (by TwinkleStar)
+- Customizable rocker amplitude (by TwinkleStar)
+- Customizable wake anim (by TwinkleStar)
 
 Vanilla fixes:
 - Allow AI to repair structures built from base nodes/trigger action 125/SW delivery in single player missions (by Trsdy)

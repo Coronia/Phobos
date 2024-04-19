@@ -157,6 +157,7 @@ Shield.Break=false                          ; boolean
 Shield.BreakAnim=                           ; Animation
 Shield.HitAnim=                             ; Animation
 Shield.BreakWeapon=                         ; WeaponType
+Shield.HitFlash=                            ; integer - Red,Green,Blue
 Shield.AbsorbPercent=                       ; floating point value
 Shield.PassPercent=                         ; floating point value
 Shield.ReceivedDamage.Minimum=              ; integer
@@ -209,6 +210,7 @@ Shield.InheritStateOnReplace=false          ; boolean
 - `BreakAnim`, if set, will be played when the shield has been broken.
 - `HitAnim`, if set, will be played when the shield is attacked, similar to `WeaponNullifyAnim` for Iron Curtain.
 - `BreakWeapon`, if set, will be fired at the TechnoType once the shield breaks.
+- `HitFlash`, if set, will create flash when the shield is attacked, similar to `IronCurtainFlash` for Iron Curtain.
 - `AbsorbPercent` controls the percentage of damage that will be absorbed by the shield. Defaults to 1.0, meaning full damage absorption.
 - `PassPercent` controls the percentage of damage that will *not* be absorbed by the shield, and will be dealt to the unit directly even if the shield is active. Defaults to 0.0 - no penetration.
 - `ReceivedDamage.Minimum` & `ReceivedDamage.Maximum` control the minimum and maximum amount of damage that can be dealt to shield in a single hit. This is applied after armor type and `AbsorbPercent` adjustments. If `AbsorbOverDamage=false`, the residual damage dealt to the TechnoType is still based on the original damage before the clamping to the range.

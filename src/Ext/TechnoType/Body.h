@@ -191,6 +191,8 @@ public:
 		Valueable<TechnoTypeClass*> Convert_HumanToComputer;
 		Valueable<TechnoTypeClass*> Convert_ComputerToHuman;
 
+		Valueable<AnimTypeClass*> Wake;
+
 		struct LaserTrailDataEntry
 		{
 			ValueableIdx<LaserTrailTypeClass> idxType;
@@ -377,6 +379,7 @@ public:
 			, DroppodType {}
 			, Convert_HumanToComputer { }
 			, Convert_ComputerToHuman { }
+			, Wake {}
 		{ }
 
 		virtual ~ExtData() = default;
@@ -412,6 +415,7 @@ public:
 
 	static void ApplyTurretOffset(TechnoTypeClass* pType, Matrix3D* mtx, double factor = 1.0);
 	static TechnoTypeClass* GetTechnoType(ObjectTypeClass* pType);
+	static AnimTypeClass* GetWakeAnim(LocomotionClass* pLoco);
 
 	// Ares 0.A
 	static const char* GetSelectionGroupID(ObjectTypeClass* pType);

@@ -92,6 +92,23 @@ void TechnoTypeExt::ExtData::ParseBurstFLHs(INI_EX& exArtINI, const char* pArtSe
 	}
 }
 
+AnimTypeClass* TechnoTypeExt::GetWakeAnim(LocomotionClass* pLoco)
+{
+	const auto pThis = pLoco->LinkedTo;
+	if (!PThis)
+		return nullptr;
+
+	const auto pExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+	if (!pExt)
+		return nullptr;
+
+	const auto pAnim = pExt->Wake
+	if (!pAnim)
+		return nullptr;
+
+	return pAnim;
+}
+
 //TODO: YRpp this with proper casting
 TechnoTypeClass* TechnoTypeExt::GetTechnoType(ObjectTypeClass* pType)
 {
@@ -278,6 +295,8 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->Convert_HumanToComputer.Read(exINI, pSection, "Convert.HumanToComputer");
 	this->Convert_ComputerToHuman.Read(exINI, pSection, "Convert.ComputerToHuman");
+
+	this->Wake.Read(exINI, pSection, "Wake");
 
 	// Ares 0.2
 	this->RadarJamRadius.Read(exINI, pSection, "RadarJamRadius");
@@ -605,6 +624,7 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->DroppodType)
 		.Process(this->Convert_HumanToComputer)
 		.Process(this->Convert_ComputerToHuman)
+		.Process(this->Wake)
 		;
 }
 void TechnoTypeExt::ExtData::LoadFromStream(PhobosStreamReader& Stm)
