@@ -1002,7 +1002,7 @@ In `rulesmd.ini`:
 ```ini
 [SOMETECHNO]
 Convert.HumanToComputer =   ; TechnoType
-Convert.ComputerToHuman =   ; TechnoType 
+Convert.ComputerToHuman =   ; TechnoType
 ```
 
 ## Terrain
@@ -1073,6 +1073,19 @@ ImmuneToCrit=no                     ; boolean
 
 ```{warning}
 If you set `Crit.Warhead` to the same Warhead it is defined on, or create a chain of Warheads with it that loops back to the first one there is a possibility for the game to get stuck in a loop and freeze or crash afterwards.
+```
+
+### Change Gatling stage and reload Ammo
+
+- You can now allow warhead to change the Stage and Rate value of a unit that use Gatling weapons.
+- You can now allow warhead to change the ammo amount of a techno with its Ammo>0.
+
+In `rulesmd.ini`:
+```ini
+[SOMEWARHEAD]       ; WarheadType
+TargetGattlingStage=0   ; integer
+TargetGattlingRateUp=0  ; integer
+TargetReloadAmmo=0      ; integer
 ```
 
 ### Convert TechnoType on impact

@@ -389,6 +389,7 @@ New:
 - Allow upgrade animations to use `Powered` & `PoweredLight/Effect/Special` keys (by Starkku)
 - Toggle for `Explodes=true` BuildingTypes to not explode during buildup or being sold (by Starkku)
 - Toggleable height-based shadow scaling for voxel air units (by Trsdy & Starkku)
+- Change Gatling stage and reload Ammo by warheads (by Ollerus)
 
 Vanilla fixes:
 - Allow AI to repair structures built from base nodes/trigger action 125/SW delivery in single player missions (by Trsdy)
@@ -449,7 +450,6 @@ Vanilla fixes:
 - Fixed infantries attempted to entering buildings when waypointing together with engineer/agent/occupier/etc (by Trsdy)
 - Fixed jumpjet crash speed when crashing onto buildings (by NetsuNegi)
 - Fixed infantry requiring `MovementZone=AmphibiousDestroyer` specifically to be able to use water sequences instead of any amphibious / water `MovementZone` (by Starkku)
-- Change Gatling stage and reload Ammo by warheads (by Ollerus)
 
 Phobos fixes:
 - Fixed a few errors of calling for superweapon launch by `LaunchSW` or building infiltration (by Trsdy)
