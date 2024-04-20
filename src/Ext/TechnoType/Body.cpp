@@ -95,14 +95,14 @@ void TechnoTypeExt::ExtData::ParseBurstFLHs(INI_EX& exArtINI, const char* pArtSe
 AnimTypeClass* TechnoTypeExt::GetWakeAnim(LocomotionClass* pLoco)
 {
 	const auto pThis = pLoco->LinkedTo;
-	if (!PThis)
+	if (!pThis)
 		return nullptr;
 
 	const auto pExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
 	if (!pExt)
 		return nullptr;
 
-	const auto pAnim = pExt->Wake
+	const auto pAnim = pExt->Wake;
 	if (!pAnim)
 		return nullptr;
 

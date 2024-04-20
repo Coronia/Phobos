@@ -71,7 +71,11 @@ void ShieldTypeClass::LoadFromINI(CCINIClass* pINI)
 	this->BreakAnim.Read(exINI, pSection, "BreakAnim");
 	this->HitAnim.Read(exINI, pSection, "HitAnim");
 	this->BreakWeapon.Read<true>(exINI, pSection, "BreakWeapon");
-	this->HitBright.Read(exINI, pSection, "HitFlash");
+
+	this->HitFlash.Read(exINI, pSection, "HitFlash");
+	this->HitFlash_Red.Read(exINI, pSection, "HitFlash.DisableRed");
+	this->HitFlash_Green.Read(exINI, pSection, "HitFlash.DisableGreen");
+	this->HitFlash_Blue.Read(exINI, pSection, "HitFlash.DisableBlue");
 
 	this->AbsorbPercent.Read(exINI, pSection, "AbsorbPercent");
 	this->PassPercent.Read(exINI, pSection, "PassPercent");
@@ -114,7 +118,10 @@ void ShieldTypeClass::Serialize(T& Stm)
 		.Process(this->BreakAnim)
 		.Process(this->HitAnim)
 		.Process(this->BreakWeapon)
-		.Process(this->HitBright)
+		.Process(this->HitFlash)
+		.Process(this->HitFlash_Red)
+		.Process(this->HitFlash_Green)
+		.Process(this->HitFlash_Blue)
 		.Process(this->AbsorbPercent)
 		.Process(this->PassPercent)
 		.Process(this->AllowTransfer)

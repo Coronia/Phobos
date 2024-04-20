@@ -32,7 +32,10 @@ public:
 	Nullable<AnimTypeClass*> BreakAnim;
 	Nullable<AnimTypeClass*> HitAnim;
 	Nullable<WeaponTypeClass*> BreakWeapon;
-	Nullable<ColorStruct> HitBright;
+	Valueable<bool> HitFlash;
+	Valueable<bool> HitFlash_Red;
+	Valueable<bool> HitFlash_Green;
+	Valueable<bool> HitFlash_Blue;
 	Valueable<double> AbsorbPercent;
 	Valueable<double> PassPercent;
 	Valueable<int> ReceivedDamage_Minimum;
@@ -71,7 +74,10 @@ public:
 		, BreakAnim { }
 		, HitAnim { }
 		, BreakWeapon { }
-		, HitBright { }
+		, HitFlash { false }
+		, HitFlash_Red { false }
+		, HitFlash_Green { false }
+		, HitFlash_Blue { false }
 		, AbsorbPercent { 1.0 }
 		, PassPercent { 0.0 }
 		, ReceivedDamage_Minimum { INT32_MIN }

@@ -70,15 +70,20 @@ DEFINE_HOOK(0x701A6B, TechnoClass_ReceiveDamage_Flash, 0xA)
 		if (!pShieldData->IsActive())
 			return 0;
 
-		const auto flags = pShieldData->GetType()->HitBright.Get();
-		if (flags)
-		{
-			auto flag = flags.R ? SpotlightFlags::NoRed : SpotlightFlags::None;
+		const auto enableFlash = pShieldData->GetType()->HitFlash.Get();
 
-			if (flags.G)
+		if (enableFlash)
+		{
+			const auto disableRed = pShieldData->GetType()->HitFlash_Red.Get();
+			const auto disableGreen = pShieldData->GetType()->HitFlash_Green.Get();
+			const auto disableBlue = pShieldData->GetType()->HitFlash_Blue.Get();
+
+			auto flag = disableRed ? SpotlightFlags::NoRed : SpotlightFlags::None;
+
+			if (disableGreen)
 				flag |= SpotlightFlags::NoGreen;
 
-			if (flags.B)
+			if (disableBlue)
 				flag |= SpotlightFlags::NoBlue;
 
 			R->Stack(0, flag);
