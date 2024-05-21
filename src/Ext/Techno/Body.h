@@ -49,9 +49,13 @@ public:
 
 		// AttachEffect stuff.
 		double AE_FirepowerMultiplier;
+		int AE_FirepowerBonus;
 		double AE_ArmorMultiplier;
+		int AE_ArmorBonus;
 		double AE_SpeedMultiplier;
+		int AE_SpeedBonus;
 		double AE_ROFMultiplier;
+		int AE_ROFBonus;
 		bool AE_Cloakable;
 		bool AE_ForceDecloak;
 		bool AE_DisableWeapons;
@@ -78,9 +82,13 @@ public:
 			, CanCurrentlyDeployIntoBuilding { false }
 			, AttachedEffects {}
 			, AE_FirepowerMultiplier { 1.0 }
+			, AE_FirepowerBonus { 0 }
 			, AE_ArmorMultiplier { 1.0 }
+			, AE_ArmorBonus { 0 }
 			, AE_SpeedMultiplier { 1.0 }
+			, AE_SpeedBonus { 0 }
 			, AE_ROFMultiplier { 1.0 }
+			, AE_ROFBonus { 0 }
 			, AE_Cloakable { false }
 			, AE_ForceDecloak { false }
 			, AE_DisableWeapons { false }

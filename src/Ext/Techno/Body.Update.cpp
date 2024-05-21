@@ -859,6 +859,10 @@ void TechnoExt::ExtData::RecalculateStatMultipliers()
 	double armor = 1.0;
 	double speed = 1.0;
 	double ROF = 1.0;
+	int firepowerBonus = 0;
+	int armorBonus = 0;
+	int speedBonus = 0;
+	int ROFBonus = 0;
 	bool cloak = pThis->Cloakable;
 	bool forceDecloak = false;
 	bool disableWeapons = false;
@@ -873,6 +877,10 @@ void TechnoExt::ExtData::RecalculateStatMultipliers()
 		speed *= type->SpeedMultiplier;
 		armor *= type->ArmorMultiplier;
 		ROF *= type->ROFMultiplier;
+		firepowerBonus += type->FirepowerBonus;
+		armorBonus += type->ArmorBonus;
+		speedBonus += type->SpeedBonus;
+		ROFBonus += type->ROFBonus;
 		cloak |= type->Cloakable;
 		forceDecloak |= type->ForceDecloak;
 		disableWeapons |= type->DisableWeapons;
@@ -882,6 +890,10 @@ void TechnoExt::ExtData::RecalculateStatMultipliers()
 	this->AE_ArmorMultiplier = armor;
 	this->AE_SpeedMultiplier = speed;
 	this->AE_ROFMultiplier = ROF;
+	this->AE_FirepowerBonus = firepowerBonus;
+	this->AE_ArmorBonus = armorBonus;
+	this->AE_SpeedBonus = speedBonus;
+	this->AE_ROFBonus = ROFBonus;
 	pThis->Cloakable = cloak;
 	this->AE_ForceDecloak = forceDecloak;
 	this->AE_DisableWeapons = disableWeapons;
