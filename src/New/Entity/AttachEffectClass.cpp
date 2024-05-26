@@ -98,12 +98,23 @@ void AttachEffectClass::AI()
 	{
 		this->HasInitialized = true;
 
-		if (this->Type->ROFMultiplier > 0.0 && this->Type->ROFMultiplier_ApplyOnCurrentTimer)
+		if ((this->Type->ROFMultiplier > 0.0 || this->Type->ROFBonus != 0) && this->Type->ROFMultiplier_ApplyOnCurrentTimer)
 		{
-			double ROFModifier = this->Type->ROFMultiplier;
+			double ROFModifier = this->Type->ROFMultiplier ? this->Type->ROFMultiplier : 1.0;
 			auto const pTechno = this->Techno;
-			pTechno->DiskLaserTimer.Start(static_cast<int>(pTechno->DiskLaserTimer.GetTimeLeft() * ROFModifier));
-			pTechno->ROF = static_cast<int>(pTechno->ROF * ROFModifier);
+			int oldROF = pTechno->ROF;
+			int ROFBonus = 0;
+
+			if (auto const pExt = TechnoExt::ExtMap.Find(pTechno))
+			{
+				ROFBonus = pExt->AE_ROFBonus;
+				oldROF -= ROFBonus;
+			}
+
+			ROFBonus += this->Type->ROFBonus;
+			int timerLeft = pTechno->DiskLaserTimer.GetTimeLeft();
+			pTechno->DiskLaserTimer.Start(static_cast<int>(timerLeft * (oldROF * ROFModifier + ROFBonus) / pTechno->ROF));
+			pTechno->ROF = static_cast<int>(oldROF * ROFModifier + ROFBonus);
 		}
 
 		if (this->Type->HasTint())
@@ -419,10 +430,22 @@ bool AttachEffectClass::Attach(AttachEffectTypeClass* pType, TechnoClass* pTarge
 	{
 		if (initialDelay <= 0)
 		{
-			if (pType->ROFMultiplier > 0.0 && pType->ROFMultiplier_ApplyOnCurrentTimer)
+			if ((pType->ROFMultiplier > 0.0 || pType->ROFBonus != 0) && pType->ROFMultiplier_ApplyOnCurrentTimer)
 			{
-				pTarget->DiskLaserTimer.Start(static_cast<int>(pTarget->DiskLaserTimer.GetTimeLeft() * pType->ROFMultiplier));
-				pTarget->ROF = static_cast<int>(pTarget->ROF * pType->ROFMultiplier);
+				double ROFModifier = pType->ROFMultiplier ? pType->ROFMultiplier : 1.0;
+				int oldROF = pTarget->ROF;
+				int ROFBonus = 0;
+
+				if (auto const pExt = TechnoExt::ExtMap.Find(pTarget))
+				{
+					ROFBonus = pExt->AE_ROFBonus;
+					oldROF -= ROFBonus;
+				}
+
+				ROFBonus += pType->ROFBonus;
+				int timerLeft = pTarget->DiskLaserTimer.GetTimeLeft();
+				pTarget->DiskLaserTimer.Start(static_cast<int>(timerLeft * (oldROF * ROFModifier + ROFBonus) / pTarget->ROF));
+				pTarget->ROF = static_cast<int>(oldROF * ROFModifier + ROFBonus);
 			}
 
 			pTargetExt->RecalculateStatMultipliers();
@@ -461,6 +484,7 @@ int AttachEffectClass::Attach(std::vector<AttachEffectTypeClass*> const& types, 
 	int attachedCount = 0;
 	bool markForRedraw = false;
 	double ROFModifier = 1.0;
+	int ROFBonus = 0;
 
 	for (size_t i = 0; i < types.size(); i++)
 	{
@@ -491,6 +515,9 @@ int AttachEffectClass::Attach(std::vector<AttachEffectTypeClass*> const& types, 
 				if (pType->ROFMultiplier > 0.0 && pType->ROFMultiplier_ApplyOnCurrentTimer)
 					ROFModifier *= pType->ROFMultiplier;
 
+				if (pType->ROFBonus != 0 && pType->ROFMultiplier_ApplyOnCurrentTimer)
+					ROFBonus += pType->ROFBonus;
+
 				if (pType->HasTint())
 					markForRedraw = true;
 
@@ -500,10 +527,21 @@ int AttachEffectClass::Attach(std::vector<AttachEffectTypeClass*> const& types, 
 		}
 	}
 
-	if (ROFModifier != 1.0)
+	if (ROFModifier != 1.0 || ROFBonus != 0)
 	{
-		pTarget->DiskLaserTimer.Start(static_cast<int>(pTarget->DiskLaserTimer.GetTimeLeft() * ROFModifier));
-		pTarget->ROF = static_cast<int>(pTarget->ROF * ROFModifier);
+		int oldROF = pTarget->ROF;
+		int oldROFBonus = 0;
+
+		if (auto const pExt = TechnoExt::ExtMap.Find(pTarget))
+		{
+			oldROFBonus = pExt->AE_ROFBonus;
+			oldROF -= oldROFBonus;
+		}
+
+		oldROFBonus += ROFBonus;
+		int timerLeft = pTarget->DiskLaserTimer.GetTimeLeft();
+		pTarget->DiskLaserTimer.Start(static_cast<int>(timerLeft * (oldROF * ROFModifier + oldROFBonus) / pTarget->ROF));
+		pTarget->ROF = static_cast<int>(oldROF * ROFModifier + oldROFBonus);
 	}
 
 	if (attachedCount > 0)

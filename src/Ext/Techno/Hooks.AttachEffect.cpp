@@ -6,7 +6,7 @@ DEFINE_HOOK(0x4DB218, FootClass_GetMovementSpeed_SpeedMultiplier, 0x6)
 	GET(int, speed, EAX);
 
 	auto const pExt = TechnoExt::ExtMap.Find(pThis);
-	speed = static_cast<int>(speed * pExt->AE_SpeedMultiplier);
+	speed = static_cast<int>(speed * pExt->AE_SpeedMultiplier + pExt->AE_SpeedBonus);
 	R->EAX(speed);
 
 	return 0;
@@ -19,7 +19,7 @@ DEFINE_HOOK(0x701966, TechnoClass_ArmorMultiplier, 0x6)       // TechnoClass_Rec
 	GET(int, damage, EAX);
 
 	auto const pExt = TechnoExt::ExtMap.Find(pThis);
-	damage = static_cast<int>(damage / pExt->AE_ArmorMultiplier);
+	damage = static_cast<int>(damage / pExt->AE_ArmorMultiplier - pExt->AE_ArmorBonus);
 	R->EAX(damage);
 
 	return 0;
@@ -32,7 +32,7 @@ DEFINE_HOOK(0x6FE352, TechnoClass_FirepowerMultiplier, 0x8)       // TechnoClass
 	GET(int, damage, EAX);
 
 	auto const pExt = TechnoExt::ExtMap.Find(pThis);
-	damage = static_cast<int>(damage * pExt->AE_FirepowerMultiplier);
+	damage = static_cast<int>(damage * pExt->AE_FirepowerMultiplier + pExt->AE_FirepowerBonus);
 	R->EAX(damage);
 
 	return 0;
