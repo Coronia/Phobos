@@ -11,6 +11,7 @@ namespace BoltTemp
 
 DEFINE_HOOK(0x6FD494, TechnoClass_FireEBolt_SetExtMap_AfterAres, 0x7)
 {
+	Debug::Log("TechnoClass_FireEBolt_SetExtMap_AfterAres\n");
 	GET_STACK(WeaponTypeClass*, pWeapon, STACK_OFFSET(0x30, 0x8));
 	GET(EBolt*, pBolt, EAX);
 
@@ -22,6 +23,7 @@ DEFINE_HOOK(0x6FD494, TechnoClass_FireEBolt_SetExtMap_AfterAres, 0x7)
 
 DEFINE_HOOK(0x4C2951, EBolt_DTOR, 0x5)
 {
+	Debug::Log("EBolt_DTOR\n");
 	GET(EBolt*, pBolt, ECX);
 
 	BoltTemp::boltWeaponTypeExt.erase(pBolt);
@@ -31,6 +33,7 @@ DEFINE_HOOK(0x4C2951, EBolt_DTOR, 0x5)
 
 DEFINE_HOOK(0x4C20BC, EBolt_DrawArcs, 0xB)
 {
+	Debug::Log("EBolt_DrawArcs\n");
 	enum { DoLoop = 0x4C20C7, Break = 0x4C2400 };
 
 	GET_STACK(EBolt*, pBolt, 0x40);
@@ -45,6 +48,7 @@ DEFINE_HOOK(0x4C20BC, EBolt_DrawArcs, 0xB)
 
 DEFINE_HOOK(0x4C24E4, Ebolt_DrawFist_Disable, 0x8)
 {
+	Debug::Log("Ebolt_DrawFist_Disable\n");
 	GET_STACK(EBolt*, pBolt, 0x40);
 	BoltTemp::pType = BoltTemp::boltWeaponTypeExt.get_or_default(pBolt);
 
@@ -53,10 +57,12 @@ DEFINE_HOOK(0x4C24E4, Ebolt_DrawFist_Disable, 0x8)
 
 DEFINE_HOOK(0x4C25FD, Ebolt_DrawSecond_Disable, 0xA)
 {
+	Debug::Log("Ebolt_DrawSecond_Disable\n");
 	return (BoltTemp::pType && BoltTemp::pType->Bolt_Disable2) ? 0x4C262A : 0;
 }
 
 DEFINE_HOOK(0x4C26EE, Ebolt_DrawThird_Disable, 0x8)
 {
+	Debug::Log("Ebolt_DrawThird_Disable\n");
 	return (BoltTemp::pType && BoltTemp::pType->Bolt_Disable3) ? 0x4C2710 : 0;
 }

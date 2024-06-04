@@ -14,6 +14,7 @@ namespace TimerValueTemp
 
 DEFINE_HOOK(0x6D4B50, PrintTimerOnTactical_Start, 0x6)
 {
+	Debug::Log("PrintTimerOnTactical_Start\n");
 	if (!Phobos::Config::RealTimeTimers)
 		return 0;
 
@@ -28,6 +29,7 @@ DEFINE_HOOK(0x6D4B50, PrintTimerOnTactical_Start, 0x6)
 		return 0;
 	}
 
+	Debug::Log("real timer switch\n");
 	switch (GameOptionsClass::Instance->GameSpeed)
 	{
 	case 1:	// 60 FPS
@@ -56,6 +58,7 @@ DEFINE_HOOK(0x6D4B50, PrintTimerOnTactical_Start, 0x6)
 
 DEFINE_HOOK(0x6D4C68, PrintTimerOnTactical_End, 0x8)
 {
+	Debug::Log("PrintTimerOnTactical_End\n");
 	if (!Phobos::Config::RealTimeTimers)
 		return 0;
 
@@ -66,6 +69,7 @@ DEFINE_HOOK(0x6D4C68, PrintTimerOnTactical_End, 0x8)
 
 DEFINE_HOOK(0x6D4CD9, PrintTimerOnTactical_BlinkColor, 0x6)
 {
+	Debug::Log("PrintTimerOnTactical_BlinkColor\n");
 	enum { SkipGameCode = 0x6D4CE2 };
 
 	R->EDI(ColorScheme::Array->GetItem(RulesExt::Global()->TimerBlinkColorScheme));

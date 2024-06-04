@@ -4,6 +4,8 @@
 #include <GameOptionsClass.h>
 #include <Unsorted.h>
 
+#include <Ext/Rules/Body.h>
+
 namespace GameSpeedTemp
 {
 	static int counter = 0;
@@ -11,12 +13,14 @@ namespace GameSpeedTemp
 
 DEFINE_HOOK(0x69BAE7, SessionClass_Resume_CampaignGameSpeed, 0xA)
 {
+	Debug::Log("SessionClass_Resume_CampaignGameSpeed\n");
 	GameOptionsClass::Instance->GameSpeed = Phobos::Config::CampaignDefaultGameSpeed;
 	return 0x69BAF1;
 }
 
 DEFINE_HOOK(0x55E160, SyncDelay_Start, 0x6)
 {
+	Debug::Log("SyncDelay_Start\n");
 	constexpr reference<CDTimerClass, 0x887348> FrameTimer;
 	//constexpr reference<CDTimerClass, 0x887328> NFTTimer;
 	if (!Phobos::Misc::CustomGS)
@@ -38,6 +42,7 @@ DEFINE_HOOK(0x55E160, SyncDelay_Start, 0x6)
 
 DEFINE_HOOK(0x55E33B, SyncDelay_End, 0x6)
 {
+	Debug::Log("SyncDelay_End\n");
 	constexpr reference<CDTimerClass, 0x887348> FrameTimer;
 	FrameTimer->TimeLeft = GameOptionsClass::Instance->GameSpeed;
 	return 0;

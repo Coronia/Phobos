@@ -202,6 +202,7 @@ DEFINE_HOOK(0x44D074, BuildingClass_Mission_Missile_ApplyGravity, 0x6)
 
 DEFINE_HOOK(0x46A3D6, BulletClass_Shrapnel_Forced, 0xA)
 {
+	Debug::Log("BulletClass_Shrapnel_Forced\n");
 	enum { Shrapnel = 0x46A40C, Skip = 0x46ADCD };
 
 	GET(BulletClass*, pThis, EDI);
@@ -210,19 +211,22 @@ DEFINE_HOOK(0x46A3D6, BulletClass_Shrapnel_Forced, 0xA)
 
 	if (auto const pObject = pThis->GetCell()->FirstObject)
 	{
+		Debug::Log("shrapnel first object\n");
 		if (pObject->WhatAmI() != AbstractType::Building || pTypeExt->Shrapnel_AffectsBuildings)
 			return Shrapnel;
 	}
 	else if (pTypeExt->Shrapnel_AffectsGround)
 	{
+		Debug::Log("shrapnel affects ground\n");
 		return Shrapnel;
 	}
-
+	Debug::Log("shrapnel skip\n");
 	return Skip;
 }
 
 DEFINE_HOOK(0x46A4FB, BulletClass_Shrapnel_Targeting, 0x6)
 {
+	Debug::Log("BulletClass_Shrapnel_Targeting\n");
 	enum { SkipObject = 0x46A8EA, Continue = 0x46A50F };
 
 	GET(BulletClass*, pThis, EDI);
@@ -237,7 +241,7 @@ DEFINE_HOOK(0x46A4FB, BulletClass_Shrapnel_Targeting, 0x6)
 	{
 		auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pShrapnelWeapon);
 		auto const pType = pObject->GetType();
-
+		Debug::Log("shrapnel use weapon targeting filter\n");
 		if (!pType->LegalTarget || GeneralUtils::GetWarheadVersusArmor(pShrapnelWeapon->Warhead, pType->Armor) == 0.0)
 			return SkipObject;
 		else if (!EnumFunctions::IsCellEligible(pObject->GetCell(), pWeaponExt->CanTarget, true, true))
@@ -258,9 +262,11 @@ DEFINE_HOOK(0x46A4FB, BulletClass_Shrapnel_Targeting, 0x6)
 	}
 	else if (pOwner->IsAlliedWith(pObject))
 	{
+		Debug::Log("shrapnel not use weapon targeting\n");
 		return SkipObject;
 	}
 
+	Debug::Log("shrapnel use weapon targeting\n");
 	return Continue;
 }
 
