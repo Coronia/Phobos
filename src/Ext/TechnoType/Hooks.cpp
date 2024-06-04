@@ -491,6 +491,7 @@ DEFINE_HOOK(0x73C47A, UnitClass_DrawAsVXL_Shadow, 0x5)
 
 	if (uTypeExt->ShadowIndices.empty())
 	{
+		Debug::Log("shadow unit empty\n");
 		if (pType->ShadowIndex >= 0 && pType->ShadowIndex < main_vxl->HVA->LayerCount)
 			pThis->DrawVoxelShadow(
 				   main_vxl,
@@ -674,6 +675,7 @@ DEFINE_HOOK(0x4147F9, AircraftClass_Draw_Shadow, 0x6)
 	// flor += loco->Shadow_Point(); // no longer needed
 	if (aTypeExt->ShadowIndices.empty())
 	{
+		Debug::Log("shadow air empty\n");
 		auto const shadow_index = pThis->Type->ShadowIndex;
 		if (shadow_index >= 0 && shadow_index < main_vxl->HVA->LayerCount)
 			pThis->DrawVoxelShadow(main_vxl,
