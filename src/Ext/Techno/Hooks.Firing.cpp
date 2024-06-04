@@ -573,6 +573,7 @@ namespace BurstFLHTemp
 
 DEFINE_HOOK(0x6F3B37, TechnoClass_GetFLH_BurstFLH_1, 0x7)
 {
+	Debug::Log("TechnoClass_GetFLH_BurstFLH_1\n");
 	GET(TechnoClass*, pThis, EBX);
 	GET_STACK(int, weaponIndex, STACK_OFFSET(0xD8, 0x8));
 
@@ -603,6 +604,7 @@ DEFINE_HOOK(0x6F3B37, TechnoClass_GetFLH_BurstFLH_1, 0x7)
 
 DEFINE_HOOK(0x6F3C88, TechnoClass_GetFLH_BurstFLH_2, 0x6)
 {
+	Debug::Log("TechnoClass_GetFLH_BurstFLH_2\n");
 	GET_STACK(int, weaponIndex, STACK_OFFSET(0xD8, 0x8));
 
 	if (BurstFLHTemp::FLHFound || weaponIndex < 0)
@@ -681,6 +683,7 @@ DEFINE_HOOK(0x6FD054, TechnoClass_RearmDelay_ForceFullDelay, 0x6)
 // Author: Starkku
 DEFINE_HOOK(0x6FD05E, TechnoClass_RearmDelay_BurstDelays, 0x7)
 {
+	Debug::Log("TechnoClass_RearmDelay_BurstDelays\n");
 	GET(TechnoClass*, pThis, ESI);
 	GET(WeaponTypeClass*, pWeapon, EDI);
 
@@ -728,6 +731,7 @@ DEFINE_HOOK(0x5209A7, InfantryClass_FiringAI_BurstDelays, 0x8)
 	// Calculate cumulative burst delay as well cumulative delay after next shot (projected delay).
 	if (pWeaponExt->Burst_FireWithinSequence)
 	{
+		Debug::Log("burst FireWithinSequence\n");
 		for (int i = 0; i <= pThis->CurrentBurstIndex; i++)
 		{
 			int burstDelay = pWeaponExt->GetBurstDelay(i);
@@ -745,12 +749,14 @@ DEFINE_HOOK(0x5209A7, InfantryClass_FiringAI_BurstDelays, 0x8)
 			cumulativeDelay += delay;
 
 			if (i == pThis->CurrentBurstIndex)
+				Debug::Log("burst CurrentBurstIndex\n");
 				projectedDelay = cumulativeDelay + delay;
 		}
 	}
 
 	if (pThis->IsFiring && pThis->Animation.Value == firingFrame + cumulativeDelay)
 	{
+		Debug::Log("burst IsFiring\n");
 		if (pWeaponExt->Burst_FireWithinSequence)
 		{
 			int frameCount = pThis->Type->Sequence->GetSequence(pThis->SequenceAnim).CountFrames;
@@ -758,6 +764,7 @@ DEFINE_HOOK(0x5209A7, InfantryClass_FiringAI_BurstDelays, 0x8)
 			// If projected frame for firing next shot goes beyond the sequence frame count, cease firing after this shot and start rearm timer.
 			if (firingFrame + projectedDelay > frameCount)
 			{
+				Debug::Log("burst ForceFullRearmDelay\n");
 				const auto pExt = TechnoExt::ExtMap.Find(pThis);
 				pExt->ForceFullRearmDelay = true;
 			}
