@@ -404,7 +404,6 @@ DEFINE_HOOK(0x73C47A, UnitClass_DrawAsVXL_Shadow, 0x5)
 
 	if (RulesExt::Global()->HeightShadowScaling && height > 0)
 	{
-		Debug::Log("shadow unit HeightShadowScaling\n");
 		const double minScale = RulesExt::Global()->HeightShadowScaling_MinScale;
 		if (jjloco)
 		{
@@ -412,7 +411,6 @@ DEFINE_HOOK(0x73C47A, UnitClass_DrawAsVXL_Shadow, 0x5)
 
 			if (cHeight > 0)
 			{
-				Debug::Log("shadow unit jjloco cHeight\n");
 				shadow_matrix.Scale((float)std::max(Pade2_2(baseScale_log * height / cHeight), minScale));
 
 				if (jjloco->State != JumpjetLocomotionClass::State::Hovering)
@@ -425,7 +423,6 @@ DEFINE_HOOK(0x73C47A, UnitClass_DrawAsVXL_Shadow, 0x5)
 
 			if (cHeight > 0 && height > 208)
 			{
-				Debug::Log("shadow unit just cHeight\n");
 				shadow_matrix.Scale((float)std::max(Pade2_2(baseScale_log * (height - 208) / cHeight), minScale));
 				vxl_index_key.Invalidate();
 			}
@@ -433,7 +430,6 @@ DEFINE_HOOK(0x73C47A, UnitClass_DrawAsVXL_Shadow, 0x5)
 	}
 	else if (!RulesExt::Global()->HeightShadowScaling && pThis->Type->ConsideredAircraft)
 	{
-		Debug::Log("shadow unit HeightShadowScaling ConsideredAircraft\n");
 		shadow_matrix.Scale((float)Pade2_2(baseScale_log));
 	}
 
@@ -476,7 +472,6 @@ DEFINE_HOOK(0x73C47A, UnitClass_DrawAsVXL_Shadow, 0x5)
 	// lazy, don't want to hook inside Shadow_Matrix
 	if (std::abs(ars) >= 0.005 || std::abs(arf) >= 0.005)
 	{
-		Debug::Log("shadow unit abs\n");
 		// index key should have been already invalid, so it won't hurt to invalidate again
 		vxl_index_key.Invalidate();
 		shadow_matrix.TranslateX(float(Math::sgn(arf) * pType->VoxelScaleX * (1 - Math::cos(arf))));
@@ -495,7 +490,6 @@ DEFINE_HOOK(0x73C47A, UnitClass_DrawAsVXL_Shadow, 0x5)
 
 	if (uTypeExt->ShadowIndices.empty())
 	{
-		Debug::Log("shadow unit empty\n");
 		if (pType->ShadowIndex >= 0 && pType->ShadowIndex < main_vxl->HVA->LayerCount)
 			pThis->DrawVoxelShadow(
 				   main_vxl,
@@ -512,7 +506,6 @@ DEFINE_HOOK(0x73C47A, UnitClass_DrawAsVXL_Shadow, 0x5)
 	}
 	else
 	{
-		Debug::Log("shadow unit not empty\n");
 		for (auto& [index, _] : uTypeExt->ShadowIndices)
 			pThis->DrawVoxelShadow(
 				   main_vxl,
@@ -566,7 +559,6 @@ DEFINE_HOOK(0x73C47A, UnitClass_DrawAsVXL_Shadow, 0x5)
 		return nullptr;
 	};
 
-	Debug::Log("shadow unit turret shadow\n");
 	Matrix3D rot = Matrix3D::GetIdentity();
 	uTypeExt->ApplyTurretOffset(&rot, Pixel_Per_Lepton);
 	rot.RotateZ(static_cast<float>(pThis->SecondaryFacing.Current().GetRadian<32>() - pThis->PrimaryFacing.Current().GetRadian<32>()));
@@ -579,7 +571,6 @@ DEFINE_HOOK(0x73C47A, UnitClass_DrawAsVXL_Shadow, 0x5)
 
 	// sorry but you're fucked
 	if (tur && tur->VXL && tur->HVA)
-		Debug::Log("shadow unit turret fucked\n");
 		pThis->DrawVoxelShadow(
 			tur,
 			0,
@@ -597,7 +588,6 @@ DEFINE_HOOK(0x73C47A, UnitClass_DrawAsVXL_Shadow, 0x5)
 
 	// and you are utterly fucked
 	if (bar && bar->VXL && bar->HVA)
-		Debug::Log("shadow unit turret utterly fucked\n");
 		pThis->DrawVoxelShadow(
 			bar,
 			0,
@@ -640,7 +630,6 @@ DEFINE_HOOK(0x4147F9, AircraftClass_Draw_Shadow, 0x6)
 
 		if (RulesExt::Global()->HeightShadowScaling)
 		{
-			Debug::Log("shadow air HeightShadowScaling\n");
 			const double minScale = RulesExt::Global()->HeightShadowScaling_MinScale;
 			const float cHeight = (float)aTypeExt->ShadowSizeCharacteristicHeight.Get(pThis->Type->GetFlightLevel());
 
@@ -653,11 +642,9 @@ DEFINE_HOOK(0x4147F9, AircraftClass_Draw_Shadow, 0x6)
 		}
 		else if (pThis->Type->ConsideredAircraft)
 		{
-			Debug::Log("shadow air ConsideredAircraft\n");
 			shadow_mtx.Scale((float)Pade2_2(baseScale_log));
 		}
 
-		Debug::Log("shadow air arf\n");
 		double arf = pThis->AngleRotatedForwards;
 		if (flyLoco->CurrentSpeed > pThis->Type->PitchSpeed)
 			arf += pThis->Type->PitchAngle;
@@ -670,7 +657,6 @@ DEFINE_HOOK(0x4147F9, AircraftClass_Draw_Shadow, 0x6)
 	}
 	else if (height > 0)
 	{
-		Debug::Log("shadowair rocket\n");
 		// You must be Rocket, otherwise GO FUCK YOURSELF
 		shadow_mtx.ScaleX((float)Math::cos(static_cast<RocketLocomotionClass*>(loco)->CurrentPitch));
 		key.Invalidate();
@@ -686,7 +672,6 @@ DEFINE_HOOK(0x4147F9, AircraftClass_Draw_Shadow, 0x6)
 	// flor += loco->Shadow_Point(); // no longer needed
 	if (aTypeExt->ShadowIndices.empty())
 	{
-		Debug::Log("shadow air empty\n");
 		auto const shadow_index = pThis->Type->ShadowIndex;
 		if (shadow_index >= 0 && shadow_index < main_vxl->HVA->LayerCount)
 			pThis->DrawVoxelShadow(main_vxl,
@@ -703,7 +688,6 @@ DEFINE_HOOK(0x4147F9, AircraftClass_Draw_Shadow, 0x6)
 	}
 	else
 	{
-		Debug::Log("shadow air not empty\n");
 		for (auto& [index, _] : aTypeExt->ShadowIndices)
 			pThis->DrawVoxelShadow(main_vxl,
 				index,
@@ -732,7 +716,6 @@ DEFINE_JUMP(CALL6, 0x4147F3, 0x5F4300);
 
 DEFINE_HOOK(0x7072A1, suka707280_ChooseTheGoddamnMatrix, 0x7)
 {
-	Debug::Log("suka707280_ChooseTheGoddamnMatrix\n");
 	GET(FootClass*, pThis, EBX);//Maybe Techno later
 	GET(VoxelStruct*, pVXL, EBP);
 	GET_STACK(Matrix3D*, pMat, STACK_OFFSET(0xE8, 0xC));
@@ -750,7 +733,6 @@ DEFINE_HOOK(0x7072A1, suka707280_ChooseTheGoddamnMatrix, 0x7)
 		// Turret or Barrel
 		if (pVXL != &pType->MainVoxel)
 		{
-			Debug::Log("shadow main voxel\n");
 			// verify just in case:
 			auto who_are_you = reinterpret_cast<uintptr_t*>(reinterpret_cast<DWORD>(pVXL) - (offsetof(TechnoTypeClass, MainVoxel)));
 			if (who_are_you[0] == UnitTypeClass::AbsVTable)
@@ -765,7 +747,6 @@ DEFINE_HOOK(0x7072A1, suka707280_ChooseTheGoddamnMatrix, 0x7)
 		auto& shadowIndices = pTypeExt->ShadowIndices;
 		if (shadowIndices.empty())
 		{
-			Debug::Log("shadow indices empty\n");
 			// Only ShadowIndex
 			if (pType->ShadowIndex == shadow_index_now)
 			{
@@ -781,7 +762,6 @@ DEFINE_HOOK(0x7072A1, suka707280_ChooseTheGoddamnMatrix, 0x7)
 		}
 		else
 		{
-			Debug::Log("shadow indices not empty\n");
 			int idx_of_now = shadowIndices[shadow_index_now];
 			if (idx_of_now > -1)
 				return idx_of_now % hva->FrameCount;
@@ -790,7 +770,6 @@ DEFINE_HOOK(0x7072A1, suka707280_ChooseTheGoddamnMatrix, 0x7)
 		return pThis->WalkedFramesSoFar % hva->FrameCount;
 	};
 
-	Debug::Log("shadow hvamat\n");
 	Matrix3D hvamat = hva->Matrixes[shadow_index_now + hva->LayerCount * ChooseFrame()];
 	{
 		auto& arr = hvamat.row;
@@ -798,7 +777,6 @@ DEFINE_HOOK(0x7072A1, suka707280_ChooseTheGoddamnMatrix, 0x7)
 	}
 	matRet = *pMat * hvamat;
 
-	Debug::Log("shadow recover vanilla instructions\n");
 	// Recover vanilla instructions
 	if (pThis->GetTechnoType()->UseBuffer)
 		*reinterpret_cast<DWORD*>(0xB43180) = 1;

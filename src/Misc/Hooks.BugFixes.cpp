@@ -150,6 +150,7 @@ DEFINE_HOOK(0x4FB2DE, HouseClass_PlaceObject_HotkeyFix, 0x6)
 // Author: Starkku
 DEFINE_HOOK(0x6FF2BE, TechnoClass_FireAt_BurstOffsetFix_1, 0x6)
 {
+	Debug::Log("TechnoClass_FireAt_BurstOffsetFix_1\n");
 	GET(TechnoClass*, pThis, ESI);
 
 	--pThis->CurrentBurstIndex;
@@ -159,6 +160,7 @@ DEFINE_HOOK(0x6FF2BE, TechnoClass_FireAt_BurstOffsetFix_1, 0x6)
 
 DEFINE_HOOK(0x6FF660, TechnoClass_FireAt_BurstOffsetFix_2, 0x6)
 {
+	Debug::Log("TechnoClass_FireAt_BurstOffsetFix_2\n");
 	GET(TechnoClass*, pThis, ESI);
 	GET_BASE(int, weaponIndex, 0xC);
 

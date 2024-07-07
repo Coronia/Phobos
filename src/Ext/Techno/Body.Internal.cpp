@@ -122,6 +122,7 @@ CoordStruct TechnoExt::GetSimpleFLH(InfantryClass* pThis, int weaponIndex, bool&
 
 		if (pThis->IsDeployed())
 		{
+			Debug::Log("burst IsDeployed");
 			if (weaponIndex == 0)
 				pickedFLH = pTypeExt->DeployedPrimaryFireFLH;
 			else if (weaponIndex == 1)
@@ -131,6 +132,7 @@ CoordStruct TechnoExt::GetSimpleFLH(InfantryClass* pThis, int weaponIndex, bool&
 		{
 			if (pThis->Crawling)
 			{
+				Debug::Log("burst Crawling");
 				if (weaponIndex == 0)
 					pickedFLH = pTypeExt->PronePrimaryFireFLH;
 				else if (weaponIndex == 1)

@@ -549,6 +549,7 @@ DEFINE_JUMP(VTABLE, 0x7F5D20, 0x523250);// Redirect UnitClass::GetFLH to Infantr
 
 DEFINE_HOOK(0x6F3AF9, TechnoClass_GetFLH_AlternateFLH, 0x6)
 {
+	Debug::Log("TechnoClass_GetFLH_AlternateFLH\n");
 	GET(TechnoClass*, pThis, EBX);
 	GET(int, weaponIdx, ESI);
 
@@ -574,7 +575,6 @@ namespace BurstFLHTemp
 
 DEFINE_HOOK(0x6F3B37, TechnoClass_GetFLH_BurstFLH_1, 0x7)
 {
-	Debug::Log("TechnoClass_GetFLH_BurstFLH_1\n");
 	GET(TechnoClass*, pThis, EBX);
 	GET_STACK(int, weaponIndex, STACK_OFFSET(0xD8, 0x8));
 
@@ -605,7 +605,6 @@ DEFINE_HOOK(0x6F3B37, TechnoClass_GetFLH_BurstFLH_1, 0x7)
 
 DEFINE_HOOK(0x6F3C88, TechnoClass_GetFLH_BurstFLH_2, 0x6)
 {
-	Debug::Log("TechnoClass_GetFLH_BurstFLH_2\n");
 	GET_STACK(int, weaponIndex, STACK_OFFSET(0xD8, 0x8));
 
 	if (BurstFLHTemp::FLHFound || weaponIndex < 0)
@@ -669,6 +668,7 @@ DEFINE_HOOK(0x6FD0B5, TechnoClass_RearmDelay_ROF, 0x6)
 
 DEFINE_HOOK(0x6FD054, TechnoClass_RearmDelay_ForceFullDelay, 0x6)
 {
+	Debug::Log("TechnoClass_RearmDelay_ForceFullDelay\n");
 	enum { ApplyFullRearmDelay = 0x6FD09E };
 
 	GET(TechnoClass*, pThis, ESI);
@@ -680,6 +680,7 @@ DEFINE_HOOK(0x6FD054, TechnoClass_RearmDelay_ForceFullDelay, 0x6)
 		{
 			if (pExt->ForceFullRearmDelay)
 			{
+				Debug::Log("burst ForceFullRearmDelay\n");
 				pExt->ForceFullRearmDelay = false;
 				pThis->CurrentBurstIndex = 0;
 				return ApplyFullRearmDelay;
@@ -738,6 +739,7 @@ DEFINE_HOOK(0x5206D2, InfantryClass_FiringAI_SetContext, 0x6)
 
 DEFINE_HOOK(0x5209AF, InfantryClass_FiringAI_BurstDelays, 0x6)
 {
+	Debug::Log("InfantryClass_FiringAI_BurstDelays\n");
 	enum { Continue = 0x5209CD, ReturnFromFunction = 0x520AD9 };
 
 	GET(InfantryClass*, pThis, EBP);
