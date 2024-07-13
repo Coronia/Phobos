@@ -575,6 +575,7 @@ namespace BurstFLHTemp
 
 DEFINE_HOOK(0x6F3B37, TechnoClass_GetFLH_BurstFLH_1, 0x7)
 {
+	Debug::Log("TechnoClass_GetFLH_BurstFLH_1\n");
 	GET(TechnoClass*, pThis, EBX);
 	GET_STACK(int, weaponIndex, STACK_OFFSET(0xD8, 0x8));
 
@@ -595,6 +596,7 @@ DEFINE_HOOK(0x6F3B37, TechnoClass_GetFLH_BurstFLH_1, 0x7)
 
 	if (FLHFound)
 	{
+		Debug::Log("FLHFound\n");
 		R->ECX(FLH.X);
 		R->EBP(FLH.Y);
 		R->EAX(FLH.Z);
@@ -605,6 +607,7 @@ DEFINE_HOOK(0x6F3B37, TechnoClass_GetFLH_BurstFLH_1, 0x7)
 
 DEFINE_HOOK(0x6F3C88, TechnoClass_GetFLH_BurstFLH_2, 0x6)
 {
+	Debug::Log("TechnoClass_GetFLH_BurstFLH_2\n");
 	GET_STACK(int, weaponIndex, STACK_OFFSET(0xD8, 0x8));
 
 	if (BurstFLHTemp::FLHFound || weaponIndex < 0)
@@ -730,6 +733,7 @@ namespace FiringAITemp
 
 DEFINE_HOOK(0x5206D2, InfantryClass_FiringAI_SetContext, 0x6)
 {
+	Debug::Log("InfantryClass_FiringAI_SetContext\n");
 	GET(int, weaponIndex, EDI);
 
 	FiringAITemp::weaponIndex = weaponIndex;
