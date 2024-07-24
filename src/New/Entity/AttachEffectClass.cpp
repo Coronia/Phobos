@@ -563,7 +563,7 @@ int AttachEffectClass::Attach(std::vector<AttachEffectTypeClass*> const& types, 
 				if (pType->ROFMultiplier > 0.0 && pType->ROFMultiplier_ApplyOnCurrentTimer)
 					ROFModifier *= pType->ROFMultiplier;
 
-				if (pType->ROFBonus != 0 && && pType->ROFMultiplier_ApplyOnCurrentTimer)
+				if (pType->ROFBonus != 0 && pType->ROFMultiplier_ApplyOnCurrentTimer)
 					ROFBonus += pType->ROFBonus;
 
 				if (pType->HasTint())
