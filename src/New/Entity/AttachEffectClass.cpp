@@ -6,6 +6,7 @@
 
 #include <Ext/Anim/Body.h>
 #include <Ext/Techno/Body.h>
+#include <Ext/WeaponType/Body.h>
 
 std::vector<AttachEffectClass*> AttachEffectClass::Array;
 
@@ -29,6 +30,7 @@ AttachEffectClass::AttachEffectClass(AttachEffectTypeClass* pType, TechnoClass* 
 	, CurrentDelay { 0 }
 	, Animation { nullptr }
 	, IsAnimHidden { false }
+	, IsInTunnel { false }
 	, IsUnderTemporal { false }
 	, IsOnline { true }
 	, IsCloaked { false }
@@ -73,11 +75,6 @@ void AttachEffectClass::PointerGotInvalid(void* ptr, bool removed)
 		for (auto pEffect : AttachEffectClass::Array)
 			AnnounceInvalidPointer(pEffect->Invoker, ptr);
 	}
-	else if (absType == AbstractType::House)
-	{
-		for (auto pEffect : AttachEffectClass::Array)
-			AnnounceInvalidPointer(pEffect->InvokerHouse, ptr);
-	}
 }
 
 // =============================
@@ -102,7 +99,7 @@ void AttachEffectClass::AI()
 		{
 			double ROFModifier = this->Type->ROFMultiplier ? this->Type->ROFMultiplier : 1.0;
 			auto const pTechno = this->Techno;
-			int oldROF = pTechno->ROF;
+			int oldROF = pTechno->ChargeTurretDelay;
 			int ROFBonus = 0;
 
 			if (auto const pExt = TechnoExt::ExtMap.Find(pTechno))
@@ -112,9 +109,9 @@ void AttachEffectClass::AI()
 			}
 
 			ROFBonus += this->Type->ROFBonus;
-			int timerLeft = pTechno->DiskLaserTimer.GetTimeLeft();
-			pTechno->DiskLaserTimer.Start(static_cast<int>(timerLeft * (oldROF * ROFModifier + ROFBonus) / pTechno->ROF));
-			pTechno->ROF = static_cast<int>(oldROF * ROFModifier + ROFBonus);
+			int timerLeft = pTechno->RearmTimer.GetTimeLeft();
+			pTechno->RearmTimer.Start(static_cast<int>(timerLeft * (oldROF * ROFModifier + ROFBonus) / pTechno->ChargeTurretDelay));
+			pTechno->ChargeTurretDelay = static_cast<int>(oldROF * ROFModifier + ROFBonus);
 		}
 
 		if (this->Type->HasTint())
@@ -168,8 +165,10 @@ void AttachEffectClass::AI()
 	this->CloakCheck();
 	this->OnlineCheck();
 
-	if (!this->Animation && !this->IsUnderTemporal && this->IsOnline && !this->IsCloaked && !this->IsAnimHidden)
+	if (!this->Animation && !this->IsUnderTemporal && this->IsOnline && !this->IsCloaked && !this->IsInTunnel && !this->IsAnimHidden)
 		this->CreateAnim();
+
+	this->AnimCheck();
 }
 
 void AttachEffectClass::AI_Temporal()
@@ -180,7 +179,7 @@ void AttachEffectClass::AI_Temporal()
 
 		this->CloakCheck();
 
-		if (!this->Animation && this->Type->Animation_TemporalAction != AttachedAnimFlag::Hides && this->IsOnline && !this->IsCloaked && !this->IsAnimHidden)
+		if (!this->Animation && this->Type->Animation_TemporalAction != AttachedAnimFlag::Hides && this->IsOnline && !this->IsCloaked && !this->IsInTunnel && !this->IsAnimHidden)
 			this->CreateAnim();
 
 		if (this->Animation)
@@ -203,6 +202,29 @@ void AttachEffectClass::AI_Temporal()
 				this->Animation->UnderTemporal = true;
 				break;
 			}
+		}
+
+		this->AnimCheck();
+	}
+}
+
+void AttachEffectClass::AnimCheck()
+{
+	if (this->Type->Animation_HideIfAttachedWith.size() > 0)
+	{
+		auto const pTechnoExt = TechnoExt::ExtMap.Find(this->Techno);
+
+		if (pTechnoExt->HasAttachedEffects(this->Type->Animation_HideIfAttachedWith, false, false, nullptr, nullptr, nullptr, nullptr))
+		{
+			this->KillAnim();
+			this->IsAnimHidden = true;
+		}
+		else
+		{
+			this->IsAnimHidden = false;
+
+			if (!this->Animation && (!this->IsUnderTemporal || this->Type->Animation_TemporalAction != AttachedAnimFlag::Hides))
+				this->CreateAnim();
 		}
 	}
 }
@@ -277,7 +299,7 @@ void AttachEffectClass::CreateAnim()
 
 	AnimTypeClass* pAnimType = nullptr;
 
-	if (this->Type->Cumulative && this->Type->CumulativeAnimations.HasValue())
+	if (this->Type->Cumulative && this->Type->CumulativeAnimations.size() > 0)
 	{
 		if (!this->IsFirstCumulativeInstance)
 			return;
@@ -287,7 +309,7 @@ void AttachEffectClass::CreateAnim()
 	}
 	else
 	{
-		pAnimType = this->Type->Animation.Get(nullptr);
+		pAnimType = this->Type->Animation;
 	}
 
 	if (!this->Animation && pAnimType)
@@ -317,12 +339,12 @@ void AttachEffectClass::KillAnim()
 	}
 }
 
-void AttachEffectClass::SetAnimationVisibility(bool visible)
+void AttachEffectClass::SetAnimationTunnelState(bool visible)
 {
-	if (!this->IsAnimHidden && !visible)
+	if (!this->IsInTunnel && !visible)
 		this->KillAnim();
 
-	this->IsAnimHidden = !visible;
+	this->IsInTunnel = !visible;
 }
 
 void AttachEffectClass::RefreshDuration(int durationOverride)
@@ -363,19 +385,50 @@ bool AttachEffectClass::HasExpired() const
 
 bool AttachEffectClass::AllowedToBeActive() const
 {
-	if (auto const pFoot = abstract_cast<FootClass*>(this->Techno))
+	auto const pTechno = this->Techno;
+
+	if (auto const pFoot = abstract_cast<FootClass*>(pTechno))
 	{
 		bool isMoving = pFoot->Locomotor->Is_Moving();
 
-		if (isMoving && (Type->DiscardOn & DiscardCondition::Move) != DiscardCondition::None)
+		if (isMoving && (this->Type->DiscardOn & DiscardCondition::Move) != DiscardCondition::None)
 			return false;
 
-		if (!isMoving && (Type->DiscardOn & DiscardCondition::Stationary) != DiscardCondition::None)
+		if (!isMoving && (this->Type->DiscardOn & DiscardCondition::Stationary) != DiscardCondition::None)
 			return false;
 	}
 
-	if (this->Techno->DrainingMe && (Type->DiscardOn & DiscardCondition::Drain) != DiscardCondition::None)
+	if (pTechno->DrainingMe && (this->Type->DiscardOn & DiscardCondition::Drain) != DiscardCondition::None)
 		return false;
+
+	if (pTechno->Target)
+	{
+		bool inRange = (this->Type->DiscardOn & DiscardCondition::InRange) != DiscardCondition::None;
+		bool outOfRange = (this->Type->DiscardOn & DiscardCondition::OutOfRange) != DiscardCondition::None;
+
+		if (inRange || outOfRange)
+		{
+			int distance = -1;
+
+			if (this->Type->DiscardOn_RangeOverride.isset())
+			{
+				distance = this->Type->DiscardOn_RangeOverride.Get();
+			}
+			else
+			{
+				int weaponIndex = pTechno->SelectWeapon(pTechno->Target);
+				auto const pWeapon = pTechno->GetWeapon(weaponIndex)->WeaponType;
+
+				if (pWeapon)
+					distance = pWeapon->Range;
+			}
+
+			int distanceFromTgt = pTechno->DistanceFrom(pTechno->Target);
+
+			if ((inRange && distanceFromTgt <= distance) || (outOfRange && distanceFromTgt >= distance))
+				return false;
+		}
+	}
 
 	return true;
 }
@@ -396,11 +449,6 @@ bool AttachEffectClass::IsFromSource(TechnoClass* pInvoker, AbstractClass* pSour
 AttachEffectTypeClass* AttachEffectClass::GetType() const
 {
 	return this->Type;
-}
-
-void AttachEffectClass::ExpireWeapon() const
-{
-	TechnoExt::FireWeaponAtSelf(this->Techno, this->Type->ExpireWeapon.Get());
 }
 
 #pragma region StaticFunctions_AttachDetachTransfer
@@ -433,7 +481,7 @@ bool AttachEffectClass::Attach(AttachEffectTypeClass* pType, TechnoClass* pTarge
 			if ((this->Type->ROFMultiplier > 0.0 || this->Type->ROFBonus != 0) && this->Type->ROFMultiplier_ApplyOnCurrentTimer)
 			{
 				double ROFModifier = this->Type->ROFMultiplier ? this->Type->ROFMultiplier : 1.0;
-				int oldROF = pTarget->ROF;
+				int oldROF = pTarget->ChargeTurretDelay;
 				int ROFBonus = 0;
 
 				if (auto const pExt = TechnoExt::ExtMap.Find(pTarget))
@@ -443,9 +491,9 @@ bool AttachEffectClass::Attach(AttachEffectTypeClass* pType, TechnoClass* pTarge
 				}
 
 				ROFBonus += this->Type->ROFBonus;
-				int timerLeft = pTarget->DiskLaserTimer.GetTimeLeft();
-				pTarget->DiskLaserTimer.Start(static_cast<int>(timerLeft * (oldROF * ROFModifier + ROFBonus) / pTarget->ROF));
-				pTarget->ROF = static_cast<int>(oldROF * ROFModifier + ROFBonus);
+				int timerLeft = pTarget->RearmTimer.GetTimeLeft();
+				pTarget->RearmTimer.Start(static_cast<int>(timerLeft * (oldROF * ROFModifier + ROFBonus) / pTarget->ChargeTurretDelay));
+				pTarget->ChargeTurretDelay = static_cast<int>(oldROF * ROFModifier + ROFBonus);
 			}
 
 			pTargetExt->RecalculateStatMultipliers();
@@ -529,7 +577,7 @@ int AttachEffectClass::Attach(std::vector<AttachEffectTypeClass*> const& types, 
 
 	if (ROFModifier != 1.0 || ROFBonus != 0)
 	{
-		int oldROF = pTarget->ROF;
+		int oldROF = pTarget->ChargeTurretDelay;
 		int oldROFBonus = 0;
 
 		if (auto const pExt = TechnoExt::ExtMap.Find(pTarget))
@@ -539,9 +587,9 @@ int AttachEffectClass::Attach(std::vector<AttachEffectTypeClass*> const& types, 
 		}
 
 		oldROFBonus += ROFBonus;
-		int timerLeft = pTarget->DiskLaserTimer.GetTimeLeft();
-		pTarget->DiskLaserTimer.Start(static_cast<int>(timerLeft * (oldROF * ROFModifier + oldROFBonus) / pTarget->ROF));
-		pTarget->ROF = static_cast<int>(oldROF * ROFModifier + oldROFBonus);
+		int timerLeft = pTarget->RearmTimer.GetTimeLeft();
+		pTarget->RearmTimer.Start(static_cast<int>(timerLeft * (oldROF * ROFModifier + oldROFBonus) / pTarget->ChargeTurretDelay));
+		pTarget->ChargeTurretDelay = static_cast<int>(oldROF * ROFModifier + oldROFBonus);
 	}
 
 	if (attachedCount > 0)
@@ -692,7 +740,7 @@ int AttachEffectClass::Detach(std::vector<AttachEffectTypeClass*> const& types, 
 /// <param name="minCounts">Minimum instance counts needed for cumulative types to be removed.</param>
 /// <param name="maxCounts">Maximum instance counts of cumulative types to be removed.</param>
 /// <returns>Number of AttachEffect instances removed.</returns>
-int AttachEffectClass::DetachByGroups(std::vector<const char*> const& groups, TechnoClass* pTarget, std::vector<int> const& minCounts, std::vector<int> const& maxCounts)
+int AttachEffectClass::DetachByGroups(std::vector<std::string> const& groups, TechnoClass* pTarget, std::vector<int> const& minCounts, std::vector<int> const& maxCounts)
 {
 	if (groups.size() < 1 || !pTarget)
 		return 0;
@@ -736,6 +784,7 @@ int AttachEffectClass::RemoveAllOfType(AttachEffectTypeClass* pType, TechnoClass
 
 	auto const targetAEs = &pTargetExt->AttachedEffects;
 	std::vector<std::unique_ptr<AttachEffectClass>>::iterator it;
+	std::vector<WeaponTypeClass*> expireWeapons;
 
 	for (it = targetAEs->begin(); it != targetAEs->end(); )
 	{
@@ -748,10 +797,10 @@ int AttachEffectClass::RemoveAllOfType(AttachEffectTypeClass* pType, TechnoClass
 		{
 			detachedCount++;
 
-			if (pType->ExpireWeapon.isset() && (pType->ExpireWeapon_TriggerOn & ExpireWeaponCondition::Remove) != ExpireWeaponCondition::None)
+			if (pType->ExpireWeapon && (pType->ExpireWeapon_TriggerOn & ExpireWeaponCondition::Remove) != ExpireWeaponCondition::None)
 			{
 				if (!pType->Cumulative || !pType->ExpireWeapon_CumulativeOnlyOnce || pTargetExt->GetAttachedEffectCumulativeCount(pType) < 2)
-					attachEffect->ExpireWeapon();
+					expireWeapons.push_back(pType->ExpireWeapon);
 			}
 
 			if (attachEffect->ResetIfRecreatable())
@@ -766,6 +815,15 @@ int AttachEffectClass::RemoveAllOfType(AttachEffectTypeClass* pType, TechnoClass
 		{
 			++it;
 		}
+	}
+
+
+	auto const coords = pTarget->GetCoords();
+	auto const pOwner = pTarget->Owner;
+
+	for (auto const& pWeapon : expireWeapons)
+	{
+		WeaponTypeExt::DetonateAt(pWeapon, coords, pTarget, pOwner, pTarget);
 	}
 
 	return detachedCount;
@@ -817,7 +875,7 @@ void AttachEffectClass::TransferAttachedEffects(TechnoClass* pSource, TechnoClas
 		}
 		else if (!type->Cumulative && currentTypeCount > 0 && match)
 		{
-			match->Duration = Math::max(sourceMatch->Duration, attachEffect->Duration);
+			match->Duration = Math::max(match->Duration, attachEffect->Duration);
 		}
 		else
 		{
@@ -851,6 +909,7 @@ bool AttachEffectClass::Serialize(T& Stm)
 		.Process(this->Source)
 		.Process(this->Animation)
 		.Process(this->IsAnimHidden)
+		.Process(this->IsInTunnel)
 		.Process(this->IsUnderTemporal)
 		.Process(this->IsOnline)
 		.Process(this->IsCloaked)

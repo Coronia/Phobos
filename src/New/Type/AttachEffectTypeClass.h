@@ -9,7 +9,7 @@
 
 class AttachEffectTypeClass final : public Enumerable<AttachEffectTypeClass>
 {
-	static std::unordered_map<const char*, std::set<AttachEffectTypeClass*>> GroupsMap;
+	static std::unordered_map<std::string, std::set<AttachEffectTypeClass*>> GroupsMap;
 
 public:
 	Valueable<int> Duration;
@@ -17,14 +17,16 @@ public:
 	Valueable<int> Cumulative_MaxCount;
 	Valueable<bool> Powered;
 	Valueable<DiscardCondition> DiscardOn;
+	Nullable<Leptons> DiscardOn_RangeOverride;
 	Valueable<bool> PenetratesIronCurtain;
-	Nullable<AnimTypeClass*> Animation;
-	NullableVector<AnimTypeClass*> CumulativeAnimations;
+	Valueable<AnimTypeClass*> Animation;
+	ValueableVector<AnimTypeClass*> CumulativeAnimations;
 	Valueable<bool> Animation_ResetOnReapply;
 	Valueable<AttachedAnimFlag> Animation_OfflineAction;
 	Valueable<AttachedAnimFlag> Animation_TemporalAction;
 	Valueable<bool> Animation_UseInvokerAsOwner;
-	Nullable<WeaponTypeClass*> ExpireWeapon;
+	ValueableVector<AttachEffectTypeClass*> Animation_HideIfAttachedWith;
+	Valueable<WeaponTypeClass*> ExpireWeapon;
 	Valueable<ExpireWeaponCondition> ExpireWeapon_TriggerOn;
 	Valueable<bool> ExpireWeapon_CumulativeOnlyOnce;
 	Nullable<ColorStruct> Tint_Color;
@@ -49,11 +51,16 @@ public:
 	Valueable<double> Crit_ExtraChance;
 	ValueableVector<WarheadTypeClass*> Crit_AllowWarheads;
 	ValueableVector<WarheadTypeClass*> Crit_DisallowWarheads;
-	Nullable<WeaponTypeClass*> RevengeWeapon;
+	Valueable<WeaponTypeClass*> RevengeWeapon;
 	Valueable<AffectedHouse> RevengeWeapon_AffectsHouses;
+	Valueable<bool> ReflectDamage;
+	Nullable<WarheadTypeClass*> ReflectDamage_Warhead;
+	Valueable<bool> ReflectDamage_Warhead_Detonate;
+	Valueable<double> ReflectDamage_Multiplier;
+	Valueable<AffectedHouse> ReflectDamage_AffectsHouses;
 	Valueable<bool> DisableWeapons;
 
-	std::vector<const char*> Groups;
+	std::vector<std::string> Groups;
 
 	AttachEffectTypeClass(const char* const pTitle) : Enumerable<AttachEffectTypeClass>(pTitle)
 		, Duration { 0 }
@@ -61,6 +68,7 @@ public:
 		, Cumulative_MaxCount { -1 }
 		, Powered { false }
 		, DiscardOn { DiscardCondition::None }
+		, DiscardOn_RangeOverride {}
 		, PenetratesIronCurtain { false }
 		, Animation {}
 		, CumulativeAnimations {}
@@ -68,6 +76,7 @@ public:
 		, Animation_OfflineAction { AttachedAnimFlag::Hides }
 		, Animation_TemporalAction { AttachedAnimFlag::None }
 		, Animation_UseInvokerAsOwner { false }
+		, Animation_HideIfAttachedWith {}
 		, ExpireWeapon {}
 		, ExpireWeapon_TriggerOn { ExpireWeaponCondition::Expire }
 		, ExpireWeapon_CumulativeOnlyOnce { false }
@@ -95,14 +104,23 @@ public:
 		, Crit_DisallowWarheads {}
 		, RevengeWeapon {}
 		, RevengeWeapon_AffectsHouses{ AffectedHouse::All }
+		, ReflectDamage { false }
+		, ReflectDamage_Warhead {}
+		, ReflectDamage_Warhead_Detonate { false }
+		, ReflectDamage_Multiplier { 1.0 }
+		, ReflectDamage_AffectsHouses { AffectedHouse::All }
 		, DisableWeapons { false }
 		, Groups {}
 	{};
 
-	bool HasTint();
-	bool HasGroup(const char* pGroupID);
-	bool HasGroups(std::vector<const char*> groupIDs, bool requireAll);
-	AnimTypeClass* GetCumulativeAnimation(int cumulativeCount);
+	bool HasTint() const
+	{
+		return this->Tint_Color.isset() || this->Tint_Intensity != 0.0;
+	}
+
+	bool HasGroup(const std::string& groupID) const;
+	bool HasGroups(const std::vector<std::string>& groupIDs, bool requireAll) const;
+	AnimTypeClass* GetCumulativeAnimation(int cumulativeCount) const;
 
 	virtual ~AttachEffectTypeClass() override = default;
 
@@ -115,7 +133,7 @@ public:
 		AttachEffectTypeClass::GroupsMap.clear();
 	}
 
-	static std::vector<AttachEffectTypeClass*> GetTypesFromGroups(std::vector<const char*> groupIDs);
+	static std::vector<AttachEffectTypeClass*> GetTypesFromGroups(const std::vector<std::string>& groupIDs);
 
 private:
 	template <typename T>

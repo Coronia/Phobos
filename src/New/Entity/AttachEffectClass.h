@@ -17,7 +17,7 @@ public:
 	void AI();
 	void AI_Temporal();
 	void KillAnim();
-	void SetAnimationVisibility(bool visible);
+	void SetAnimationTunnelState(bool visible);
 	AttachEffectTypeClass* GetType() const;
 	void RefreshDuration(int durationOverride = 0);
 	bool ResetIfRecreatable();
@@ -26,8 +26,6 @@ public:
 	bool AllowedToBeActive() const;
 	bool IsActive() const;
 	bool IsFromSource(TechnoClass* pInvoker, AbstractClass* pSource) const;
-
-	void ExpireWeapon() const;
 
 	static void PointerGotInvalid(void* ptr, bool removed);
 	bool Load(PhobosStreamReader& Stm, bool RegisterForChange);
@@ -41,12 +39,13 @@ public:
 
 	static int Detach(AttachEffectTypeClass* pType, TechnoClass* pTarget,int minCount = -1, int maxCount = -1);
 	static int Detach(std::vector<AttachEffectTypeClass*> const& types, TechnoClass* pTarget, std::vector<int> const& minCounts, std::vector<int> const& maxCounts);
-	static int DetachByGroups(std::vector<const char*> const& groups, TechnoClass* pTarget, std::vector<int> const& minCounts, std::vector<int> const& maxCounts);
+	static int DetachByGroups(std::vector<std::string> const& groups, TechnoClass* pTarget, std::vector<int> const& minCounts, std::vector<int> const& maxCounts);
 	static void TransferAttachedEffects(TechnoClass* pSource, TechnoClass* pTarget);
 
 private:
 	void OnlineCheck();
 	void CloakCheck();
+	void AnimCheck();
 	void CreateAnim();
 
 	static AttachEffectClass* CreateAndAttach(AttachEffectTypeClass* pType, TechnoClass* pTarget, std::vector<std::unique_ptr<AttachEffectClass>>& targetAEs,
@@ -70,6 +69,7 @@ private:
 	AbstractClass* Source;
 	AnimClass* Animation;
 	bool IsAnimHidden;
+	bool IsInTunnel;
 	bool IsUnderTemporal;
 	bool IsOnline;
 	bool IsCloaked;
