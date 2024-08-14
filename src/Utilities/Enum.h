@@ -150,6 +150,15 @@ enum class AutoDeathBehavior
 	Sell = 2,     // buildings only
 };
 
+
+enum class ConditionGroupType
+{
+	AutoDeath = 0,
+	SW = 1,
+	AEAttach = 2,
+	AEDiscard = 3,
+};
+
 enum class SelfHealGainType
 {
 	None = 0,

@@ -376,6 +376,9 @@ bool AttachEffectClass::AllowedToBeActive() const
 {
 	auto const pTechno = this->Techno;
 
+	if (this->Type->DiscardOn_UseExtendConditions && ConditionGroup::CheckTechnoConditions(pThis, this->Type->DiscardOn_Condition))
+		return false;
+
 	if (auto const pFoot = abstract_cast<FootClass*>(pTechno))
 	{
 		bool isMoving = pFoot->Locomotor->Is_Moving();
@@ -571,6 +574,9 @@ AttachEffectClass* AttachEffectClass::CreateAndAttach(AttachEffectTypeClass* pTy
 	HouseClass* pInvokerHouse, TechnoClass* pInvoker, AbstractClass* pSource, int durationOverride, int delay, int initialDelay, int recreationDelay)
 {
 	if (!pType || !pTarget)
+		return nullptr;
+
+	if (this->Type->AttachOn_UseExtendConditions && !ConditionGroup::CheckTechnoConditions(pThis, this->Type->AttachOn_Condition))
 		return nullptr;
 
 	if (pTarget->IsIronCurtained())

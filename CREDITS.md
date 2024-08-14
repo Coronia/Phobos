@@ -348,6 +348,7 @@ This page lists all the individual contributions to the project by their author.
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude
+  - Attach & discard condition groups for attached effect
 - **handama** - AI script action to jump back to previous script
 - **Ares developers**
   - YRpp and Syringe which are used, save/load, project foundation and generally useful code from Ares

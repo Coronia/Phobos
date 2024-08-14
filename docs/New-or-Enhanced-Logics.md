@@ -17,6 +17,18 @@ This page describes all the engine features that are either new and introduced b
     - `drain`: Discard when the object is being affected by a weapon with `DrainWeapon=true`.
     - `inrange`: Discard if within weapon range from current target. Distance can be overridden via `DiscardOn.RangeOverride`.
     - `outofrange`: Discard if outside weapon range from current target. Distance can be overridden via `DiscardOn.RangeOverride`.
+  - Attached effects can set a series of conditions to further determine whether the effect could be applied on the object, or when the effect should be discarded, toggled by `AttachOn\DiscardOn.UseExtendConditions` respectively. An effect will only be applied if *all* conditions in `AttachOn` meets, but will discard if *any* of the conditions in `DiscardOn` meets.
+    - `AmmoExceed` / `AmmoBelow`: The effect is applied/discarded if its current passenger amount is greater / smaller than (or equal to) set value.
+    - `OwnedByPlayer` / `OwnedByAI`: The effect is applied/discarded if its owner house is / isn't a human player.
+    - `MoneyExceed` / `MoneyBelow`: The effect is applied/discarded if its owner house has credits greater / smaller than (or equal to) set value.
+    - `LowPower` / `FullPower`: The effect is applied/discarded if its owner house is in low / full power.
+    - `RequiredHouses` / `ForbiddenHouses`: The effect is applied/discarded if its owner house is within / without the set list.
+    - `AbovePercent` / `BelowPercent`: The effect is applied/discarded if its current health percentage is greater / smaller than (or equal to) set value.
+    - `PassengersExceed` / `PassengersBelow`: The effect is applied/discarded if its current passenger amount is greater / smaller than (or equal to) set value.
+    - `TechnosExist` / `TechnosDontExist`: The effect is applied/discarded if TechnoTypes exist or do not exist, respectively.
+      - `Technos(Dont)Exist.Any` controls whether or not a single listed TechnoType is enough to satisfy the requirement or if all are required.
+      - `Technos(Dont)Exist.AllowLimboed` controls whether or not limboed TechnoTypes (f.ex those in transports) are counted.
+      - `Technos(Dont)Exist.Houses` controls which houses are checked.
   - If `PenetratesIronCurtain` is not set to true, the effect is not applied on currently invulnerable objects.
     - `PenetratesForceShield` can be used to set this separately for Force Shielded objects, defaults to value of `PenetratesIronCurtain`.
   - `Animation` defines animation to play in an indefinite loop for as long as the effect is active on the object it is attached to.
@@ -80,6 +92,52 @@ Cumulative.MaxCount=-1                         ; integer
 Powered=false                                  ; boolean
 DiscardOn=none                                 ; list of discard condition enumeration (none|entry|move|stationary|drain|inrange|outofrange)
 DiscardOn.RangeOverride=                       ; floating point value, distance in cells
+DiscardOn.UseExtendConditions=false            ; boolean
+DiscardOn.AmmoExceed=-1                        ; integer
+DiscardOn.AmmoBelow=-1                         ; integer
+DiscardOn.OwnedByPlayer=false                  ; boolean
+DiscardOn.OwnedByAI=false                      ; boolean
+DiscardOn.MoneyExceed=-1                       ; integer
+DiscardOn.MoneyBelow=-1                        ; integer
+DiscardOn.LowPower=false                       ; boolean
+DiscardOn.FullPower=false                      ; boolean
+DiscardOn.RequiredHouses=                      ; list of House
+DiscardOn.ForbiddenHouses=                     ; list of House
+DiscardOn.AbovePercent=                        ; floating point value, percents or absolute (0.0-1.0)
+DiscardOn.BelowPercent=                        ; floating point value, percents or absolute (0.0-1.0)
+DiscardOn.PassengersExceed=-1                  ; integer
+DiscardOn.PassengersBelow=-1                   ; integer
+DiscardOn.TechnosDontExist=                    ; list of TechnoType names
+DiscardOn.TechnosDontExist.Any=false           ; boolean
+DiscardOn.TechnosDontExist.AllowLimboed=false  ; boolean
+DiscardOn.TechnosDontExist.Houses=owner        ; Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
+DiscardOn.TechnosExist=                        ; list of TechnoType names
+DiscardOn.TechnosExist.Any=true                ; boolean
+DiscardOn.TechnosExist.AllowLimboed=false      ; boolean
+DiscardOn.TechnosExist.Houses=owner            ; Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
+AttachOn.UseExtendConditions=false             ; boolean
+AttachOn.AmmoExceed=-1                         ; integer
+AttachOn.AmmoBelow=-1                          ; integer
+AttachOn.OwnedByPlayer=false                   ; boolean
+AttachOn.OwnedByAI=false                       ; boolean
+AttachOn.MoneyExceed=-1                        ; integer
+AttachOn.MoneyBelow=-1                         ; integer
+AttachOn.LowPower=false                        ; boolean
+AttachOn.FullPower=false                       ; boolean
+AttachOn.RequiredHouses=                       ; list of House
+AttachOn.ForbiddenHouses=                      ; list of House
+AttachOn.AbovePercent=                         ; floating point value, percents or absolute (0.0-1.0)
+AttachOn.BelowPercent=                         ; floating point value, percents or absolute (0.0-1.0)
+AttachOn.PassengersExceed=-1                   ; integer
+AttachOn.PassengersBelow=-1                    ; integer
+AttachOn.TechnosDontExist=                     ; list of TechnoType names
+AttachOn.TechnosDontExist.Any=false            ; boolean
+AttachOn.TechnosDontExist.AllowLimboed=false   ; boolean
+AttachOn.TechnosDontExist.Houses=owner         ; Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
+AttachOn.TechnosExist=                         ; list of TechnoType names
+AttachOn.TechnosExist.Any=true                 ; boolean
+AttachOn.TechnosExist.AllowLimboed=false       ; boolean
+AttachOn.TechnosExist.Houses=owner             ; Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
 PenetratesIronCurtain=false                    ; boolean
 PenetratesForceShield=                         ; boolean
 Animation=                                     ; Animation

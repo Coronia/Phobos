@@ -152,6 +152,12 @@ void AttachEffectTypeClass::LoadFromINI(CCINIClass* pINI)
 	// Groups
 	exINI.ParseStringList(this->Groups, pSection, "Groups");
 	AddToGroupsMap();
+
+	// Condition groups
+	this->AttachOn_UseExtendConditions.Read<true>(exINI, pSection, "AttachOn.UseExtendConditions");
+	this->DiscardOn_UseExtendConditions.Read(exINI, pSection, "DiscardOn.UseExtendConditions");
+	ConditionGroup::ParseAEAttach(AttachOn_Condition, exINI, pSection);
+	ConditionGroup::ParseAEDiscard(DiscardOn_Condition, exINI, pSection);
 }
 
 template <typename T>
@@ -202,6 +208,10 @@ void AttachEffectTypeClass::Serialize(T& Stm)
 		.Process(this->ReflectDamage_AffectsHouses)
 		.Process(this->DisableWeapons)
 		.Process(this->Groups)
+		.Process(this->AttachOn_UseExtendConditions)
+		.Process(this->DiscardOn_UseExtendConditions)
+		.Process(this->AttachOn_Condition)
+		.Process(this->DiscardOn_Condition)
 		;
 }
 

@@ -7,6 +7,8 @@
 #include <Utilities/Template.h>
 #include <Utilities/TemplateDef.h>
 
+#include <New/Type/Affiliated/ConditionGroup.h>
+
 class AttachEffectTypeClass final : public Enumerable<AttachEffectTypeClass>
 {
 	static std::unordered_map<std::string, std::set<AttachEffectTypeClass*>> GroupsMap;
@@ -59,6 +61,11 @@ public:
 
 	std::vector<std::string> Groups;
 
+	Valueable<bool> AttachOn_UseExtendConditions;
+	Valueable<bool> DiscardOn_UseExtendConditions;
+	ConditionGroup AttachOn_Condition;
+	ConditionGroup DiscardOn_Condition;
+
 	AttachEffectTypeClass(const char* const pTitle) : Enumerable<AttachEffectTypeClass>(pTitle)
 		, Duration { 0 }
 		, Cumulative { false }
@@ -105,6 +112,10 @@ public:
 		, ReflectDamage_AffectsHouses { AffectedHouse::All }
 		, DisableWeapons { false }
 		, Groups {}
+		, AttachOn_UseExtendConditions { false }
+		, DiscardOn_UseExtendConditions { false }
+		, AttachOn_Condition {}
+		, DiscardOn_Condition {}
 	{};
 
 	bool HasTint() const
