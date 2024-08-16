@@ -83,6 +83,56 @@ void BulletExt::ExtData::InterceptBullet(TechnoClass* pSource, WeaponTypeClass* 
 			}
 		}
 
+		auto newTarget = pThis->Target;
+		auto newCoords = pThis->TargetCoords;
+
+		switch (pInterceptorType->Retarget)
+		{
+			case InterceptorRetargetType::Target:
+				newCoords = pThis->Target->GetCoords();
+
+				if (!pInterceptorType->Retarget_LockTarget)
+					newTarget = nullptr;
+
+				break;
+
+			case InterceptorRetargetType::Source:
+				newCoords = pThis->SourceCoords;
+				newTarget = pInterceptorType->Retarget_LockTarget ? pThis->Owner : nullptr;
+				break;
+
+			case InterceptorRetargetType::Firer:
+				newCoords = pThis->Owner->GetCoords();
+				newTarget = pInterceptorType->Retarget_LockTarget ? pThis->Owner : nullptr;
+				break;
+
+			case InterceptorRetargetType::Interceptor:
+				newCoords = pSource->GetCoords();
+				newTarget = pInterceptorType->Retarget_LockTarget ? pSource : nullptr;
+				break;
+
+			default:
+				if (!pInterceptorType->Retarget_LockTarget)
+					newTarget = nullptr;
+
+				break;
+		}
+
+		int range = static_cast<int>(pInterceptorType->Retarget_RangeOverride.Get(Leptons(pThis->WeaponType->Range)));
+
+		if (pInterceptorType->Retarget_ConsiderFormerRange)
+			range -= pThis->SourceCoords.DistanceFrom(pThis->Data.Location);
+
+		range = Math::clamp(range, pInterceptorType->Retarget_MinimumRange, pInterceptorType->Retarget_MaximumRange);
+
+		if (newCoords.DistanceFrom(pThis->Data.Location) > range)
+		{
+			newTarget = nullptr;
+		}
+
+		if (pInterceptorType->ChangeOwner)
+			pThis->Owner = pSource;
+
 		if (isIntercepted && !pInterceptorType->KeepIntact)
 			this->InterceptedStatus = InterceptedStatus::Intercepted;
 	}

@@ -164,6 +164,16 @@ enum class InterceptedStatus
 	Intercepted = 2
 };
 
+enum class InterceptorRetargetType
+{
+	None = 0,
+	Target = 1,
+	Source = 2,
+	Firer = 3,
+	Interceptor = 4,
+	Random = 5
+}
+
 enum class PhobosAction
 {
 	None = 0,

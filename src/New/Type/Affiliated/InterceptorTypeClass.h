@@ -23,6 +23,13 @@ public:
 	Valueable<bool> WeaponCumulativeDamage;
 	Valueable<bool> KeepIntact;
 	Nullable<bool> DeleteOnIntercept;
+	Valueable<bool> ChangeOwner;
+	Valueable<InterceptorRetargetType> Retarget;
+	Valueable<bool> Retarget_LockTarget;
+	Nullable<Leptons> Retarget_RangeOverride;
+	Nullable<Leptons> Retarget_MaximumRange;
+	Nullable<Leptons> Retarget_MinimumRange;
+	Valueable<bool> Retarget_ConsiderFormerRange;
 
 	void LoadFromINI(CCINIClass* pINI, const char* pSection);
 	bool Load(PhobosStreamReader& stm, bool registerForChange);
