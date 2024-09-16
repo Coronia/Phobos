@@ -156,7 +156,7 @@ void TechnoExt::DrawInsignia(TechnoClass* pThis, Point2D* pLocation, RectangleSt
 
 		auto& frames = pTechnoTypeExt->InsigniaFrames_Passengers[passengersIndex];
 
-		if (frames != Vector3D<int>(-1, -1, -1))
+		if (frames.isset())
 			insigniaFrames = frames;
 	}
 
@@ -178,7 +178,7 @@ void TechnoExt::DrawInsignia(TechnoClass* pThis, Point2D* pLocation, RectangleSt
 
 		auto& frames = pTechnoTypeExt->InsigniaFrames_Weapon[weaponIndex];
 
-		if (frames != Vector3D<int>(-1, -1, -1))
+		if (frames.isset())
 			insigniaFrames = frames;
 	}
 
