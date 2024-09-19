@@ -142,7 +142,7 @@ bool ConditionGroup::CheckHouseConditions(HouseClass* pOwner, const ConditionGro
 	return false;
 }
 
-bool ConditionGroup::CheckTechnoConditions(const TechnoClass* pTechno, const ConditionGroup condition, CDTimerClass& Timer)
+bool ConditionGroup::CheckTechnoConditions(TechnoClass* pTechno, const ConditionGroup condition)
 {
 	auto const pType = pTechno->GetTechnoType();
 	auto const pOwner = pTechno->Owner;
@@ -158,6 +158,35 @@ bool ConditionGroup::CheckTechnoConditions(const TechnoClass* pTechno, const Con
 		else if (!condition.OnAnyCondition)
 		{
 			return false;
+		}
+	}
+
+	// Powered
+	if (condition.PowerOn || condition.PowerOff)
+	{
+		bool isActive = !(pTechno->Deactivated || pTechno->IsUnderEMP());
+
+		if (isActive && pTechno->WhatAmI() == AbstractType::Building)
+		{
+			auto const pBuilding = static_cast<BuildingClass const*>(pTechno);
+			isActive = pBuilding->IsPowerOnline();
+		}
+
+		if (isActive)
+		{
+			if (condition.PowerOn && condition.OnAnyCondition)
+				return true;
+
+			if (condition.PowerOff && !condition.OnAnyCondition)
+				return false;
+		}
+		else
+		{
+			if (condition.PowerOn && !condition.OnAnyCondition)
+				return false;
+
+			if (condition.PowerOff && condition.OnAnyCondition)
+				return true;
 		}
 	}
 
@@ -242,17 +271,31 @@ bool ConditionGroup::CheckTechnoConditions(const TechnoClass* pTechno, const Con
 		}
 	}
 
-	// Countdown ends
-	if (condition.AfterDelay > 0)
+	// Move
+	if (auto const pFoot = abstract_cast<FootClass*>(pTechno))
 	{
-		if (!Timer.HasStarted())
+		if (pFoot->Locomotor->Is_Moving())
 		{
-			Timer.Start(condition.AfterDelay);
+			if (condition.IsMoving && condition.OnAnyCondition)
+				return true;
 
-			if (!condition.OnAnyCondition)
+			if (condition.IsStationary && !condition.OnAnyCondition)
 				return false;
 		}
-		else if (Timer.Completed())
+		else
+		{
+			if (condition.IsMoving && condition.OnAnyCondition)
+				return false;
+
+			if (condition.IsStationary && !condition.OnAnyCondition)
+				return true;
+		}
+	}
+
+	// Cloak
+	if (condition.IsCloaked)
+	{
+		if (pTechno->CloakState == CloakState::Cloaked)
 		{
 			if (condition.OnAnyCondition)
 				return true;
@@ -260,6 +303,63 @@ bool ConditionGroup::CheckTechnoConditions(const TechnoClass* pTechno, const Con
 		else if (!condition.OnAnyCondition)
 		{
 			return false;
+		}
+	}
+
+	// Drain
+	if (condition.IsDrained)
+	{
+		if (pTechno->DrainingMe)
+		{
+			if (condition.OnAnyCondition)
+				return true;
+		}
+		else if (!condition.OnAnyCondition)
+		{
+			return false;
+		}
+	}
+
+	// Shield
+	auto const pExt = TechnoExt::ExtMap.Find(pTechno);
+
+	if (auto const pShieldData = pExt->Shield.get())
+	{
+		if (pShieldData->IsActive())
+		{
+			if (condition.ShieldActive && condition.OnAnyCondition)
+				return true;
+
+			if (condition.ShieldInactive && !condition.OnAnyCondition)
+				return false;
+
+			if (condition.ShieldAbovePercent.isset() && pShieldData->GetHealthRatio() >= condition.ShieldAbovePercent)
+			{
+				if (condition.OnAnyCondition)
+					return true;
+			}
+			else if (!condition.OnAnyCondition)
+			{
+				return false;
+			}
+
+			if (condition.ShieldBelowPercent.isset() && pShieldData->GetHealthRatio() <= condition.ShieldBelowPercent)
+			{
+				if (condition.OnAnyCondition)
+					return true;
+			}
+			else if (!condition.OnAnyCondition)
+			{
+				return false;
+			}
+		}
+		else
+		{
+			if (condition.ShieldActive && condition.OnAnyCondition)
+				return false;
+
+			if (condition.ShieldInactive && !condition.OnAnyCondition)
+				return true;
 		}
 	}
 
@@ -289,8 +389,51 @@ bool ConditionGroup::BatchCheckTechnoExist(HouseClass* pOwner, const ValueableVe
 		: std::all_of(vTypes.begin(), vTypes.end(), existSingleType);
 }
 
+bool ConditionGroup::CheckTechnoConditionsWithTimer(TechnoClass* pTechno, const ConditionGroup condition, CDTimerClass& Timer)
+{
+	// Process techno conditions
+	if (ConditionGroup::CheckTechnoConditions(pTechno, condition))
+	{
+		if (condition.OnAnyCondition)
+			return true;
+	}
+	else if (!condition.OnAnyCondition)
+	{
+		return false;
+	}
+
+	// Countdown ends
+	if (condition.AfterDelay > 0)
+	{
+		if (!Timer.HasStarted())
+		{
+			Timer.Start(condition.AfterDelay);
+
+			if (!condition.OnAnyCondition)
+				return false;
+		}
+		else if (Timer.Completed())
+		{
+			if (condition.OnAnyCondition)
+				return true;
+		}
+		else if (!condition.OnAnyCondition)
+		{
+			return false;
+		}
+	}
+
+	// if OnAnyCondition set to false, then all conditions have met in this step
+	if (!condition.OnAnyCondition)
+		return true;
+
+	return false;
+}
+
 ConditionGroup::ConditionGroup()
-	: AmmoExceed { -1 }
+	: PowerOn { false }
+	, PowerOff { false }
+	, AmmoExceed { -1 }
 	, AmmoBelow { -1 }
 	, AfterDelay { 0 }
 	, OwnedByPlayer { false }
@@ -306,6 +449,14 @@ ConditionGroup::ConditionGroup()
 	, BelowPercent {}
 	, PassengersExceed { -1 }
 	, PassengersBelow { -1 }
+	, ShieldActive { false }
+	, ShieldInactive { false }
+	, ShieldAbovePercent {}
+	, ShieldBelowPercent {}
+	, IsMoving { false }
+	, IsStationary { false }
+	, IsCloaked { false }
+	, IsDrained { false }
 	, TechnosDontExist {}
 	, TechnosDontExist_Any { false }
 	, TechnosDontExist_AllowLimboed { false }
@@ -318,18 +469,16 @@ ConditionGroup::ConditionGroup()
 {
 }
 
-void ConditionGroup::ParseAEAttach(ConditionGroup& condition, INI_EX& exINI, const char* pSection)
+void ConditionGroup::ParseAEAttach(ConditionGroup& condition, CCINIClass* const pINI, INI_EX& exINI, const char* pSection)
 {
 	condition.AmmoExceed.Read(exINI, pSection, "AttachOn.AmmoExceed");
 	condition.AmmoBelow.Read(exINI, pSection, "AttachOn.AmmoBelow");
 	condition.OwnedByPlayer.Read(exINI, pSection, "AttachOn.OwnedByPlayer");
 	condition.OwnedByAI.Read(exINI, pSection, "AttachOn.OwnedByAI");
-	condition.MoneyExceed.Read(exINI, pSection, "AttachOn.MoneyExceed");
-	condition.MoneyBelow.Read(exINI, pSection, "AttachOn.MoneyBelow");
 	condition.LowPower.Read(exINI, pSection, "AttachOn.LowPower");
 	condition.FullPower.Read(exINI, pSection, "AttachOn.FullPower");
-	condition.RequiredHouses.Read(exINI, pSection, "AttachOn.RequiredHouses");
-	condition.ForbiddenHouses.Read(exINI, pSection, "AttachOn.ForbiddenHouses");
+	condition.RequiredHouses = pINI->ReadHouseTypesList(pSection, "AttachOn.RequiredHouses", condition.RequiredHouses);
+	condition.ForbiddenHouses = pINI->ReadHouseTypesList(pSection, "AttachOn.ForbiddenHouses", condition.ForbiddenHouses);
 	condition.AbovePercent.Read(exINI, pSection, "AttachOn.AbovePercent");
 	condition.BelowPercent.Read(exINI, pSection, "AttachOn.BelowPercent");
 	condition.PassengersExceed.Read(exINI, pSection, "AttachOn.PassengersExceed");
@@ -349,18 +498,16 @@ void ConditionGroup::ParseAEAttach(ConditionGroup& condition, INI_EX& exINI, con
 	condition.type = ConditionGroupType::AEAttach;
 }
 
-void ConditionGroup::ParseAEDiscard(ConditionGroup& condition, INI_EX& exINI, const char* pSection)
+void ConditionGroup::ParseAEDiscard(ConditionGroup& condition, CCINIClass* const pINI, INI_EX& exINI, const char* pSection)
 {
 	condition.AmmoExceed.Read(exINI, pSection, "DiscardOn.AmmoExceed");
 	condition.AmmoBelow.Read(exINI, pSection, "DiscardOn.AmmoBelow");
 	condition.OwnedByPlayer.Read(exINI, pSection, "DiscardOn.OwnedByPlayer");
 	condition.OwnedByAI.Read(exINI, pSection, "DiscardOn.OwnedByAI");
-	condition.MoneyExceed.Read(exINI, pSection, "DiscardOn.MoneyExceed");
-	condition.MoneyBelow.Read(exINI, pSection, "DiscardOn.MoneyBelow");
 	condition.LowPower.Read(exINI, pSection, "DiscardOn.LowPower");
 	condition.FullPower.Read(exINI, pSection, "DiscardOn.FullPower");
-	condition.RequiredHouses.Read(exINI, pSection, "DiscardOn.RequiredHouses");
-	condition.ForbiddenHouses.Read(exINI, pSection, "DiscardOn.ForbiddenHouses");
+	condition.RequiredHouses = pINI->ReadHouseTypesList(pSection, "DiscardOn.RequiredHouses", condition.RequiredHouses);
+	condition.ForbiddenHouses = pINI->ReadHouseTypesList(pSection, "DiscardOn.ForbiddenHouses", condition.ForbiddenHouses);
 	condition.AbovePercent.Read(exINI, pSection, "DiscardOn.AbovePercent");
 	condition.BelowPercent.Read(exINI, pSection, "DiscardOn.BelowPercent");
 	condition.PassengersExceed.Read(exINI, pSection, "DiscardOn.PassengersExceed");
@@ -384,6 +531,8 @@ template <typename T>
 bool ConditionGroup::Serialize(T& stm)
 {
 	return stm
+		.Process(this->PowerOn)
+		.Process(this->PowerOff)
 		.Process(this->AmmoExceed)
 		.Process(this->AmmoBelow)
 		.Process(this->AfterDelay)
@@ -398,6 +547,14 @@ bool ConditionGroup::Serialize(T& stm)
 		.Process(this->ForbiddenHouses)
 		.Process(this->PassengersExceed)
 		.Process(this->PassengersBelow)
+		.Process(this->ShieldActive)
+		.Process(this->ShieldInactive)
+		.Process(this->ShieldAbovePercent)
+		.Process(this->ShieldBelowPercent)
+		.Process(this->IsMoving)
+		.Process(this->IsStationary)
+		.Process(this->IsCloaked)
+		.Process(this->IsDrained)
 		.Process(this->TechnosDontExist)
 		.Process(this->TechnosDontExist_Any)
 		.Process(this->TechnosDontExist_AllowLimboed)

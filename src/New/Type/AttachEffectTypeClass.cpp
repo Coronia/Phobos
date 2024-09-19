@@ -102,6 +102,7 @@ void AttachEffectTypeClass::LoadFromINI(CCINIClass* pINI)
 	this->DiscardOn.Read(exINI, pSection, "DiscardOn");
 	this->DiscardOn_RangeOverride.Read(exINI, pSection, "DiscardOn.RangeOverride");
 	this->PenetratesIronCurtain.Read(exINI, pSection, "PenetratesIronCurtain");
+	this->PenetratesForceShield.Read(exINI, pSection, "PenetratesForceShield");
 
 	this->Animation.Read(exINI, pSection, "Animation");
 	this->CumulativeAnimations.Read(exINI, pSection, "CumulativeAnimations");
@@ -154,10 +155,14 @@ void AttachEffectTypeClass::LoadFromINI(CCINIClass* pINI)
 	AddToGroupsMap();
 
 	// Condition groups
-	this->AttachOn_UseExtendConditions.Read<true>(exINI, pSection, "AttachOn.UseExtendConditions");
+	this->AttachOn_UseExtendConditions.Read(exINI, pSection, "AttachOn.UseExtendConditions");
 	this->DiscardOn_UseExtendConditions.Read(exINI, pSection, "DiscardOn.UseExtendConditions");
-	ConditionGroup::ParseAEAttach(AttachOn_Condition, exINI, pSection);
-	ConditionGroup::ParseAEDiscard(DiscardOn_Condition, exINI, pSection);
+
+	if (this->AttachOn_UseExtendConditions)
+		ConditionGroup::ParseAEAttach(AttachOn_Condition, pINI, exINI, pSection);
+
+	if (this->DiscardOn_UseExtendConditions)
+		ConditionGroup::ParseAEDiscard(DiscardOn_Condition, pINI, exINI, pSection);
 }
 
 template <typename T>
@@ -171,6 +176,7 @@ void AttachEffectTypeClass::Serialize(T& Stm)
 		.Process(this->DiscardOn)
 		.Process(this->DiscardOn_RangeOverride)
 		.Process(this->PenetratesIronCurtain)
+		.Process(this->PenetratesForceShield)
 		.Process(this->Animation)
 		.Process(this->CumulativeAnimations)
 		.Process(this->Animation_ResetOnReapply)

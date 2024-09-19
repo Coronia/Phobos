@@ -376,7 +376,7 @@ bool AttachEffectClass::AllowedToBeActive() const
 {
 	auto const pTechno = this->Techno;
 
-	if (this->Type->DiscardOn_UseExtendConditions && ConditionGroup::CheckTechnoConditions(pThis, this->Type->DiscardOn_Condition))
+	if (this->Type->DiscardOn_UseExtendConditions && ConditionGroup::CheckTechnoConditions(pTechno, this->Type->DiscardOn_Condition))
 		return false;
 
 	if (auto const pFoot = abstract_cast<FootClass*>(pTechno))
@@ -576,9 +576,6 @@ AttachEffectClass* AttachEffectClass::CreateAndAttach(AttachEffectTypeClass* pTy
 	if (!pType || !pTarget)
 		return nullptr;
 
-	if (this->Type->AttachOn_UseExtendConditions && !ConditionGroup::CheckTechnoConditions(pThis, this->Type->AttachOn_Condition))
-		return nullptr;
-
 	if (pTarget->IsIronCurtained())
 	{
 		bool penetrates = pTarget->ForceShielded ? pType->PenetratesForceShield.Get(pType->PenetratesIronCurtain) : pType->PenetratesIronCurtain;
@@ -586,6 +583,9 @@ AttachEffectClass* AttachEffectClass::CreateAndAttach(AttachEffectTypeClass* pTy
 		if (!penetrates)
 			return nullptr;
 	}
+
+	if (pType->AttachOn_UseExtendConditions && !ConditionGroup::CheckTechnoConditions(pTarget, pType->AttachOn_Condition))
+		return nullptr;
 
 	int currentTypeCount = 0;
 	AttachEffectClass* match = nullptr;
