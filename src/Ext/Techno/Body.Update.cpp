@@ -136,12 +136,11 @@ bool TechnoExt::ExtData::CheckDeathConditions(bool isInLimbo)
 
 	// Self-destruction must be enabled
 	const auto howToDie = pTypeExt->AutoDeath_Behavior.Get();
-	const auto pVanishAnim = pTypeExt->AutoDeath_VanishAnimation;
 
 	// Death if no ammo
 	if (pType->Ammo > 0 && pThis->Ammo <= 0 && pTypeExt->AutoDeath_OnAmmoDepletion)
 	{
-		TechnoExt::KillSelf(pThis, howToDie, pVanishAnim, isInLimbo);
+		TechnoExt::KillSelf(pThis, howToDie, pTypeExt->AutoDeath_VanishAnimation, isInLimbo);
 		return true;
 	}
 
@@ -154,7 +153,7 @@ bool TechnoExt::ExtData::CheckDeathConditions(bool isInLimbo)
 		}
 		else if (this->AutoDeathTimer.Completed())
 		{
-			TechnoExt::KillSelf(pThis, howToDie, pVanishAnim, isInLimbo);
+			TechnoExt::KillSelf(pThis, howToDie, pTypeExt->AutoDeath_VanishAnimation, isInLimbo);
 			return true;
 		}
 	}
@@ -183,7 +182,7 @@ bool TechnoExt::ExtData::CheckDeathConditions(bool isInLimbo)
 	{
 		if (!existTechnoTypes(pTypeExt->AutoDeath_TechnosDontExist, pTypeExt->AutoDeath_TechnosDontExist_Houses, !pTypeExt->AutoDeath_TechnosDontExist_Any, pTypeExt->AutoDeath_TechnosDontExist_AllowLimboed))
 		{
-			TechnoExt::KillSelf(pThis, howToDie, pVanishAnim, isInLimbo);
+			TechnoExt::KillSelf(pThis, howToDie, pTypeExt->AutoDeath_VanishAnimation, isInLimbo);
 
 			return true;
 		}
@@ -194,7 +193,7 @@ bool TechnoExt::ExtData::CheckDeathConditions(bool isInLimbo)
 	{
 		if (existTechnoTypes(pTypeExt->AutoDeath_TechnosExist, pTypeExt->AutoDeath_TechnosExist_Houses, pTypeExt->AutoDeath_TechnosExist_Any, pTypeExt->AutoDeath_TechnosExist_AllowLimboed))
 		{
-			TechnoExt::KillSelf(pThis, howToDie, pVanishAnim, isInLimbo);
+			TechnoExt::KillSelf(pThis, howToDie, pTypeExt->AutoDeath_VanishAnimation, isInLimbo);
 
 			return true;
 		}
@@ -283,12 +282,7 @@ void TechnoExt::ExtData::EatPassengers()
 					if (pDelType->ReportSound >= 0)
 						VocClass::PlayAt(pDelType->ReportSound.Get(), pThis->GetCoords(), nullptr);
 
-					if (const auto pAnimType = pDelType->Anim.Get())
-					{
-						auto const pAnim = GameCreate<AnimClass>(pAnimType, pThis->Location);
-						pAnim->SetOwnerObject(pThis);
-						pAnim->Owner = pThis->Owner;
-					}
+					AnimExt::CreateRandomAnim(pDelType->Anim, pThis->Location, pThis, nullptr, true, true);
 
 					// Check if there is money refund
 					if (pDelType->Soylent &&
@@ -444,8 +438,6 @@ void TechnoExt::ExtData::UpdateTypeData(TechnoTypeClass* pCurrentType)
 		auto& vec = ScenarioExt::Global()->AutoDeathObjects;
 		vec.erase(std::remove(vec.begin(), vec.end(), this), vec.end());
 	}
-
-	auto const rtti = pOldType->WhatAmI();
 
 	// Remove from limbo reloaders if no longer applicable
 	if (pOldType->Ammo > 0 && pOldTypeExt->ReloadInTransport && !this->TypeExtData->ReloadInTransport)
@@ -604,67 +596,65 @@ void TechnoExt::ApplyGainedSelfHeal(TechnoClass* pThis)
 
 	if (pThis->Health && healthDeficit > 0)
 	{
-		if (auto const pExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType()))
+		auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+		bool isBuilding = pThis->WhatAmI() == AbstractType::Building;
+		bool isOrganic = pThis->WhatAmI() == AbstractType::Infantry || pThis->WhatAmI() == AbstractType::Unit && pThis->GetTechnoType()->Organic;
+		auto defaultSelfHealType = isBuilding ? SelfHealGainType::NoHeal : isOrganic ? SelfHealGainType::Infantry : SelfHealGainType::Units;
+		auto selfHealType = pTypeExt->SelfHealGainType.Get(defaultSelfHealType);
+
+		if (selfHealType == SelfHealGainType::NoHeal)
+			return;
+
+		bool applyHeal = false;
+		int amount = 0;
+
+		if (selfHealType == SelfHealGainType::Infantry)
 		{
-			bool isBuilding = pThis->WhatAmI() == AbstractType::Building;
-			bool isOrganic = pThis->WhatAmI() == AbstractType::Infantry || pThis->WhatAmI() == AbstractType::Unit && pThis->GetTechnoType()->Organic;
-			auto defaultSelfHealType = isBuilding ? SelfHealGainType::None : isOrganic ? SelfHealGainType::Infantry : SelfHealGainType::Units;
-			auto selfHealType = pExt->SelfHealGainType.Get(defaultSelfHealType);
+			int count = RulesExt::Global()->InfantryGainSelfHealCap.isset() ?
+				std::min(std::max(RulesExt::Global()->InfantryGainSelfHealCap.Get(), 1), pThis->Owner->InfantrySelfHeal) :
+				pThis->Owner->InfantrySelfHeal;
 
-			if (selfHealType == SelfHealGainType::None)
-				return;
+			amount = RulesClass::Instance->SelfHealInfantryAmount * count;
 
-			bool applyHeal = false;
-			int amount = 0;
+			if (!(Unsorted::CurrentFrame % RulesClass::Instance->SelfHealInfantryFrames) && amount)
+				applyHeal = true;
+		}
+		else
+		{
+			int count = RulesExt::Global()->UnitsGainSelfHealCap.isset() ?
+				std::min(std::max(RulesExt::Global()->UnitsGainSelfHealCap.Get(), 1), pThis->Owner->UnitsSelfHeal) :
+				pThis->Owner->UnitsSelfHeal;
 
-			if (selfHealType == SelfHealGainType::Infantry)
+			amount = RulesClass::Instance->SelfHealUnitAmount * count;
+
+			if (!(Unsorted::CurrentFrame % RulesClass::Instance->SelfHealUnitFrames) && amount)
+				applyHeal = true;
+		}
+
+		if (applyHeal && amount)
+		{
+			if (amount >= healthDeficit)
+				amount = healthDeficit;
+
+			bool wasDamaged = pThis->GetHealthPercentage() <= RulesClass::Instance->ConditionYellow;
+
+			pThis->Health += amount;
+
+			if (wasDamaged && (pThis->GetHealthPercentage() > RulesClass::Instance->ConditionYellow
+				|| pThis->GetHeight() < -10))
 			{
-				int count = RulesExt::Global()->InfantryGainSelfHealCap.isset() ?
-					std::min(std::max(RulesExt::Global()->InfantryGainSelfHealCap.Get(), 1), pThis->Owner->InfantrySelfHeal) :
-					pThis->Owner->InfantrySelfHeal;
-
-				amount = RulesClass::Instance->SelfHealInfantryAmount * count;
-
-				if (!(Unsorted::CurrentFrame % RulesClass::Instance->SelfHealInfantryFrames) && amount)
-					applyHeal = true;
-			}
-			else
-			{
-				int count = RulesExt::Global()->UnitsGainSelfHealCap.isset() ?
-					std::min(std::max(RulesExt::Global()->UnitsGainSelfHealCap.Get(), 1), pThis->Owner->UnitsSelfHeal) :
-					pThis->Owner->UnitsSelfHeal;
-
-				amount = RulesClass::Instance->SelfHealUnitAmount * count;
-
-				if (!(Unsorted::CurrentFrame % RulesClass::Instance->SelfHealUnitFrames) && amount)
-					applyHeal = true;
-			}
-
-			if (applyHeal && amount)
-			{
-				if (amount >= healthDeficit)
-					amount = healthDeficit;
-
-				bool wasDamaged = pThis->GetHealthPercentage() <= RulesClass::Instance->ConditionYellow;
-
-				pThis->Health += amount;
-
-				if (wasDamaged && (pThis->GetHealthPercentage() > RulesClass::Instance->ConditionYellow
-					|| pThis->GetHeight() < -10))
+				if (auto const pBuilding = abstract_cast<BuildingClass*>(pThis))
 				{
-					if (auto const pBuilding = abstract_cast<BuildingClass*>(pThis))
-					{
-						pBuilding->Mark(MarkType::Change);
-						pBuilding->ToggleDamagedAnims(false);
-					}
+					pBuilding->Mark(MarkType::Change);
+					pBuilding->ToggleDamagedAnims(false);
+				}
 
-					if (pThis->WhatAmI() == AbstractType::Unit || pThis->WhatAmI() == AbstractType::Building)
-					{
-						auto dmgParticle = pThis->DamageParticleSystem;
+				if (pThis->WhatAmI() == AbstractType::Unit || pThis->WhatAmI() == AbstractType::Building)
+				{
+					auto dmgParticle = pThis->DamageParticleSystem;
 
-						if (dmgParticle)
-							dmgParticle->UnInit();
-					}
+					if (dmgParticle)
+						dmgParticle->UnInit();
 				}
 			}
 		}
@@ -686,7 +676,7 @@ void TechnoExt::ApplyMindControlRangeLimit(TechnoClass* pThis)
 	}
 }
 
-void TechnoExt::KillSelf(TechnoClass* pThis, AutoDeathBehavior deathOption, AnimTypeClass* pVanishAnimation, bool isInLimbo)
+void TechnoExt::KillSelf(TechnoClass* pThis, AutoDeathBehavior deathOption, std::vector<AnimTypeClass*> pVanishAnimation, bool isInLimbo)
 {
 	if (isInLimbo)
 	{
@@ -707,15 +697,7 @@ void TechnoExt::KillSelf(TechnoClass* pThis, AutoDeathBehavior deathOption, Anim
 
 	case AutoDeathBehavior::Vanish:
 	{
-		if (pVanishAnimation)
-		{
-			if (auto const pAnim = GameCreate<AnimClass>(pVanishAnimation, pThis->GetCoords()))
-			{
-				auto const pAnimExt = AnimExt::ExtMap.Find(pAnim);
-				pAnim->Owner = pThis->Owner;
-				pAnimExt->SetInvoker(pThis);
-			}
-		}
+		AnimExt::CreateRandomAnim(pVanishAnimation, pThis->GetCoords(), pThis, nullptr, true);
 
 		pThis->KillPassengers(pThis);
 		pThis->Stun();
@@ -840,7 +822,8 @@ void TechnoExt::ExtData::UpdateAttachEffects()
 			if (pType->HasTint())
 				markForRedraw = true;
 
-			this->UpdateCumulativeAttachEffects(attachEffect->GetType());
+			if (pType->Cumulative && pType->CumulativeAnimations.size() > 0)
+				this->UpdateCumulativeAttachEffects(attachEffect->GetType(), attachEffect);
 
 			if (pType->ExpireWeapon && (pType->ExpireWeapon_TriggerOn & ExpireWeaponCondition::Expire) != ExpireWeaponCondition::None)
 			{
@@ -953,31 +936,45 @@ void TechnoExt::ExtData::UpdateSelfOwnedAttachEffects()
 		pThis->MarkForRedraw();
 }
 
-// Updates state of AttachEffects of same cumulative type on techno, (which one is first active instance existing, if any), kills animations if needed.
-void TechnoExt::ExtData::UpdateCumulativeAttachEffects(AttachEffectTypeClass* pAttachEffectType)
+// Updates CumulativeAnimations AE's on techno.
+void TechnoExt::ExtData::UpdateCumulativeAttachEffects(AttachEffectTypeClass* pAttachEffectType, AttachEffectClass* pRemoved)
 {
-	if (!pAttachEffectType || !pAttachEffectType->Cumulative)
-		return;
-
-	bool foundFirst = false;
+	AttachEffectClass* pAELargestDuration = nullptr;
+	AttachEffectClass* pAEWithAnim = nullptr;
+	int duration = 0;
 
 	for (auto const& attachEffect : this->AttachedEffects)
 	{
-		if (attachEffect->GetType() != pAttachEffectType || !attachEffect->IsActive())
+		if (attachEffect->GetType() != pAttachEffectType)
 			continue;
 
-		if (!foundFirst)
+		if (attachEffect->HasCumulativeAnim)
 		{
-			foundFirst = true;
-			attachEffect->IsFirstCumulativeInstance = true;
+			pAEWithAnim = attachEffect.get();
 		}
-		else
+		else if (attachEffect->CanShowAnim())
 		{
-			attachEffect->IsFirstCumulativeInstance = false;
-		}
+			int currentDuration = attachEffect->GetRemainingDuration();
 
-		if (pAttachEffectType->CumulativeAnimations.size() > 0)
-			attachEffect->KillAnim();
+			if (currentDuration < 0 || currentDuration > duration)
+			{
+				pAELargestDuration = attachEffect.get();
+				duration = currentDuration;
+			}
+		}
+	}
+
+	if (pAEWithAnim)
+	{
+		pAEWithAnim->UpdateCumulativeAnim();
+
+		if (pRemoved == pAEWithAnim)
+		{
+			pAEWithAnim->HasCumulativeAnim = false;
+
+			if (pAELargestDuration)
+				pAELargestDuration->TransferCumulativeAnim(pAEWithAnim);
+		}
 	}
 }
 

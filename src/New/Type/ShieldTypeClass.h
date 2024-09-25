@@ -29,8 +29,8 @@ public:
 	Valueable<AttachedAnimFlag> IdleAnim_TemporalAction;
 	Damageable<AnimTypeClass*> IdleAnim;
 	Damageable<AnimTypeClass*> IdleAnimDamaged;
-	Valueable<AnimTypeClass*> BreakAnim;
-	Valueable<AnimTypeClass*> HitAnim;
+	ValueableVector<AnimTypeClass*> BreakAnim;
+	ValueableVector<AnimTypeClass*> HitAnim;
 	Valueable<bool> HitFlash;
 	Nullable<int> HitFlash_FixedSize;
 	Valueable<bool> HitFlash_Red;
@@ -102,11 +102,9 @@ public:
 		, Tint_VisibleToHouses { AffectedHouse::All }
 	{ };
 
-	virtual ~ShieldTypeClass() override = default;
-
-	virtual void LoadFromINI(CCINIClass* pINI) override;
-	virtual void LoadFromStream(PhobosStreamReader& Stm) override;
-	virtual void SaveToStream(PhobosStreamWriter& Stm) override;
+	void LoadFromINI(CCINIClass* pINI);
+	void LoadFromStream(PhobosStreamReader& Stm);
+	void SaveToStream(PhobosStreamWriter& Stm);
 
 	bool HasTint() const
 	{
