@@ -274,7 +274,7 @@ bool ConditionGroup::CheckTechnoConditions(TechnoClass* pTechno, const Condition
 	// Move
 	if (auto const pFoot = abstract_cast<FootClass*>(pTechno))
 	{
-		if (pFoot->Locomotor->Is_Moving())
+		if (pFoot->Locomotor->Is_Really_Moving_Now())
 		{
 			if (condition.IsMoving && condition.OnAnyCondition)
 				return true;
