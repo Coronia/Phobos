@@ -469,8 +469,10 @@ ConditionGroup::ConditionGroup()
 {
 }
 
-void ConditionGroup::ParseAEAttach(ConditionGroup& condition, CCINIClass* const pINI, INI_EX& exINI, const char* pSection)
+void ConditionGroup::ParseAEAttach(ConditionGroup& condition, CCINIClass* const pINI, const char* pSection)
 {
+	INI_EX exINI(pINI);
+
 	condition.AmmoExceed.Read(exINI, pSection, "AttachOn.AmmoExceed");
 	condition.AmmoBelow.Read(exINI, pSection, "AttachOn.AmmoBelow");
 	condition.OwnedByPlayer.Read(exINI, pSection, "AttachOn.OwnedByPlayer");
@@ -498,8 +500,10 @@ void ConditionGroup::ParseAEAttach(ConditionGroup& condition, CCINIClass* const 
 	condition.type = ConditionGroupType::AEAttach;
 }
 
-void ConditionGroup::ParseAEDiscard(ConditionGroup& condition, CCINIClass* const pINI, INI_EX& exINI, const char* pSection)
+void ConditionGroup::ParseAEDiscard(ConditionGroup& condition, CCINIClass* const pINI, const char* pSection)
 {
+	INI_EX exINI(pINI);
+
 	condition.AmmoExceed.Read(exINI, pSection, "DiscardOn.AmmoExceed");
 	condition.AmmoBelow.Read(exINI, pSection, "DiscardOn.AmmoBelow");
 	condition.OwnedByPlayer.Read(exINI, pSection, "DiscardOn.OwnedByPlayer");

@@ -160,10 +160,10 @@ void AttachEffectTypeClass::LoadFromINI(CCINIClass* pINI)
 	this->DiscardOn_UseExtendConditions.Read(exINI, pSection, "DiscardOn.UseExtendConditions");
 
 	if (this->AttachOn_UseExtendConditions)
-		ConditionGroup::ParseAEAttach(AttachOn_Condition, pINI, exINI, pSection);
+		ConditionGroup::ParseAEAttach(this->AttachOn_Condition, pINI, pSection);
 
 	if (this->DiscardOn_UseExtendConditions)
-		ConditionGroup::ParseAEDiscard(DiscardOn_Condition, pINI, exINI, pSection);
+		ConditionGroup::ParseAEDiscard(this->DiscardOn_Condition, pINI, pSection);
 }
 
 template <typename T>

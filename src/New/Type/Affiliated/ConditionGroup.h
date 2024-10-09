@@ -52,8 +52,8 @@ public:
 	static bool CheckTechnoConditions(TechnoClass* pTechno, const ConditionGroup condition);
 	static bool CheckTechnoConditionsWithTimer(TechnoClass* pTechno, const ConditionGroup condition, CDTimerClass& Timer);
 	static bool BatchCheckTechnoExist(HouseClass* pOwner, const ValueableVector<TechnoTypeClass*>& vTypes, AffectedHouse affectedHouse, bool any, bool allowLimbo);
-	static void ParseAEAttach(ConditionGroup& condition, CCINIClass* const pINI, INI_EX& exINI, const char* section);
-	static void ParseAEDiscard(ConditionGroup& condition, CCINIClass* const pINI, INI_EX& exINI, const char* section);
+	static void ParseAEAttach(ConditionGroup& condition, CCINIClass* const pINI, const char* section);
+	static void ParseAEDiscard(ConditionGroup& condition, CCINIClass* const pINI, const char* section);
 
 private:
 	template <typename T>
