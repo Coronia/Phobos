@@ -160,10 +160,20 @@ void AttachEffectTypeClass::LoadFromINI(CCINIClass* pINI)
 	this->DiscardOn_UseExtendConditions.Read(exINI, pSection, "DiscardOn.UseExtendConditions");
 
 	if (this->AttachOn_UseExtendConditions)
-		ConditionGroup::ParseAEAttach(AttachOn_Condition, pINI, exINI, pSection);
+		this->AttachOn_Condition = std::make_unique<ConditionGroup>();
+	else if (this->AttachOn_Condition)
+		this->AttachOn_Condition.reset();
+
+	if (this->AttachOn_Condition)
+		this->AttachOn_Condition->ParseAEAttach(pINI, pSection);
 
 	if (this->DiscardOn_UseExtendConditions)
-		ConditionGroup::ParseAEDiscard(DiscardOn_Condition, pINI, exINI, pSection);
+		this->DiscardOn_Condition = std::make_unique<ConditionGroup>();
+	else if (this->DiscardOn_Condition)
+		this->DiscardOn_Condition.reset();
+
+	if (this->DiscardOn_Condition)
+		this->DiscardOn_Condition->ParseAEDiscard(pINI, pSection);
 }
 
 template <typename T>

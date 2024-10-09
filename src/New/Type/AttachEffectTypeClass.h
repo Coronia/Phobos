@@ -78,8 +78,8 @@ public:
 
 	Valueable<bool> AttachOn_UseExtendConditions;
 	Valueable<bool> DiscardOn_UseExtendConditions;
-	ConditionGroup AttachOn_Condition;
-	ConditionGroup DiscardOn_Condition;
+	std::unique_ptr<ConditionGroup*> AttachOn_Condition;
+	std::unique_ptr<ConditionGroup*> DiscardOn_Condition;
 
 	AttachEffectTypeClass(const char* const pTitle) : Enumerable<AttachEffectTypeClass>(pTitle)
 		, Duration { 0 }

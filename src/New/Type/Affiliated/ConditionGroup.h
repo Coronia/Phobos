@@ -43,17 +43,17 @@ public:
 	Valueable<AffectedHouse> TechnosExist_Houses;
 	Valueable<bool> OnAnyCondition;
 
-	ConditionGroup();
+	ConditionGroup() = default;
 
 	bool Load(PhobosStreamReader& stm, bool registerForChange);
 	bool Save(PhobosStreamWriter& stm) const;
 
-	static bool CheckHouseConditions(HouseClass* pOwner, const ConditionGroup condition);
-	static bool CheckTechnoConditions(TechnoClass* pTechno, const ConditionGroup condition);
-	static bool CheckTechnoConditionsWithTimer(TechnoClass* pTechno, const ConditionGroup condition, CDTimerClass& Timer);
-	static bool BatchCheckTechnoExist(HouseClass* pOwner, const ValueableVector<TechnoTypeClass*>& vTypes, AffectedHouse affectedHouse, bool any, bool allowLimbo);
-	static void ParseAEAttach(ConditionGroup& condition, CCINIClass* const pINI, INI_EX& exINI, const char* section);
-	static void ParseAEDiscard(ConditionGroup& condition, CCINIClass* const pINI, INI_EX& exINI, const char* section);
+	bool CheckHouseConditions(HouseClass* pOwner);
+	bool CheckTechnoConditions(TechnoClass* pTechno);
+	bool CheckTechnoConditionsWithTimer(TechnoClass* pTechno, CDTimerClass& Timer);
+	bool BatchCheckTechnoExist(HouseClass* pOwner, const ValueableVector<TechnoTypeClass*>& vTypes, AffectedHouse affectedHouse, bool any, bool allowLimbo) const;
+	void ParseAEAttach(CCINIClass* const pINI, const char* section);
+	void ParseAEDiscard(CCINIClass* const pINI, const char* section);
 
 private:
 	template <typename T>

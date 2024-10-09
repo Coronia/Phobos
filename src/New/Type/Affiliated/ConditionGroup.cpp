@@ -2,48 +2,48 @@
 #include <Ext/House/Body.h>
 #include <Utilities/EnumFunctions.h>
 
-bool ConditionGroup::CheckHouseConditions(HouseClass* pOwner, const ConditionGroup condition)
+bool ConditionGroup::CheckHouseConditions(HouseClass* pOwner)
 {
 	// Owning house
 	if (pOwner->IsControlledByHuman())
 	{
-		if (condition.OwnedByPlayer && condition.OnAnyCondition)
+		if (this->OwnedByPlayer && this->OnAnyCondition)
 			return true;
 
-		if (condition.OwnedByAI && !condition.OnAnyCondition)
+		if (this->OwnedByAI && !this->OnAnyCondition)
 			return false;
 	}
 	else
 	{
-		if (condition.OwnedByPlayer && !condition.OnAnyCondition)
+		if (this->OwnedByPlayer && !this->OnAnyCondition)
 			return false;
 
-		if (condition.OwnedByAI && condition.OnAnyCondition)
+		if (this->OwnedByAI && this->OnAnyCondition)
 			return true;
 	}
 
 	// Money
-	if (condition.MoneyExceed >= 0)
+	if (this->MoneyExceed >= 0)
 	{
-		if (pOwner->Available_Money() >= condition.MoneyExceed)
+		if (pOwner->Available_Money() >= this->MoneyExceed)
 		{
-			if (condition.OnAnyCondition)
+			if (this->OnAnyCondition)
 				return true;
 		}
-		else if (!condition.OnAnyCondition)
+		else if (!this->OnAnyCondition)
 		{
 			return false;
 		}
 	}
 
-	if (condition.MoneyBelow >= 0)
+	if (this->MoneyBelow >= 0)
 	{
-		if (pOwner->Available_Money() <= condition.MoneyBelow)
+		if (pOwner->Available_Money() <= this->MoneyBelow)
 		{
-			if (condition.OnAnyCondition)
+			if (this->OnAnyCondition)
 				return true;
 		}
-		else if (!condition.OnAnyCondition)
+		else if (!this->OnAnyCondition)
 		{
 			return false;
 		}
@@ -52,97 +52,97 @@ bool ConditionGroup::CheckHouseConditions(HouseClass* pOwner, const ConditionGro
 	// Power
 	if (pOwner->HasLowPower())
 	{
-		if (condition.LowPower && condition.OnAnyCondition)
+		if (this->LowPower && this->OnAnyCondition)
 			return true;
 
-		if (condition.FullPower && !condition.OnAnyCondition)
+		if (this->FullPower && !this->OnAnyCondition)
 			return false;
 	}
 	else if (pOwner->HasFullPower())
 	{
-		if (condition.LowPower && !condition.OnAnyCondition)
+		if (this->LowPower && !this->OnAnyCondition)
 			return false;
 
-		if (condition.FullPower && condition.OnAnyCondition)
+		if (this->FullPower && this->OnAnyCondition)
 			return true;
 	}
 
 	// TechLevel
-	if (condition.TechLevel > 0)
+	if (this->TechLevel > 0)
 	{
-		if (pOwner->TechLevel >= condition.TechLevel)
+		if (pOwner->TechLevel >= this->TechLevel)
 		{
-			if (condition.OnAnyCondition)
+			if (this->OnAnyCondition)
 				return true;
 		}
-		else if (!condition.OnAnyCondition)
+		else if (!this->OnAnyCondition)
 		{
 			return false;
 		}
 	}
 
 	// RequiredHouses & ForbiddenHouses
-	if (condition.type == ConditionGroupType::SW || condition.type == ConditionGroupType::AEAttach || condition.type == ConditionGroupType::AEDiscard)
+	if (this->type == ConditionGroupType::SW || this->type == ConditionGroupType::AEAttach || this->type == ConditionGroupType::AEDiscard)
 	{
 		const auto OwnerBits = 1u << pOwner->Type->ArrayIndex;
 
-		if (condition.RequiredHouses & OwnerBits)
+		if (this->RequiredHouses & OwnerBits)
 		{
-			if (condition.OnAnyCondition)
+			if (this->OnAnyCondition)
 				return true;
 		}
-		else if (!condition.OnAnyCondition)
+		else if (!this->OnAnyCondition)
 		{
 			return false;
 		}
 
-		if (!(condition.ForbiddenHouses & OwnerBits))
+		if (!(this->ForbiddenHouses & OwnerBits))
 		{
-			if (condition.OnAnyCondition)
+			if (this->OnAnyCondition)
 				return true;
 		}
-		else if (!condition.OnAnyCondition)
+		else if (!this->OnAnyCondition)
 		{
 			return false;
 		}
 	}
 
 	// Listed technos don't exist
-	if (!condition.TechnosDontExist.empty())
+	if (!this->TechnosDontExist.empty())
 	{
-		if (!ConditionGroup::BatchCheckTechnoExist(pOwner, condition.TechnosDontExist, condition.TechnosDontExist_Houses, !condition.TechnosDontExist_Any, condition.TechnosDontExist_AllowLimboed))
+		if (!ConditionGroup::BatchCheckTechnoExist(pOwner, this->TechnosDontExist, this->TechnosDontExist_Houses, !this->TechnosDontExist_Any, this->TechnosDontExist_AllowLimboed))
 		{
-			if (condition.OnAnyCondition)
+			if (this->OnAnyCondition)
 				return true;
 		}
-		else if (!condition.OnAnyCondition)
+		else if (!this->OnAnyCondition)
 		{
 			return false;
 		}
 	}
 
 	// Listed technos exist
-	if (!condition.TechnosExist.empty())
+	if (!this->TechnosExist.empty())
 	{
-		if (ConditionGroup::BatchCheckTechnoExist(pOwner, condition.TechnosExist, condition.TechnosExist_Houses, condition.TechnosExist_Any, condition.TechnosDontExist_AllowLimboed))
+		if (ConditionGroup::BatchCheckTechnoExist(pOwner, this->TechnosExist, this->TechnosExist_Houses, this->TechnosExist_Any, this->TechnosDontExist_AllowLimboed))
 		{
-			if (condition.OnAnyCondition)
+			if (this->OnAnyCondition)
 				return true;
 		}
-		else if (!condition.OnAnyCondition)
+		else if (!this->OnAnyCondition)
 		{
 			return false;
 		}
 	}
 
 	// if OnAnyCondition set to false, then all conditions have met in this step
-	if (!condition.OnAnyCondition)
+	if (!this->OnAnyCondition)
 		return true;
 
 	return false;
 }
 
-bool ConditionGroup::CheckTechnoConditions(TechnoClass* pTechno, const ConditionGroup condition)
+bool ConditionGroup::CheckTechnoConditions(TechnoClass* pTechno)
 {
 	auto const pType = pTechno->GetTechnoType();
 	auto const pOwner = pTechno->Owner;
@@ -150,19 +150,19 @@ bool ConditionGroup::CheckTechnoConditions(TechnoClass* pTechno, const Condition
 	// Process house conditions
 	if (pOwner)
 	{
-		if (ConditionGroup::CheckHouseConditions(pOwner, condition))
+		if (this->CheckHouseConditions(pOwner))
 		{
-			if (condition.OnAnyCondition)
+			if (this->OnAnyCondition)
 				return true;
 		}
-		else if (!condition.OnAnyCondition)
+		else if (!this->OnAnyCondition)
 		{
 			return false;
 		}
 	}
 
 	// Powered
-	if (condition.PowerOn || condition.PowerOff)
+	if (this->PowerOn || this->PowerOff)
 	{
 		bool isActive = !(pTechno->Deactivated || pTechno->IsUnderEMP());
 
@@ -174,98 +174,98 @@ bool ConditionGroup::CheckTechnoConditions(TechnoClass* pTechno, const Condition
 
 		if (isActive)
 		{
-			if (condition.PowerOn && condition.OnAnyCondition)
+			if (this->PowerOn && this->OnAnyCondition)
 				return true;
 
-			if (condition.PowerOff && !condition.OnAnyCondition)
+			if (this->PowerOff && !this->OnAnyCondition)
 				return false;
 		}
 		else
 		{
-			if (condition.PowerOn && !condition.OnAnyCondition)
+			if (this->PowerOn && !this->OnAnyCondition)
 				return false;
 
-			if (condition.PowerOff && condition.OnAnyCondition)
+			if (this->PowerOff && this->OnAnyCondition)
 				return true;
 		}
 	}
 
 	// Health
-	if (condition.AbovePercent.isset())
+	if (this->AbovePercent.isset())
 	{
-		if (pTechno->GetHealthPercentage() >= condition.AbovePercent.Get())
+		if (pTechno->GetHealthPercentage() >= this->AbovePercent.Get())
 		{
-			if (condition.OnAnyCondition)
+			if (this->OnAnyCondition)
 				return true;
 		}
-		else if (!condition.OnAnyCondition)
+		else if (!this->OnAnyCondition)
 		{
 			return false;
 		}
 	}
 
-	if (condition.BelowPercent.isset())
+	if (this->BelowPercent.isset())
 	{
-		if (pTechno->GetHealthPercentage() <= condition.BelowPercent.Get())
+		if (pTechno->GetHealthPercentage() <= this->BelowPercent.Get())
 		{
-			if (condition.OnAnyCondition)
+			if (this->OnAnyCondition)
 				return true;
 		}
-		else if (!condition.OnAnyCondition)
+		else if (!this->OnAnyCondition)
 		{
 			return false;
 		}
 	}
 
 	// Ammo
-	if (condition.AmmoExceed >= 0)
+	if (this->AmmoExceed >= 0)
 	{
-		if (pType->Ammo > 0 && pTechno->Ammo >= condition.AmmoExceed)
+		if (pType->Ammo > 0 && pTechno->Ammo >= this->AmmoExceed)
 		{
-			if (condition.OnAnyCondition)
+			if (this->OnAnyCondition)
 				return true;
 		}
-		else if (!condition.OnAnyCondition)
+		else if (!this->OnAnyCondition)
 		{
 			return false;
 		}
 	}
 
-	if (condition.AmmoBelow >= 0)
+	if (this->AmmoBelow >= 0)
 	{
-		if (pType->Ammo > 0 && pTechno->Ammo <= condition.AmmoBelow)
+		if (pType->Ammo > 0 && pTechno->Ammo <= this->AmmoBelow)
 		{
-			if (condition.OnAnyCondition)
+			if (this->OnAnyCondition)
 				return true;
 		}
-		else if (!condition.OnAnyCondition)
+		else if (!this->OnAnyCondition)
 		{
 			return false;
 		}
 	}
 
 	// Passengers
-	if (condition.PassengersExceed >= 0)
+	if (this->PassengersExceed >= 0)
 	{
-		if (pType->Passengers > 0 && pTechno->Passengers.NumPassengers >= condition.PassengersExceed)
+		if (pType->Passengers > 0 && pTechno->Passengers.NumPassengers >= this->PassengersExceed)
 		{
-			if (condition.OnAnyCondition)
+			if (this->OnAnyCondition)
 				return true;
 		}
-		else if (!condition.OnAnyCondition)
+		else if (!this->OnAnyCondition)
 		{
 			return false;
 		}
 	}
 
-	if (condition.PassengersBelow >= 0)
+	if (this->PassengersBelow >= 0)
 	{
-		if (pType->Passengers > 0 && pTechno->Passengers.NumPassengers <= condition.PassengersBelow)
+		if (pType->Passengers > 0 && pTechno->Passengers.NumPassengers <= this->PassengersBelow)
 		{
-			if (condition.OnAnyCondition)
+			if (this->OnAnyCondition)
 				return true;
 		}
-		else if (!condition.OnAnyCondition)
+		else if (!this->OnAnyCondition)
 		{
 			return false;
 		}
@@ -276,45 +276,45 @@ bool ConditionGroup::CheckTechnoConditions(TechnoClass* pTechno, const Condition
 	{
 		if (pFoot->Locomotor->Is_Really_Moving_Now())
 		{
-			if (condition.IsMoving && condition.OnAnyCondition)
+			if (this->IsMoving && this->OnAnyCondition)
 				return true;
 
-			if (condition.IsStationary && !condition.OnAnyCondition)
+			if (this->IsStationary && !this->OnAnyCondition)
 				return false;
 		}
 		else
 		{
-			if (condition.IsMoving && condition.OnAnyCondition)
+			if (this->IsMoving && this->OnAnyCondition)
 				return false;
 
-			if (condition.IsStationary && !condition.OnAnyCondition)
+			if (this->IsStationary && !this->OnAnyCondition)
 				return true;
 		}
 	}
 
 	// Cloak
-	if (condition.IsCloaked)
+	if (this->IsCloaked)
 	{
 		if (pTechno->CloakState == CloakState::Cloaked)
 		{
-			if (condition.OnAnyCondition)
+			if (this->OnAnyCondition)
 				return true;
 		}
-		else if (!condition.OnAnyCondition)
+		else if (!this->OnAnyCondition)
 		{
 			return false;
 		}
 	}
 
 	// Drain
-	if (condition.IsDrained)
+	if (this->IsDrained)
 	{
 		if (pTechno->DrainingMe)
 		{
-			if (condition.OnAnyCondition)
+			if (this->OnAnyCondition)
 				return true;
 		}
-		else if (!condition.OnAnyCondition)
+		else if (!this->OnAnyCondition)
 		{
 			return false;
 		}
@@ -327,50 +327,50 @@ bool ConditionGroup::CheckTechnoConditions(TechnoClass* pTechno, const Condition
 	{
 		if (pShieldData->IsActive())
 		{
-			if (condition.ShieldActive && condition.OnAnyCondition)
+			if (this->ShieldActive && this->OnAnyCondition)
 				return true;
 
-			if (condition.ShieldInactive && !condition.OnAnyCondition)
+			if (this->ShieldInactive && !this->OnAnyCondition)
 				return false;
 
-			if (condition.ShieldAbovePercent.isset() && pShieldData->GetHealthRatio() >= condition.ShieldAbovePercent)
+			if (this->ShieldAbovePercent.isset() && pShieldData->GetHealthRatio() >= this->ShieldAbovePercent)
 			{
-				if (condition.OnAnyCondition)
+				if (this->OnAnyCondition)
 					return true;
 			}
-			else if (!condition.OnAnyCondition)
+			else if (!this->OnAnyCondition)
 			{
 				return false;
 			}
 
-			if (condition.ShieldBelowPercent.isset() && pShieldData->GetHealthRatio() <= condition.ShieldBelowPercent)
+			if (this->ShieldBelowPercent.isset() && pShieldData->GetHealthRatio() <= this->ShieldBelowPercent)
 			{
-				if (condition.OnAnyCondition)
+				if (this->OnAnyCondition)
 					return true;
 			}
-			else if (!condition.OnAnyCondition)
+			else if (!this->OnAnyCondition)
 			{
 				return false;
 			}
 		}
 		else
 		{
-			if (condition.ShieldActive && condition.OnAnyCondition)
+			if (this->ShieldActive && this->OnAnyCondition)
 				return false;
 
-			if (condition.ShieldInactive && !condition.OnAnyCondition)
+			if (this->ShieldInactive && !this->OnAnyCondition)
 				return true;
 		}
 	}
 
 	// if OnAnyCondition set to false, then all conditions have met in this step
-	if (!condition.OnAnyCondition)
+	if (!this->OnAnyCondition)
 		return true;
 
 	return false;
 }
 
-bool ConditionGroup::BatchCheckTechnoExist(HouseClass* pOwner, const ValueableVector<TechnoTypeClass*>& vTypes, AffectedHouse affectedHouse, bool any, bool allowLimbo)
+bool ConditionGroup::BatchCheckTechnoExist(HouseClass* pOwner, const ValueableVector<TechnoTypeClass*>& vTypes, AffectedHouse affectedHouse, bool any, bool allowLimbo) const
 {
 	auto existSingleType = [pOwner, affectedHouse, allowLimbo](TechnoTypeClass* pType)
 		{
@@ -389,42 +389,42 @@ bool ConditionGroup::BatchCheckTechnoExist(HouseClass* pOwner, const ValueableVe
 		: std::all_of(vTypes.begin(), vTypes.end(), existSingleType);
 }
 
-bool ConditionGroup::CheckTechnoConditionsWithTimer(TechnoClass* pTechno, const ConditionGroup condition, CDTimerClass& Timer)
+bool ConditionGroup::CheckTechnoConditionsWithTimer(TechnoClass* pTechno, CDTimerClass& Timer)
 {
 	// Process techno conditions
-	if (ConditionGroup::CheckTechnoConditions(pTechno, condition))
+	if (this->CheckTechnoConditions(pTechno))
 	{
-		if (condition.OnAnyCondition)
+		if (this->OnAnyCondition)
 			return true;
 	}
-	else if (!condition.OnAnyCondition)
+	else if (!this->OnAnyCondition)
 	{
 		return false;
 	}
 
 	// Countdown ends
-	if (condition.AfterDelay > 0)
+	if (this->AfterDelay > 0)
 	{
 		if (!Timer.HasStarted())
 		{
-			Timer.Start(condition.AfterDelay);
+			Timer.Start(this->AfterDelay);
 
-			if (!condition.OnAnyCondition)
+			if (!this->OnAnyCondition)
 				return false;
 		}
 		else if (Timer.Completed())
 		{
-			if (condition.OnAnyCondition)
+			if (this->OnAnyCondition)
 				return true;
 		}
-		else if (!condition.OnAnyCondition)
+		else if (!this->OnAnyCondition)
 		{
 			return false;
 		}
 	}
 
 	// if OnAnyCondition set to false, then all conditions have met in this step
-	if (!condition.OnAnyCondition)
+	if (!this->OnAnyCondition)
 		return true;
 
 	return false;
@@ -469,60 +469,64 @@ ConditionGroup::ConditionGroup()
 {
 }
 
-void ConditionGroup::ParseAEAttach(ConditionGroup& condition, CCINIClass* const pINI, INI_EX& exINI, const char* pSection)
+void ConditionGroup::ParseAEAttach(CCINIClass* const pINI, const char* pSection)
 {
-	condition.AmmoExceed.Read(exINI, pSection, "AttachOn.AmmoExceed");
-	condition.AmmoBelow.Read(exINI, pSection, "AttachOn.AmmoBelow");
-	condition.OwnedByPlayer.Read(exINI, pSection, "AttachOn.OwnedByPlayer");
-	condition.OwnedByAI.Read(exINI, pSection, "AttachOn.OwnedByAI");
-	condition.LowPower.Read(exINI, pSection, "AttachOn.LowPower");
-	condition.FullPower.Read(exINI, pSection, "AttachOn.FullPower");
-	condition.RequiredHouses = pINI->ReadHouseTypesList(pSection, "AttachOn.RequiredHouses", condition.RequiredHouses);
-	condition.ForbiddenHouses = pINI->ReadHouseTypesList(pSection, "AttachOn.ForbiddenHouses", condition.ForbiddenHouses);
-	condition.AbovePercent.Read(exINI, pSection, "AttachOn.AbovePercent");
-	condition.BelowPercent.Read(exINI, pSection, "AttachOn.BelowPercent");
-	condition.PassengersExceed.Read(exINI, pSection, "AttachOn.PassengersExceed");
-	condition.PassengersBelow.Read(exINI, pSection, "AttachOn.PassengersBelow");
-	condition.TechnosDontExist.Read(exINI, pSection, "AttachOn.TechnosDontExist");
-	condition.TechnosDontExist_Any.Read(exINI, pSection, "AttachOn.TechnosDontExist.Any");
-	condition.TechnosDontExist_AllowLimboed.Read(exINI, pSection, "AttachOn.TechnosDontExist.AllowLimboed");
-	condition.TechnosDontExist_Houses.Read(exINI, pSection, "AttachOn.TechnosDontExist.Houses");
-	condition.TechnosExist.Read(exINI, pSection, "AttachOn.TechnosExist");
-	condition.TechnosDontExist_Any.Read(exINI, pSection, "AttachOn.TechnosDontExist.Any");
-	condition.TechnosExist_AllowLimboed.Read(exINI, pSection, "AttachOn.TechnosExist.AllowLimboed");
-	condition.TechnosExist_Houses.Read(exINI, pSection, "AttachOn.TechnosExist.Houses");
+	INI_EX exINI(pINI);
 
-	condition.OnAnyCondition = false;
+	this->AmmoExceed.Read(exINI, pSection, "AttachOn.AmmoExceed");
+	this->AmmoBelow.Read(exINI, pSection, "AttachOn.AmmoBelow");
+	this->OwnedByPlayer.Read(exINI, pSection, "AttachOn.OwnedByPlayer");
+	this->OwnedByAI.Read(exINI, pSection, "AttachOn.OwnedByAI");
+	this->LowPower.Read(exINI, pSection, "AttachOn.LowPower");
+	this->FullPower.Read(exINI, pSection, "AttachOn.FullPower");
+	this->RequiredHouses = pINI->ReadHouseTypesList(pSection, "AttachOn.RequiredHouses", this->RequiredHouses);
+	this->ForbiddenHouses = pINI->ReadHouseTypesList(pSection, "AttachOn.ForbiddenHouses", this->ForbiddenHouses);
+	this->AbovePercent.Read(exINI, pSection, "AttachOn.AbovePercent");
+	this->BelowPercent.Read(exINI, pSection, "AttachOn.BelowPercent");
+	this->PassengersExceed.Read(exINI, pSection, "AttachOn.PassengersExceed");
+	this->PassengersBelow.Read(exINI, pSection, "AttachOn.PassengersBelow");
+	this->TechnosDontExist.Read(exINI, pSection, "AttachOn.TechnosDontExist");
+	this->TechnosDontExist_Any.Read(exINI, pSection, "AttachOn.TechnosDontExist.Any");
+	this->TechnosDontExist_AllowLimboed.Read(exINI, pSection, "AttachOn.TechnosDontExist.AllowLimboed");
+	this->TechnosDontExist_Houses.Read(exINI, pSection, "AttachOn.TechnosDontExist.Houses");
+	this->TechnosExist.Read(exINI, pSection, "AttachOn.TechnosExist");
+	this->TechnosDontExist_Any.Read(exINI, pSection, "AttachOn.TechnosDontExist.Any");
+	this->TechnosExist_AllowLimboed.Read(exINI, pSection, "AttachOn.TechnosExist.AllowLimboed");
+	this->TechnosExist_Houses.Read(exINI, pSection, "AttachOn.TechnosExist.Houses");
+
+	this->OnAnyCondition = false;
 
 	// Type of this condition group must be set
-	condition.type = ConditionGroupType::AEAttach;
+	this->type = ConditionGroupType::AEAttach;
 }
 
-void ConditionGroup::ParseAEDiscard(ConditionGroup& condition, CCINIClass* const pINI, INI_EX& exINI, const char* pSection)
+void ConditionGroup::ParseAEDiscard(CCINIClass* const pINI, const char* pSection)
 {
-	condition.AmmoExceed.Read(exINI, pSection, "DiscardOn.AmmoExceed");
-	condition.AmmoBelow.Read(exINI, pSection, "DiscardOn.AmmoBelow");
-	condition.OwnedByPlayer.Read(exINI, pSection, "DiscardOn.OwnedByPlayer");
-	condition.OwnedByAI.Read(exINI, pSection, "DiscardOn.OwnedByAI");
-	condition.LowPower.Read(exINI, pSection, "DiscardOn.LowPower");
-	condition.FullPower.Read(exINI, pSection, "DiscardOn.FullPower");
-	condition.RequiredHouses = pINI->ReadHouseTypesList(pSection, "DiscardOn.RequiredHouses", condition.RequiredHouses);
-	condition.ForbiddenHouses = pINI->ReadHouseTypesList(pSection, "DiscardOn.ForbiddenHouses", condition.ForbiddenHouses);
-	condition.AbovePercent.Read(exINI, pSection, "DiscardOn.AbovePercent");
-	condition.BelowPercent.Read(exINI, pSection, "DiscardOn.BelowPercent");
-	condition.PassengersExceed.Read(exINI, pSection, "DiscardOn.PassengersExceed");
-	condition.PassengersBelow.Read(exINI, pSection, "DiscardOn.PassengersBelow");
-	condition.TechnosDontExist.Read(exINI, pSection, "DiscardOn.TechnosDontExist");
-	condition.TechnosDontExist_Any.Read(exINI, pSection, "DiscardOn.TechnosDontExist.Any");
-	condition.TechnosDontExist_AllowLimboed.Read(exINI, pSection, "DiscardOn.TechnosDontExist.AllowLimboed");
-	condition.TechnosDontExist_Houses.Read(exINI, pSection, "DiscardOn.TechnosDontExist.Houses");
-	condition.TechnosExist.Read(exINI, pSection, "DiscardOn.TechnosExist");
-	condition.TechnosDontExist_Any.Read(exINI, pSection, "DiscardOn.TechnosDontExist.Any");
-	condition.TechnosExist_AllowLimboed.Read(exINI, pSection, "DiscardOn.TechnosExist.AllowLimboed");
-	condition.TechnosExist_Houses.Read(exINI, pSection, "DiscardOn.TechnosExist.Houses");
+	INI_EX exINI(pINI);
+
+	this->AmmoExceed.Read(exINI, pSection, "DiscardOn.AmmoExceed");
+	this->AmmoBelow.Read(exINI, pSection, "DiscardOn.AmmoBelow");
+	this->OwnedByPlayer.Read(exINI, pSection, "DiscardOn.OwnedByPlayer");
+	this->OwnedByAI.Read(exINI, pSection, "DiscardOn.OwnedByAI");
+	this->LowPower.Read(exINI, pSection, "DiscardOn.LowPower");
+	this->FullPower.Read(exINI, pSection, "DiscardOn.FullPower");
+	this->RequiredHouses = pINI->ReadHouseTypesList(pSection, "DiscardOn.RequiredHouses", this->RequiredHouses);
+	this->ForbiddenHouses = pINI->ReadHouseTypesList(pSection, "DiscardOn.ForbiddenHouses", this->ForbiddenHouses);
+	this->AbovePercent.Read(exINI, pSection, "DiscardOn.AbovePercent");
+	this->BelowPercent.Read(exINI, pSection, "DiscardOn.BelowPercent");
+	this->PassengersExceed.Read(exINI, pSection, "DiscardOn.PassengersExceed");
+	this->PassengersBelow.Read(exINI, pSection, "DiscardOn.PassengersBelow");
+	this->TechnosDontExist.Read(exINI, pSection, "DiscardOn.TechnosDontExist");
+	this->TechnosDontExist_Any.Read(exINI, pSection, "DiscardOn.TechnosDontExist.Any");
+	this->TechnosDontExist_AllowLimboed.Read(exINI, pSection, "DiscardOn.TechnosDontExist.AllowLimboed");
+	this->TechnosDontExist_Houses.Read(exINI, pSection, "DiscardOn.TechnosDontExist.Houses");
+	this->TechnosExist.Read(exINI, pSection, "DiscardOn.TechnosExist");
+	this->TechnosDontExist_Any.Read(exINI, pSection, "DiscardOn.TechnosDontExist.Any");
+	this->TechnosExist_AllowLimboed.Read(exINI, pSection, "DiscardOn.TechnosExist.AllowLimboed");
+	this->TechnosExist_Houses.Read(exINI, pSection, "DiscardOn.TechnosExist.Houses");
 
 	// Type of this condition group must be set
-	condition.type = ConditionGroupType::AEDiscard;
+	this->type = ConditionGroupType::AEDiscard;
 }
 
 #pragma region(save/load)

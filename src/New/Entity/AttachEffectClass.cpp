@@ -416,8 +416,13 @@ bool AttachEffectClass::AllowedToBeActive() const
 
 	auto const pTechno = this->Techno;
 
-	if (this->Type->DiscardOn_UseExtendConditions && ConditionGroup::CheckTechnoConditions(pTechno, this->Type->DiscardOn_Condition))
-		return false;
+	if (this->Type->DiscardOn_UseExtendConditions && this->Type->DiscardOn_Condition)
+	{
+		auto const pCondition = this->Type->DiscardOn_Condition.get();
+
+		if (pCondition->CheckTechnoConditions(pTechno))
+			return false;
+	}
 
 	if (auto const pFoot = abstract_cast<FootClass*>(pTechno))
 	{
@@ -619,8 +624,13 @@ AttachEffectClass* AttachEffectClass::CreateAndAttach(AttachEffectTypeClass* pTy
 			return nullptr;
 	}
 
-	if (pType->AttachOn_UseExtendConditions && !ConditionGroup::CheckTechnoConditions(pTarget, pType->AttachOn_Condition))
-		return nullptr;
+	if (this->Type->AttachOn_UseExtendConditions && pType->AttachOn_Condition)
+	{
+		auto const pCondition = pType->AttachOn_Condition.get();
+
+		if (!pCondition->CheckTechnoConditions(pTarget))
+			return nullptr;
+	}
 
 	int currentTypeCount = 0;
 	AttachEffectClass* match = nullptr;
