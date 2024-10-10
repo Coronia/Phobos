@@ -221,7 +221,8 @@ int ShieldClass::ReceiveDamage(args_ReceiveDamage* args)
 			}
 		}
 
-		this->ResponseAttack();
+		if (!pWHExt->Nonprovocative)
+			this->ResponseAttack();
 
 		if (pWHExt->DecloakDamagedTargets)
 			this->Techno->Uncloak(false);
@@ -436,7 +437,7 @@ void ShieldClass::AI()
 		if (GeneralUtils::HasHealthRatioThresholdChanged(LastTechnoHealthRatio, ratio))
 			UpdateIdleAnim();
 
-		if (!this->Cloak && !this->Temporal && this->Online && (this->HP > 0 && this->Techno->Health > 0))
+		if (!this->Temporal && this->Online && (this->HP > 0 && this->Techno->Health > 0))
 			this->CreateAnim();
 	}
 
@@ -456,7 +457,7 @@ void ShieldClass::CloakCheck()
 	const auto cloakState = this->Techno->CloakState;
 	this->Cloak = cloakState == CloakState::Cloaked || cloakState == CloakState::Cloaking;
 
-	if (this->Cloak)
+	if (this->Cloak && this->IdleAnim && AnimTypeExt::ExtMap.Find(this->IdleAnim->Type)->DetachOnCloak)
 		this->KillAnim();
 }
 
@@ -771,6 +772,9 @@ void ShieldClass::CreateAnim()
 {
 	auto idleAnimType = this->GetIdleAnimType();
 
+	if (this->Cloak && (!idleAnimType || AnimTypeExt::ExtMap.Find(idleAnimType)->DetachOnCloak))
+		return;
+
 	if (!this->IdleAnim && idleAnimType)
 	{
 		if (auto const pAnim = GameCreate<AnimClass>(idleAnimType, this->Techno->Location))
@@ -974,10 +978,18 @@ ShieldTypeClass* ShieldClass::GetType() const
 
 ArmorType ShieldClass::GetArmorType() const
 {
-	if (this->Techno && this->Type->InheritArmorFromTechno)
-		return this->Techno->GetTechnoType()->Armor;
+	const auto pShieldType = this->Type;
 
-	return this->Type->Armor.Get();
+	if (this->Techno && pShieldType->InheritArmorFromTechno)
+	{
+		const auto pTechnoType = this->Techno->GetTechnoType();
+
+		if (pShieldType->InheritArmor_Allowed.empty() || pShieldType->InheritArmor_Allowed.Contains(pTechnoType)
+			&& (pShieldType->InheritArmor_Disallowed.empty() || !pShieldType->InheritArmor_Disallowed.Contains(pTechnoType)))
+			return pTechnoType->Armor;
+	}
+
+	return pShieldType->Armor.Get();
 }
 
 int ShieldClass::GetFramesSinceLastBroken() const
