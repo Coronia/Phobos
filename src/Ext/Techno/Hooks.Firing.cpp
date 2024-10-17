@@ -102,6 +102,42 @@ DEFINE_HOOK(0x6F3428, TechnoClass_WhatWeaponShouldIUse_ForceWeapon, 0x6)
 		{
 			forceWeaponIndex = pTypeExt->ForceWeapon_Disguised;
 		}
+		else if (!pTypeExt->ForceWeapon_InRange.empty())
+		{
+			for (size_t i = 0; i < pTypeExt->ForceWeapon_InRange.size(); i++)
+			{
+				int distance = 0;
+
+				// Value below 0 means Range won't be overriden
+				if (i < pTypeExt->ForceWeapon_InRange_Overrides.size() && pTypeExt->ForceWeapon_InRange_Overrides[i] > 0)
+					distance = static_cast<int>(pTypeExt->ForceWeapon_InRange_Overrides[i] * 256.0);
+
+				if (pTypeExt->ForceWeapon_InRange[i] >= 0)
+				{
+					auto const pWeapon = pThis->GetWeapon(pTypeExt->ForceWeapon_InRange[i])->WeaponType;
+					distance = distance > 0 ? distance : pWeapon->Range;
+
+					if (pTypeExt->ForceWeapon_InRange_ApplyRangeModifiers)
+						distance = WeaponTypeExt::GetRangeWithModifiers(pWeapon, pThis, distance);
+
+					if (pThis->DistanceFrom(pTarget) <= distance)
+					{
+						forceWeaponIndex = pTypeExt->ForceWeapon_InRange[i];
+						break;
+					}
+				}
+				else
+				{
+					// Apply range modifiers regardless of weapon
+					if (pTypeExt->ForceWeapon_InRange_ApplyRangeModifiers)
+						distance = WeaponTypeExt::GetRangeWithModifiers(nullptr, pThis, distance);
+
+					// Don't force weapon if range satisfied
+					if (pThis->DistanceFrom(pTarget) <= distance)
+						break;
+				}
+			}
+		}
 
 		if (forceWeaponIndex >= 0)
 		{
@@ -410,6 +446,25 @@ DEFINE_HOOK(0x6FCBE6, TechnoClass_CanFire_BridgeAAFix, 0x6)
 #pragma endregion
 
 #pragma region TechnoClass_Fire
+
+DEFINE_HOOK(0x6FDDC0, TechnoClass_FireAt_DiscardAEOnFire, 0x6)
+{
+	GET(TechnoClass* const, pThis, ESI);
+
+	auto const pExt = TechnoExt::ExtMap.Find(pThis);
+
+	if (pExt->AE.HasOnFireDiscardables)
+	{
+		for (const auto& attachEffect : pExt->AttachedEffects)
+		{
+			if ((attachEffect->GetType()->DiscardOn & DiscardCondition::Firing) != DiscardCondition::None)
+				attachEffect->ShouldBeDiscarded = true;
+		}
+	}
+
+	return 0;
+}
+
 DEFINE_HOOK(0x6FE43B, TechnoClass_FireAt_OpenToppedDmgMult, 0x8)
 {
 	enum { ApplyDamageMult = 0x6FE45A, ContinueCheck = 0x6FE460 };
@@ -559,10 +614,10 @@ DEFINE_HOOK(0x6FF4CC, TechnoClass_FireAt_ToggleLaserWeaponIndex, 0x6)
 	{
 		if (auto const pExt = BuildingExt::ExtMap.Find(abstract_cast<BuildingClass*>(pThis)))
 		{
-			if (pExt->CurrentLaserWeaponIndex.empty())
+			if (!pExt->CurrentLaserWeaponIndex.has_value())
 				pExt->CurrentLaserWeaponIndex = weaponIndex;
 			else
-				pExt->CurrentLaserWeaponIndex.clear();
+				pExt->CurrentLaserWeaponIndex.reset();
 		}
 	}
 
@@ -657,9 +712,9 @@ DEFINE_HOOK(0x70E1A0, TechnoClass_GetTurretWeapon_LaserWeapon, 0x5)
 	{
 		auto const pExt = BuildingExt::ExtMap.Find(pBuilding);
 
-		if (!pExt->CurrentLaserWeaponIndex.empty())
+		if (pExt->CurrentLaserWeaponIndex.has_value())
 		{
-			auto weaponStruct = pThis->GetWeapon(pExt->CurrentLaserWeaponIndex.get());
+			auto weaponStruct = pThis->GetWeapon(*pExt->CurrentLaserWeaponIndex);
 			R->EAX(weaponStruct);
 			return ReturnResult;
 		}
