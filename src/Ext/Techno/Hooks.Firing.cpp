@@ -75,16 +75,22 @@ DEFINE_HOOK(0x6F3428, TechnoClass_WhatWeaponShouldIUse_ForceWeapon, 0x6)
 
 	GET(TechnoClass*, pThis, ECX);
 
-	if (pThis && pThis->Target)
+	if (!pThis)
+		return 0;
+
+	int forceWeaponIndex = -1;
+	CoordStruct coord = pThis->GetCoords();
+	CoordStruct* pCoord = &coord;
+	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+
+	if (pThis->Target)
 	{
 		auto const pTarget = abstract_cast<TechnoClass*>(pThis->Target);
 
 		if (!pTarget)
 			return 0;
 
-		int forceWeaponIndex = -1;
 		auto const pTargetType = pTarget->GetTechnoType();
-		auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
 
 		if (pTypeExt->ForceWeapon_Naval_Decloaked >= 0 &&
 			pTargetType->Cloakable && pTargetType->Naval &&
@@ -102,12 +108,26 @@ DEFINE_HOOK(0x6F3428, TechnoClass_WhatWeaponShouldIUse_ForceWeapon, 0x6)
 		{
 			forceWeaponIndex = pTypeExt->ForceWeapon_Disguised;
 		}
-
-		if (forceWeaponIndex >= 0)
+		else if (!pTypeExt->ForceWeapon_InRange.empty())
 		{
-			R->EAX(forceWeaponIndex);
-			return UseWeaponIndex;
+			int currentDistance = pThis->DistanceFrom(pTarget);
+			forceWeaponIndex = TechnoExt::ApplyForceWeaponInRange(pThis, pTypeExt->ForceWeapon_InRange, pTypeExt->ForceWeapon_InRange_Overrides,
+				pTypeExt->ForceWeapon_InRange_ApplyRangeModifiers, currentDistance);
 		}
+	}
+	else if (pTypeExt->ForceWeapon_InRange_AttackGround &&
+		!pTypeExt->ForceWeapon_InRange.empty() &&
+		*pThis->GetAttackCoordinates(pCoord) != coord) // Attacking ground
+	{
+		int currentDistance = static_cast<int>(coord.DistanceFrom(*pThis->GetAttackCoordinates(pCoord)));
+		forceWeaponIndex = TechnoExt::ApplyForceWeaponInRange(pThis, pTypeExt->ForceWeapon_InRange, pTypeExt->ForceWeapon_InRange_Overrides,
+			pTypeExt->ForceWeapon_InRange_ApplyRangeModifiers, currentDistance);
+	}
+
+	if (forceWeaponIndex >= 0)
+	{
+		R->EAX(forceWeaponIndex);
+		return UseWeaponIndex;
 	}
 
 	return 0;
@@ -410,6 +430,25 @@ DEFINE_HOOK(0x6FCBE6, TechnoClass_CanFire_BridgeAAFix, 0x6)
 #pragma endregion
 
 #pragma region TechnoClass_Fire
+
+DEFINE_HOOK(0x6FDDC0, TechnoClass_FireAt_DiscardAEOnFire, 0x6)
+{
+	GET(TechnoClass* const, pThis, ESI);
+
+	auto const pExt = TechnoExt::ExtMap.Find(pThis);
+
+	if (pExt->AE.HasOnFireDiscardables)
+	{
+		for (const auto& attachEffect : pExt->AttachedEffects)
+		{
+			if ((attachEffect->GetType()->DiscardOn & DiscardCondition::Firing) != DiscardCondition::None)
+				attachEffect->ShouldBeDiscarded = true;
+		}
+	}
+
+	return 0;
+}
+
 DEFINE_HOOK(0x6FE43B, TechnoClass_FireAt_OpenToppedDmgMult, 0x8)
 {
 	enum { ApplyDamageMult = 0x6FE45A, ContinueCheck = 0x6FE460 };
@@ -559,10 +598,10 @@ DEFINE_HOOK(0x6FF4CC, TechnoClass_FireAt_ToggleLaserWeaponIndex, 0x6)
 	{
 		if (auto const pExt = BuildingExt::ExtMap.Find(abstract_cast<BuildingClass*>(pThis)))
 		{
-			if (pExt->CurrentLaserWeaponIndex.empty())
+			if (!pExt->CurrentLaserWeaponIndex.has_value())
 				pExt->CurrentLaserWeaponIndex = weaponIndex;
 			else
-				pExt->CurrentLaserWeaponIndex.clear();
+				pExt->CurrentLaserWeaponIndex.reset();
 		}
 	}
 
@@ -657,9 +696,9 @@ DEFINE_HOOK(0x70E1A0, TechnoClass_GetTurretWeapon_LaserWeapon, 0x5)
 	{
 		auto const pExt = BuildingExt::ExtMap.Find(pBuilding);
 
-		if (!pExt->CurrentLaserWeaponIndex.empty())
+		if (pExt->CurrentLaserWeaponIndex.has_value())
 		{
-			auto weaponStruct = pThis->GetWeapon(pExt->CurrentLaserWeaponIndex.get());
+			auto weaponStruct = pThis->GetWeapon(*pExt->CurrentLaserWeaponIndex);
 			R->EAX(weaponStruct);
 			return ReturnResult;
 		}
