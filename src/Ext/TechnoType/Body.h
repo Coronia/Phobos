@@ -212,6 +212,7 @@ public:
 
 		Valueable<WeaponTypeClass*> RevengeWeapon;
 		Valueable<AffectedHouse> RevengeWeapon_AffectsHouses;
+		Nullable<bool> RevengeWeapon_FireAtShieldBreak;
 
 		AEAttachInfoTypeClass AttachEffects;
 
@@ -437,6 +438,7 @@ public:
 
 			, RevengeWeapon {}
 			, RevengeWeapon_AffectsHouses { AffectedHouse::All }
+			, RevengeWeapon_FireAtShieldBreak { false }
 
 			, AttachEffects {}
 

@@ -117,12 +117,14 @@ DEFINE_HOOK(0x702672, TechnoClass_ReceiveDamage_RevengeWeapon, 0x5)
 		auto const pExt = TechnoExt::ExtMap.Find(pThis);
 		auto const pTypeExt = pExt->TypeExtData;
 		auto const pWHExt = WarheadTypeExt::ExtMap.Find(pWarhead);
+		auto const pRevengeWeapon = pWHExt->RevengeWeapon.Get(pTypeExt->RevengeWeapon);
+		auto const affectedHouse = pWHExt->RevengeWeapon_AffectsHouses.Get(pTypeExt->RevengeWeapon_AffectsHouses);
 		bool hasFilters = pWHExt->SuppressRevengeWeapons_Types.size() > 0;
 
-		if (pTypeExt && pTypeExt->RevengeWeapon && EnumFunctions::CanTargetHouse(pTypeExt->RevengeWeapon_AffectsHouses, pThis->Owner, pSource->Owner))
+		if (pRevengeWeapon && EnumFunctions::CanTargetHouse(affectedHouse, pThis->Owner, pSource->Owner))
 		{
-			if (!pWHExt->SuppressRevengeWeapons || (hasFilters && !pWHExt->SuppressRevengeWeapons_Types.Contains(pTypeExt->RevengeWeapon)))
-				WeaponTypeExt::DetonateAt(pTypeExt->RevengeWeapon, pSource, pThis);
+			if (!pWHExt->SuppressRevengeWeapons || (hasFilters && !pWHExt->SuppressRevengeWeapons_Types.Contains(pRevengeWeapon)))
+				WeaponTypeExt::DetonateAt(pRevengeWeapon, pSource, pThis);
 		}
 
 		for (auto& attachEffect : pExt->AttachedEffects)
