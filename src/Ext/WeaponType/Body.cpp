@@ -73,6 +73,7 @@ void WeaponTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	INI_EX exINI(pINI);
 
 	this->DiskLaser_Radius.Read(exINI, pSection, "DiskLaser.Radius");
+	this->ProjectileRange.Read(exINI, pSection, "ProjectileRange");
 
 	this->Bolt_Disable1.Read(exINI, pSection, "Bolt.Disable1");
 	this->Bolt_Disable2.Read(exINI, pSection, "Bolt.Disable2");
@@ -120,6 +121,7 @@ void WeaponTypeExt::ExtData::Serialize(T& Stm)
 {
 	Stm
 		.Process(this->DiskLaser_Radius)
+		.Process(this->ProjectileRange)
 		.Process(this->Bolt_Disable1)
 		.Process(this->Bolt_Disable2)
 		.Process(this->Bolt_Disable3)
@@ -268,10 +270,10 @@ int WeaponTypeExt::GetRangeWithModifiers(WeaponTypeClass* pThis, TechnoClass* pF
 		if (type->WeaponRange_Multiplier == 1.0 && type->WeaponRange_ExtraRange == 0.0)
 			continue;
 
-		if (type->WeaponRange_AllowWeapons.size() > 0 && !type->WeaponRange_AllowWeapons.Contains(pThis))
+		if (type->WeaponRange_AllowWeapons.size() > 0 && pThis && !type->WeaponRange_AllowWeapons.Contains(pThis))
 			continue;
 
-		if (type->WeaponRange_DisallowWeapons.size() > 0 && type->WeaponRange_DisallowWeapons.Contains(pThis))
+		if (type->WeaponRange_DisallowWeapons.size() > 0 && pThis && type->WeaponRange_DisallowWeapons.Contains(pThis))
 			continue;
 
 		range = static_cast<int>(range * Math::max(type->WeaponRange_Multiplier, 0.0));
