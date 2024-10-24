@@ -59,23 +59,23 @@ void ScenarioExt::ExtData::ReadVariables(bool bIsGlobal, CCINIClass* pINI)
 	}
 }
 
+// you've inspired something controversial
 void ScenarioExt::ExtData::SaveVariablesToFile(bool isGlobal)
 {
 	const auto fileName = isGlobal ? "globals.ini" : "locals.ini";
-	auto pINI = GameCreate<CCINIClass>();
-	auto pFile = GameCreate<CCFileClass>(fileName);
+	CCINIClass fINI {};
+	CCFileClass file { fileName };
 
-	if (pFile->Exists())
-		pINI->ReadCCFile(pFile);
+	if (file.Exists())
+		fINI.ReadCCFile(&file);
 	else
-		pFile->CreateFileA();
+		file.CreateFileA();
 
-	const auto& variables = Global()->Variables[isGlobal];
-	for (const auto& variable : variables)
-		pINI->WriteInteger(ScenarioClass::Instance()->FileName, variable.second.Name, variable.second.Value, false);
+	for (const auto& [_,varext] : Global()->Variables[isGlobal])
+		fINI.WriteInteger(ScenarioClass::Instance->FileName, varext.Name, varext.Value, false);
 
-	pINI->WriteCCFile(pFile);
-	pFile->Close();
+	fINI.WriteCCFile(&file);
+	file.Close();
 }
 
 void ScenarioExt::Allocate(ScenarioClass* pThis)
@@ -112,6 +112,35 @@ void ScenarioExt::ExtData::UpdateTransportReloaders()
 
 		if (pTechno->IsAlive && pTechno->Transporter && pTechno->Transporter->IsInLogic)
 			pTechno->Reload();
+	}
+}
+
+void ScenarioExt::ExtData::UpdateDefermentSWs()
+{
+	std::vector<std::unique_ptr<SWFireTypeClass>>::iterator it;
+
+	for (it = this->DefermentSWs.begin(); it != this->DefermentSWs.end(); )
+	{
+		auto const pSWFireType = it->get();
+
+		if (pSWFireType->deferment.Completed())
+		{
+			pSWFireType->SW->SetReadiness(true);
+			pSWFireType->SW->Launch(pSWFireType->cell, pSWFireType->playerControl);
+			pSWFireType->SW->Reset();
+
+			if (pSWFireType->oldstart >= 0 && pSWFireType->oldleft >= 0)
+			{
+				pSWFireType->SW->RechargeTimer.StartTime = pSWFireType->oldstart;
+				pSWFireType->SW->RechargeTimer.TimeLeft = pSWFireType->oldleft;
+			}
+
+			it = this->DefermentSWs.erase(it);
+		}
+		else
+		{
+			it++;
+		}
 	}
 }
 
@@ -163,6 +192,7 @@ void ScenarioExt::ExtData::Serialize(T& Stm)
 		.Process(this->BriefingTheme)
 		.Process(this->AutoDeathObjects)
 		.Process(this->TransportReloaders)
+		.Process(this->DefermentSWs)
 		;
 }
 
@@ -188,6 +218,34 @@ bool ScenarioExt::SaveGlobals(PhobosStreamWriter& Stm)
 	return Stm.Success();
 }
 
+// SW Deferment
+
+#pragma region(save/load)
+
+template <class T>
+bool SWFireTypeClass::Serialize(T& stm)
+{
+	return stm
+		.Process(this->SW)
+		.Process(this->deferment)
+		.Process(this->cell)
+		.Process(this->playerControl)
+		.Process(this->oldstart)
+		.Process(this->oldleft)
+		.Success();
+}
+
+bool SWFireTypeClass::Load(PhobosStreamReader& stm, bool registerForChange)
+{
+	return this->Serialize(stm);
+}
+
+bool SWFireTypeClass::Save(PhobosStreamWriter& stm) const
+{
+	return const_cast<SWFireTypeClass*>(this)->Serialize(stm);
+}
+
+#pragma endregion(save/load)
 
 // =============================
 // container hooks
@@ -271,6 +329,7 @@ DEFINE_HOOK(0x55B4E1, LogicClass_Update_BeforeAll, 0x5)
 
 	ScenarioExt::Global()->UpdateAutoDeathObjectsInLimbo();
 	ScenarioExt::Global()->UpdateTransportReloaders();
+	ScenarioExt::Global()->UpdateDefermentSWs();
 
 	return 0;
 }

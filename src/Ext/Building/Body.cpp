@@ -3,6 +3,8 @@
 #include <BitFont.h>
 
 #include <Utilities/EnumFunctions.h>
+#include <Ext/SWType/Body.h>
+#include <Ext/Scenario/Body.h>
 
 BuildingExt::ExtContainer BuildingExt::ExtMap;
 
@@ -300,6 +302,7 @@ void BuildingExt::ExtData::ApplyPoweredKillSpawns()
 bool BuildingExt::ExtData::HandleInfiltrate(HouseClass* pInfiltratorHouse, int moneybefore)
 {
 	auto pVictimHouse = this->OwnerObject()->Owner;
+	auto const pTypeExt = this->TypeExtData;
 	this->AccumulatedIncome += pVictimHouse->Available_Money() - moneybefore;
 
 	if (!pVictimHouse->IsControlledByHuman() && !RulesExt::Global()->DisplayIncome_AllowAI)
@@ -308,40 +311,98 @@ bool BuildingExt::ExtData::HandleInfiltrate(HouseClass* pInfiltratorHouse, int m
 		FlyingStrings::AddMoneyString(
 				this->AccumulatedIncome,
 				pVictimHouse,
-				this->TypeExtData->DisplayIncome_Houses.Get(RulesExt::Global()->DisplayIncome_Houses.Get()),
+				pTypeExt->DisplayIncome_Houses.Get(RulesExt::Global()->DisplayIncome_Houses.Get()),
 				this->OwnerObject()->GetRenderCoords(),
-				this->TypeExtData->DisplayIncome_Offset
+				pTypeExt->DisplayIncome_Offset
 		);
 	}
 
-	if (!this->TypeExtData->SpyEffect_Custom)
+	if (!pTypeExt->SpyEffect_Custom)
 		return false;
 
 	if (pInfiltratorHouse != pVictimHouse)
 	{
 		// I assume you were not launching for real, Morton
 
-		auto launchTheSWHere = [this](SuperClass* const pSuper, HouseClass* const pHouse)->void
+		auto launchTheSWHere = [this](SuperClass* const pSuper, HouseClass* const pHouse, bool useDeferment, int extraDeferment)->void
 			{
 				int oldstart = pSuper->RechargeTimer.StartTime;
 				int oldleft = pSuper->RechargeTimer.TimeLeft;
-				pSuper->SetReadiness(true);
-				pSuper->Launch(CellClass::Coord2Cell(this->OwnerObject()->GetCenterCoords()), pHouse->IsCurrentPlayer());
-				pSuper->Reset();
-				pSuper->RechargeTimer.StartTime = oldstart;
-				pSuper->RechargeTimer.TimeLeft = oldleft;
+				auto const pSWExt = SWTypeExt::ExtMap.Find(pSuper->Type);
+				int deferment = extraDeferment + (useDeferment ? pSWExt->SW_Deferment : 0);
+
+				if (deferment > 0)
+				{
+					ScenarioExt::Global()->DefermentSWs.push_back(std::make_unique<SWFireTypeClass>(pSuper, deferment,
+						CellClass::Coord2Cell(this->OwnerObject()->GetCenterCoords()), pHouse->IsCurrentPlayer(), oldstart, oldleft));
+				}
+				else
+				{
+					pSuper->SetReadiness(true);
+					pSuper->Launch(CellClass::Coord2Cell(this->OwnerObject()->GetCenterCoords()), pHouse->IsCurrentPlayer());
+					pSuper->Reset();
+					pSuper->RechargeTimer.StartTime = oldstart;
+					pSuper->RechargeTimer.TimeLeft = oldleft;
+				}
 			};
 
-		int idx = this->TypeExtData->SpyEffect_VictimSuperWeapon;
+		int idx = pTypeExt->SpyEffect_VictimSuperWeapon;
 		if (idx >= 0)
-			launchTheSWHere(pVictimHouse->Supers.Items[idx], pVictimHouse);
+			launchTheSWHere(pVictimHouse->Supers.Items[idx], pVictimHouse,
+				pTypeExt->SpyEffect_VictimSuperWeapon_UseDeferment, pTypeExt->SpyEffect_VictimSuperWeapon_ExtraDeferment);
 
-		idx = this->TypeExtData->SpyEffect_InfiltratorSuperWeapon;
+		idx = pTypeExt->SpyEffect_InfiltratorSuperWeapon;
 		if (idx >= 0)
-			launchTheSWHere(pInfiltratorHouse->Supers.Items[idx], pInfiltratorHouse);
+			launchTheSWHere(pInfiltratorHouse->Supers.Items[idx], pInfiltratorHouse,
+				pTypeExt->SpyEffect_InfiltratorSuperWeapon_UseDeferment, pTypeExt->SpyEffect_InfiltratorSuperWeapon_ExtraDeferment);
 	}
 
 	return true;
+}
+
+// Get all cells covered by the building, optionally including those covered by OccupyHeight.
+const std::vector<CellStruct> BuildingExt::GetFoundationCells(BuildingClass* const pThis, CellStruct const baseCoords, bool includeOccupyHeight)
+{
+	const CellStruct foundationEnd = { 0x7FFF, 0x7FFF };
+	auto const pFoundation = pThis->GetFoundationData(false);
+
+	int occupyHeight = includeOccupyHeight ? pThis->Type->OccupyHeight : 1;
+
+	if (occupyHeight <= 0)
+		occupyHeight = 1;
+
+	auto pCellIterator = pFoundation;
+
+	while (*pCellIterator != foundationEnd)
+		++pCellIterator;
+
+	std::vector<CellStruct> foundationCells;
+	foundationCells.reserve(static_cast<int>(std::distance(pFoundation, pCellIterator + 1)) * occupyHeight);
+	pCellIterator = pFoundation;
+
+	while (*pCellIterator != foundationEnd)
+	{
+		auto actualCell = baseCoords + *pCellIterator;
+
+		for (auto i = occupyHeight; i > 0; --i)
+		{
+			foundationCells.push_back(actualCell);
+			--actualCell.X;
+			--actualCell.Y;
+		}
+		++pCellIterator;
+	}
+
+	std::sort(foundationCells.begin(), foundationCells.end(),
+		[](const CellStruct& lhs, const CellStruct& rhs) -> bool
+	{
+		return lhs.X > rhs.X || lhs.X == rhs.X && lhs.Y > rhs.Y;
+	});
+
+	auto const it = std::unique(foundationCells.begin(), foundationCells.end());
+	foundationCells.erase(it, foundationCells.end());
+
+	return foundationCells;
 }
 
 // =============================
@@ -362,6 +423,7 @@ void BuildingExt::ExtData::Serialize(T& Stm)
 		.Process(this->AccumulatedIncome)
 		.Process(this->CurrentLaserWeaponIndex)
 		.Process(this->PoweredUpToLevel)
+		.Process(this->EMPulseSW)
 		;
 }
 

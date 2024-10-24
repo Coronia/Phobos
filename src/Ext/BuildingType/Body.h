@@ -57,16 +57,30 @@ public:
 
 		Valueable<bool> SpyEffect_Custom;
 		ValueableIdx<SuperWeaponTypeClass> SpyEffect_VictimSuperWeapon;
+		Valueable<bool> SpyEffect_VictimSuperWeapon_UseDeferment;
+		Valueable<int> SpyEffect_VictimSuperWeapon_ExtraDeferment;
 		ValueableIdx<SuperWeaponTypeClass> SpyEffect_InfiltratorSuperWeapon;
+		Valueable<bool> SpyEffect_InfiltratorSuperWeapon_UseDeferment;
+		Valueable<int> SpyEffect_InfiltratorSuperWeapon_ExtraDeferment;
 
 		Nullable<bool> ConsideredVehicle;
 		Valueable<bool> ZShapePointMove_OnBuildup;
 		Valueable<int> SellBuildupLength;
+		Valueable<bool> IsDestroyableObstacle;
 
-		std::vector<OptionalStruct<DirType, true>> AircraftDockingDirs;
+		std::vector<std::optional<DirType>> AircraftDockingDirs;
 
 		ValueableVector<TechnoTypeClass*> FactoryPlant_AllowTypes;
 		ValueableVector<TechnoTypeClass*> FactoryPlant_DisallowTypes;
+
+		Nullable<double> Units_RepairRate;
+		Nullable<int> Units_RepairStep;
+		Nullable<double> Units_RepairPercent;
+		Valueable<bool> Units_DisableRepairCost;
+
+		Valueable<bool> NoBuildAreaOnBuildup;
+		ValueableVector<BuildingTypeClass*> Adjacent_Allowed;
+		ValueableVector<BuildingTypeClass*> Adjacent_Disallowed;
 
 		ExtData(BuildingTypeClass* OwnerObject) : Extension<BuildingTypeClass>(OwnerObject)
 			, PowersUp_Owner { AffectedHouse::Owner }
@@ -101,13 +115,25 @@ public:
 			, PlacementPreview_Translucency {}
 			, SpyEffect_Custom { false }
 			, SpyEffect_VictimSuperWeapon {}
+			, SpyEffect_VictimSuperWeapon_UseDeferment { false }
+			, SpyEffect_VictimSuperWeapon_ExtraDeferment { 0 }
 			, SpyEffect_InfiltratorSuperWeapon {}
+			, SpyEffect_InfiltratorSuperWeapon_UseDeferment { false }
+			, SpyEffect_InfiltratorSuperWeapon_ExtraDeferment { 0 }
 			, ConsideredVehicle {}
 			, ZShapePointMove_OnBuildup { false }
 			, SellBuildupLength { 23 }
 			, AircraftDockingDirs {}
 			, FactoryPlant_AllowTypes {}
 			, FactoryPlant_DisallowTypes {}
+			, IsDestroyableObstacle { false }
+			, Units_RepairRate {}
+			, Units_RepairStep {}
+			, Units_RepairPercent {}
+			, Units_DisableRepairCost { false }
+			, NoBuildAreaOnBuildup { false }
+			, Adjacent_Allowed {}
+			, Adjacent_Disallowed {}
 		{ }
 
 		// Ares 0.A functions
