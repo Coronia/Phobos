@@ -250,15 +250,25 @@ void SWTypeExt::ExtData::ApplySWNext(SuperClass* pSW, const CellStruct& cell)
 					if ((this->SW_Next_IgnoreInhibitors || !pNextTypeExt->HasInhibitor(pHouse, cell))
 						&& (this->SW_Next_IgnoreDesignators || pNextTypeExt->HasDesignator(pHouse, cell)))
 					{
-						int oldstart = pSuper->RechargeTimer.StartTime;
-						int oldleft = pSuper->RechargeTimer.TimeLeft;
-						pSuper->SetReadiness(true);
-						pSuper->Launch(cell, pHouse->IsCurrentPlayer());
-						pSuper->Reset();
-						if (!this->SW_Next_RealLaunch)
+						int oldstart = this->SW_Next_RealLaunch ? -1 : pSuper->RechargeTimer.StartTime;
+						int oldleft = this->SW_Next_RealLaunch ? -1 : pSuper->RechargeTimer.TimeLeft;
+						int deferment = this->SW_Next_ExtraDeferment + (this->SW_Next_UseDeferment ? pNextTypeExt->SW_Deferment : 0);
+						
+						if (deferment > 0)
 						{
-							pSuper->RechargeTimer.StartTime = oldstart;
-							pSuper->RechargeTimer.TimeLeft = oldleft;
+							ScenarioExt::Global()->DefermentSWs.push_back(std::make_unique<SWFireTypeClass>(pSuper, deferment, cell, pHouse->IsCurrentPlayer(), oldstart, oldleft));
+						}
+						else
+						{
+							pSuper->SetReadiness(true);
+							pSuper->Launch(cell, pHouse->IsCurrentPlayer());
+							pSuper->Reset();
+
+							if (!this->SW_Next_RealLaunch)
+							{
+								pSuper->RechargeTimer.StartTime = oldstart;
+								pSuper->RechargeTimer.TimeLeft = oldleft;
+							}
 						}
 					}
 				}

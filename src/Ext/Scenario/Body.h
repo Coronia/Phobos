@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ScenarioClass.h>
+#include <SuperClass.h>
 
 #include <Helpers/Macro.h>
 #include <Utilities/Container.h>
@@ -14,6 +15,40 @@ struct ExtendedVariable
 {
 	char Name[0x100];
 	int Value;
+};
+
+// Container for SW Deferment
+class SWFireTypeClass
+{
+public:
+	SuperClass* SW;
+	CDTimerClass deferment;
+	CellStruct cell;
+	bool playerControl;
+	int oldstart;
+	int oldleft;
+
+	bool Load(PhobosStreamReader& stm, bool registerForChange);
+	bool Save(PhobosStreamWriter& stm) const;
+
+	SWFireTypeClass() = default;
+
+	SWFireTypeClass(SuperClass* SW, int deferment, CellStruct cell, bool playerControl, int oldstart, int oldleft) :
+		SW { SW },
+		deferment {},
+		cell { cell },
+		playerControl { playerControl },
+		oldstart { oldstart },
+		oldleft { oldleft }
+	{
+		this->deferment.Start(deferment);
+	}
+
+	~SWFireTypeClass() = default;
+
+private:
+	template <typename T>
+	bool Serialize(T& stm);
 };
 
 class ScenarioExt
@@ -35,6 +70,7 @@ public:
 
 		std::vector<TechnoExt::ExtData*> AutoDeathObjects;
 		std::vector<TechnoExt::ExtData*> TransportReloaders; // Objects that can reload ammo in limbo
+		std::vector<std::unique_ptr<SWFireTypeClass>> DefermentSWs;
 
 		ExtData(ScenarioClass* OwnerObject) : Extension<ScenarioClass>(OwnerObject)
 			, ShowBriefing { false }
@@ -43,6 +79,7 @@ public:
 			, Variables { }
 			, AutoDeathObjects {}
 			, TransportReloaders {}
+			, DefermentSWs {}
 		{ }
 
 		void SetVariableToByID(bool bIsGlobal, int nIndex, char bState);
@@ -61,6 +98,7 @@ public:
 
 		void UpdateAutoDeathObjectsInLimbo();
 		void UpdateTransportReloaders();
+		void UpdateDefermentSWs();
 	private:
 		template <typename T>
 		void Serialize(T& Stm);
