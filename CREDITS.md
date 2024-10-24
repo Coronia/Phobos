@@ -243,6 +243,14 @@ This page lists all the individual contributions to the project by their author.
   - Forbidding parallel AI queues for specific TechnoTypes
   - Nonprovocative Warheads
   - Customizing effect of level lighting on air units
+  - Reimplemented `Airburst` & `Splits` logic with more customization options
+  - Buildings considered as destroyable pathfinding obstacles
+  - Animation visibility customization settings
+  - Light effect customizations
+  - Building unit repair customizations
+  - Build area customizations
+  - `Scorch` / `Flamer` fire animation customization
+  - EM Pulse cannon logic improvements
 - **Morton (MortonPL)**:
   - `XDrawOffset` for animations
   - Shield passthrough & absorption
@@ -363,6 +371,7 @@ This page lists all the individual contributions to the project by their author.
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude
+  - `RevengeWeapon` for shield breaking & overridden by warheads
 - **handama** - AI script action to jump back to previous script
 - **TaranDahl (航味麻酱)**
   - Skirmish AI "sell all buildings and set all technos to hunt" behavior dehardcode

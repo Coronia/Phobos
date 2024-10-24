@@ -47,6 +47,10 @@
 DEFINE_JUMP(LJMP, 0x545CE2, 0x545CE9) //Phobos_BugFixes_Tileset255_RemoveNonMMArrayFill
 DEFINE_JUMP(LJMP, 0x546C23, 0x546C8B) //Phobos_BugFixes_Tileset255_RefNonMMArray
 
+// Patches TechnoClass::Kill_Cargo/KillPassengers (push ESI -> push EBP)
+// Fixes recursive passenger kills not being accredited
+// to proper techno but to their transports
+DEFINE_PATCH(0x707CF2, 0x55);
 
 // WWP's shit code! Wrong check.
 // To avoid units dying when they are already dead.
@@ -803,6 +807,7 @@ DEFINE_JUMP(LJMP, 0x719CBC, 0x719CD8);//Teleport, notorious CLEG frozen state re
 DEFINE_JUMP(LJMP, 0x72A16A, 0x72A186);//Tunnel, not a big deal
 DEFINE_JUMP(LJMP, 0x663428, 0x663445);//Rocket, not a big deal
 DEFINE_JUMP(LJMP, 0x5170CE, 0x5170E0);//Hover, not a big deal
+DEFINE_JUMP(LJMP, 0x65B3F7, 0x65B416);//RadSite, no effect
 
 // Save GameModeOptions in campaign modes
 DEFINE_JUMP(LJMP, 0x67E3BD, 0x67E3D3); // Save
@@ -968,3 +973,25 @@ DEFINE_HOOK(0x5B11DD, MechLocomotionClass_ProcessMoving_SlowdownDistance, 0x9)
 }
 
 DEFINE_JUMP(LJMP, 0x517FF5, 0x518016); // Warhead with InfDeath=9 versus infantry in air
+
+// Fixes docks not repairing docked aircraft unless they enter the dock first e.g just built ones.
+// Also potential edge cases with unusual docking offsets, original had a distance check for 64 leptons which is replaced with IsInAir here.
+DEFINE_HOOK(0x44985B, BuildingClass_Mission_Guard_UnitReload, 0x6)
+{
+	enum { AssignRepairMission = 0x449942 };
+
+	GET(BuildingClass*, pThis, ESI);
+	GET(TechnoClass*, pLink, EDI);
+
+	if (pThis->Type->UnitReload && pLink->WhatAmI() == AbstractType::Aircraft && !pLink->IsInAir()
+		&& pThis->SendCommand(RadioCommand::QueryMoving, pLink) == RadioCommand::AnswerPositive)
+	{
+		return AssignRepairMission;
+	}
+
+	return 0;
+}
+
+// Patch tileset parsing to not reset certain tileset indices for Lunar theater.
+DEFINE_JUMP(LJMP, 0x546C8B, 0x546CBF);
+

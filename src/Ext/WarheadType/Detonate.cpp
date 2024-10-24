@@ -76,7 +76,7 @@ void WarheadTypeExt::ExtData::Detonate(TechnoClass* pOwner, HouseClass* pHouse, 
 
 				if (pHouse->CanTransactMoney(pSWExt->Money_Amount) && (!this->LaunchSW_RealLaunch || (pSuper->IsPresent && pSuper->IsReady && !pSuper->IsSuspended)))
 				{
-					if (this->LaunchSW_IgnoreInhibitors || !pSWExt->HasInhibitor(pHouse, cell)
+					if ((this->LaunchSW_IgnoreInhibitors || !pSWExt->HasInhibitor(pHouse, cell))
 					&& (this->LaunchSW_IgnoreDesignators || pSWExt->HasDesignator(pHouse, cell)))
 					{
 						if (this->LaunchSW_DisplayMoney && pSWExt->Money_Amount != 0)
@@ -153,13 +153,13 @@ void WarheadTypeExt::ExtData::DetonateOnOneUnit(HouseClass* pHouse, TechnoClass*
 	if (!this->CanTargetHouse(pHouse, pTarget) || !this->CanAffectTarget(pTarget, pTargetExt))
 		return;
 
-	this->ApplyShieldModifiers(pTarget, pTargetExt);
+	this->ApplyShieldModifiers(pTarget, pOwner, pTargetExt);
 
 	if (this->RemoveDisguise)
 		this->ApplyRemoveDisguise(pHouse, pTarget);
 
 	if (this->RemoveMindControl)
-		this->ApplyRemoveMindControl(pHouse, pTarget);
+		this->ApplyRemoveMindControl(pTarget);
 
 	if (this->Crit_CurrentChance > 0.0 && (!this->Crit_SuppressWhenIntercepted || !bulletWasIntercepted))
 		this->ApplyCrit(pHouse, pTarget, pOwner, pTargetExt);
@@ -167,7 +167,7 @@ void WarheadTypeExt::ExtData::DetonateOnOneUnit(HouseClass* pHouse, TechnoClass*
 	if (this->Convert_Pairs.size() > 0)
 		this->ApplyConvert(pHouse, pTarget);
 
-	if (this->AttachEffect_AttachTypes.size() > 0 || this->AttachEffect_RemoveTypes.size() > 0 || this->AttachEffect_RemoveGroups.size() > 0)
+	if (this->AttachEffects.AttachTypes.size() > 0 || this->AttachEffects.RemoveTypes.size() > 0 || this->AttachEffects.RemoveGroups.size() > 0)
 		this->ApplyAttachEffects(pTarget, pHouse, pOwner);
 
 #ifdef LOCO_TEST_WARHEADS
@@ -180,7 +180,7 @@ void WarheadTypeExt::ExtData::DetonateOnOneUnit(HouseClass* pHouse, TechnoClass*
 
 }
 
-void WarheadTypeExt::ExtData::ApplyShieldModifiers(TechnoClass* pTarget, TechnoExt::ExtData* pTargetExt = nullptr)
+void WarheadTypeExt::ExtData::ApplyShieldModifiers(TechnoClass* pTarget, TechnoClass* pOwner, TechnoExt::ExtData* pTargetExt = nullptr)
 {
 	if (!pTargetExt)
 		pTargetExt = TechnoExt::ExtMap.Find(pTarget);
@@ -250,7 +250,10 @@ void WarheadTypeExt::ExtData::ApplyShieldModifiers(TechnoClass* pTarget, TechnoE
 				};
 
 			if (this->Shield_Break && pTargetExt->Shield->IsActive() && isShieldTypeEligible(this->Shield_Break_Types.GetElements(this->Shield_AffectTypes)))
+			{
 				pTargetExt->Shield->BreakShield(this->Shield_BreakAnim, this->Shield_BreakWeapon);
+				pTargetExt->Shield->ShieldRevengeWeapon(pOwner, pTarget, this->OwnerObject());
+			}
 
 			if (this->Shield_Respawn_Duration > 0 && isShieldTypeEligible(this->Shield_Respawn_Types.GetElements(this->Shield_AffectTypes)))
 			{
@@ -270,12 +273,6 @@ void WarheadTypeExt::ExtData::ApplyShieldModifiers(TechnoClass* pTarget, TechnoE
 	}
 }
 
-void WarheadTypeExt::ExtData::ApplyRemoveMindControl(HouseClass* pHouse, TechnoClass* pTarget)
-{
-	if (auto pController = pTarget->MindControlledBy)
-		pTarget->MindControlledBy->CaptureManager->FreeUnit(pTarget);
-}
-
 void WarheadTypeExt::ExtData::ApplyRemoveDisguise(HouseClass* pHouse, TechnoClass* pTarget)
 {
 	if (pTarget->IsDisguised())
@@ -285,6 +282,12 @@ void WarheadTypeExt::ExtData::ApplyRemoveDisguise(HouseClass* pHouse, TechnoClas
 		else if (auto pMirage = specific_cast<UnitClass*>(pTarget))
 			pMirage->ClearDisguise();
 	}
+}
+
+void WarheadTypeExt::ExtData::ApplyRemoveMindControl(TechnoClass* pTarget)
+{
+	if (auto pController = pTarget->MindControlledBy)
+		pTarget->MindControlledBy->CaptureManager->FreeUnit(pTarget);
 }
 
 void WarheadTypeExt::ExtData::ApplyCrit(HouseClass* pHouse, TechnoClass* pTarget, TechnoClass* pOwner, TechnoExt::ExtData* pTargetExt = nullptr)
@@ -449,10 +452,10 @@ void WarheadTypeExt::ExtData::ApplyAttachEffects(TechnoClass* pTarget, HouseClas
 		return;
 
 	std::vector<int> dummy = std::vector<int>();
-
-	AttachEffectClass::Attach(this->AttachEffect_AttachTypes, pTarget, pInvokerHouse, pInvoker, this->OwnerObject(), this->AttachEffect_DurationOverrides, dummy, dummy, dummy);
-	AttachEffectClass::Detach(this->AttachEffect_RemoveTypes, pTarget, this->AttachEffect_CumulativeRemoveMinCounts, this->AttachEffect_CumulativeRemoveMaxCounts);
-	AttachEffectClass::DetachByGroups(this->AttachEffect_RemoveGroups, pTarget, this->AttachEffect_CumulativeRemoveMinCounts, this->AttachEffect_CumulativeRemoveMaxCounts);
+	auto const& info = this->AttachEffects;
+	AttachEffectClass::Attach(pTarget, pInvokerHouse, pInvoker, this->OwnerObject(), info);
+	AttachEffectClass::Detach(pTarget, info);
+	AttachEffectClass::DetachByGroups(pTarget, info);
 }
 
 double WarheadTypeExt::ExtData::GetCritChance(TechnoClass* pFirer) const
