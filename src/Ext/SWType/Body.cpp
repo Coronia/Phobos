@@ -24,6 +24,8 @@ void SWTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->SW_NegBuildings)
 		.Process(this->SW_InitialReady)
 		.Process(this->SW_PostDependent)
+		.Process(this->SW_MaxCount)
+		.Process(this->SW_Deferment)
 		.Process(this->UIDescription)
 		.Process(this->CameoPriority)
 		.Process(this->LimboDelivery_Types)
@@ -44,6 +46,8 @@ void SWTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->SW_Next_IgnoreDesignators)
 		.Process(this->SW_Next_RandomWeightsData)
 		.Process(this->SW_Next_RollChances)
+		.Process(this->SW_Next_UseDeferment)
+		.Process(this->SW_Next_ExtraDeferment)
 		.Process(this->ShowTimer_Priority)
 		.Process(this->Convert_Pairs)
 		.Process(this->ShowDesignatorRange)
@@ -52,6 +56,10 @@ void SWTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->UseWeeds_Amount)
 		.Process(this->UseWeeds_StorageTimer)
 		.Process(this->UseWeeds_ReadinessAnimationPercentage)
+		.Process(this->EMPulse_WeaponIndex)
+		.Process(this->EMPulse_SuspendOthers)
+		.Process(this->EMPulse_Cannons)
+		.Process(this->EMPulse_TargetSelf)
 		;
 }
 
@@ -81,6 +89,8 @@ void SWTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->SW_NegBuildings.Read(exINI, pSection, "SW.NegBuildings");
 	this->SW_InitialReady.Read(exINI, pSection, "SW.InitialReady");
 	this->SW_PostDependent.Read(exINI, pSection, "SW.PostDependent");
+	this->SW_MaxCount.Read(exINI, pSection, "SW.MaxCount");
+	this->SW_Deferment.Read(exINI, pSection, "SW.Deferment");
 
 	this->UIDescription.Read(exINI, pSection, "UIDescription");
 	this->CameoPriority.Read(exINI, pSection, "CameoPriority");
@@ -94,8 +104,15 @@ void SWTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->SW_Next_IgnoreInhibitors.Read(exINI, pSection, "SW.Next.IgnoreInhibitors");
 	this->SW_Next_IgnoreDesignators.Read(exINI, pSection, "SW.Next.IgnoreDesignators");
 	this->SW_Next_RollChances.Read(exINI, pSection, "SW.Next.RollChances");
+	this->SW_Next_UseDeferment.Read(exINI, pSection, "SW.Next.UseDeferment");
+	this->SW_Next_ExtraDeferment.Read(exINI, pSection, "SW.Next.ExtraDeferment");
 
 	this->ShowTimer_Priority.Read(exINI, pSection, "ShowTimer.Priority");
+
+	this->EMPulse_WeaponIndex.Read(exINI, pSection, "EMPulse.WeaponIndex");
+	this->EMPulse_SuspendOthers.Read(exINI, pSection, "EMPulse.SuspendOthers");
+	this->EMPulse_Cannons.Read(exINI, pSection, "EMPulse.Cannons");
+	this->EMPulse_TargetSelf.Read(exINI, pSection, "EMPulse.TargetSelf");
 
 	char tempBuffer[32];
 	// LimboDelivery.RandomWeights

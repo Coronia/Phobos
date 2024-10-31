@@ -147,9 +147,19 @@ void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->ConsideredVehicle.Read(exINI, pSection, "ConsideredVehicle");
 	this->SellBuildupLength.Read(exINI, pSection, "SellBuildupLength");
+	this->IsDestroyableObstacle.Read(exINI, pSection, "IsDestroyableObstacle");
 
 	this->FactoryPlant_AllowTypes.Read(exINI, pSection, "FactoryPlant.AllowTypes");
 	this->FactoryPlant_DisallowTypes.Read(exINI, pSection, "FactoryPlant.DisallowTypes");
+
+	this->Units_RepairRate.Read(exINI, pSection, "Units.RepairRate");
+	this->Units_RepairStep.Read(exINI, pSection, "Units.RepairStep");
+	this->Units_RepairPercent.Read(exINI, pSection, "Units.RepairPercent");
+	this->Units_DisableRepairCost.Read(exINI, pSection, "Units.DisableRepairCost");
+
+	this->NoBuildAreaOnBuildup.Read(exINI, pSection, "NoBuildAreaOnBuildup");
+	this->Adjacent_Allowed.Read(exINI, pSection, "Adjacent.Allowed");
+	this->Adjacent_Disallowed.Read(exINI, pSection, "Adjacent.Disallowed");
 
 	if (pThis->NumberOfDocks > 0)
 	{
@@ -180,7 +190,11 @@ void BuildingTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 		this->SuperWeapons.Read(exINI, pSection, "SuperWeapons");
 
 		this->SpyEffect_VictimSuperWeapon.Read(exINI, pSection, "SpyEffect.VictimSuperWeapon");
+		this->SpyEffect_VictimSuperWeapon_UseDeferment.Read(exINI, pSection, "SpyEffect.VictimSuperWeapon.UseDeferment");
+		this->SpyEffect_VictimSuperWeapon_ExtraDeferment.Read(exINI, pSection, "SpyEffect.VictimSuperWeapon.ExtraDeferment");
 		this->SpyEffect_InfiltratorSuperWeapon.Read(exINI, pSection, "SpyEffect.InfiltratorSuperWeapon");
+		this->SpyEffect_InfiltratorSuperWeapon_UseDeferment.Read(exINI, pSection, "SpyEffect.InfiltratorSuperWeapon.UseDeferment");
+		this->SpyEffect_InfiltratorSuperWeapon_ExtraDeferment.Read(exINI, pSection, "SpyEffect.InfiltratorSuperWeapon.ExtraDeferment");
 	}
 
 	if (pThis->MaxNumberOccupants > 10)
@@ -258,13 +272,25 @@ void BuildingTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->PlacementPreview_Translucency)
 		.Process(this->SpyEffect_Custom)
 		.Process(this->SpyEffect_VictimSuperWeapon)
+		.Process(this->SpyEffect_VictimSuperWeapon_UseDeferment)
+		.Process(this->SpyEffect_VictimSuperWeapon_ExtraDeferment)
 		.Process(this->SpyEffect_InfiltratorSuperWeapon)
+		.Process(this->SpyEffect_InfiltratorSuperWeapon_UseDeferment)
+		.Process(this->SpyEffect_InfiltratorSuperWeapon_ExtraDeferment)
 		.Process(this->ConsideredVehicle)
 		.Process(this->ZShapePointMove_OnBuildup)
 		.Process(this->SellBuildupLength)
 		.Process(this->AircraftDockingDirs)
 		.Process(this->FactoryPlant_AllowTypes)
 		.Process(this->FactoryPlant_DisallowTypes)
+		.Process(this->IsDestroyableObstacle)
+		.Process(this->Units_RepairRate)
+		.Process(this->Units_RepairStep)
+		.Process(this->Units_RepairPercent)
+		.Process(this->Units_DisableRepairCost)
+		.Process(this->NoBuildAreaOnBuildup)
+		.Process(this->Adjacent_Allowed)
+		.Process(this->Adjacent_Disallowed)
 		;
 }
 

@@ -36,6 +36,8 @@ public:
 		ValueableVector<BuildingTypeClass*> SW_NegBuildings;
 		Valueable<bool> SW_InitialReady;
 		ValueableIdx<SuperWeaponTypeClass> SW_PostDependent;
+		Valueable<int> SW_MaxCount;
+		Valueable<int> SW_Deferment;
 
 		Valueable<CSFText> UIDescription;
 		Valueable<int> CameoPriority;
@@ -50,6 +52,8 @@ public:
 		Valueable<bool> SW_Next_IgnoreInhibitors;
 		Valueable<bool> SW_Next_IgnoreDesignators;
 		ValueableVector<float> SW_Next_RollChances;
+		Valueable<bool> SW_Next_UseDeferment;
+		Valueable<int> SW_Next_ExtraDeferment;
 
 		Valueable<int> ShowTimer_Priority;
 
@@ -72,6 +76,11 @@ public:
 		Valueable<bool> UseWeeds_StorageTimer;
 		Valueable<double> UseWeeds_ReadinessAnimationPercentage;
 
+		Valueable<int> EMPulse_WeaponIndex;
+		Valueable<bool> EMPulse_SuspendOthers;
+		ValueableVector<BuildingTypeClass*> EMPulse_Cannons;
+		Valueable<bool> EMPulse_TargetSelf;
+
 		ExtData(SuperWeaponTypeClass* OwnerObject) : Extension<SuperWeaponTypeClass>(OwnerObject)
 			, Money_Amount { 0 }
 			, SW_Inhibitors {}
@@ -86,6 +95,8 @@ public:
 			, SW_NegBuildings {}
 			, SW_InitialReady { false }
 			, SW_PostDependent {}
+			, SW_MaxCount { -1 }
+			, SW_Deferment { 0 }
 			, UIDescription {}
 			, CameoPriority { 0 }
 			, LimboDelivery_Types {}
@@ -106,6 +117,8 @@ public:
 			, SW_Next_IgnoreDesignators { true }
 			, SW_Next_RollChances {}
 			, SW_Next_RandomWeightsData {}
+			, SW_Next_UseDeferment { false }
+			, SW_Next_ExtraDeferment { 0 }
 			, ShowTimer_Priority { 0 }
 			, Convert_Pairs {}
 			, ShowDesignatorRange { true }
@@ -114,6 +127,10 @@ public:
 			, UseWeeds_Amount { RulesClass::Instance->WeedCapacity }
 			, UseWeeds_StorageTimer { false }
 			, UseWeeds_ReadinessAnimationPercentage { 0.9 }
+			, EMPulse_WeaponIndex { 0 }
+			, EMPulse_SuspendOthers { false }
+			, EMPulse_Cannons {}
+			, EMPulse_TargetSelf { false }
 		{ }
 
 		// Ares 0.A functions
@@ -133,6 +150,9 @@ public:
 		void ApplyDetonation(HouseClass* pHouse, const CellStruct& cell);
 		void ApplySWNext(SuperClass* pSW, const CellStruct& cell);
 		void ApplyTypeConversion(SuperClass* pSW);
+		void HandleEMPulseLaunch(SuperClass* pSW, const CellStruct& cell) const;
+		std::vector<BuildingClass*> GetEMPulseCannons(HouseClass* pOwner, const CellStruct& cell) const;
+		std::pair<double, double> GetEMPulseCannonRange(BuildingClass* pBuilding) const;
 
 		virtual void LoadFromINIFile(CCINIClass* pINI) override;
 		virtual ~ExtData() = default;

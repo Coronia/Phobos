@@ -43,6 +43,7 @@ public:
 		Valueable<bool> Conventional_IgnoreUnits;
 		Valueable<bool> RemoveDisguise;
 		Valueable<bool> RemoveMindControl;
+		Nullable<bool> RemoveParasite;
 		Valueable<bool> DecloakDamagedTargets;
 		Valueable<bool> ShakeIsLocal;
 		Valueable<bool> ApplyModifiersOnNegativeDamage;
@@ -60,6 +61,7 @@ public:
 		Valueable<AffectedHouse> Crit_AffectsHouses;
 		ValueableVector<AnimTypeClass*> Crit_AnimList;
 		Nullable<bool> Crit_AnimList_PickRandom;
+		Nullable<bool> Crit_AnimList_CreateAll;
 		ValueableVector<AnimTypeClass*> Crit_ActiveChanceAnims;
 		Valueable<bool> Crit_AnimOnAffectedTargets;
 		Valueable<double> Crit_AffectBelowPercent;
@@ -114,6 +116,8 @@ public:
 		Valueable<bool> LaunchSW_RealLaunch;
 		Valueable<bool> LaunchSW_IgnoreInhibitors;
 		Valueable<bool> LaunchSW_IgnoreDesignators;
+		Valueable<bool> LaunchSW_UseDeferment;
+		Valueable<int> LaunchSW_ExtraDeferment;
 		Valueable<bool> LaunchSW_DisplayMoney;
 		Valueable<AffectedHouse> LaunchSW_DisplayMoney_Houses;
 		Valueable<Point2D> LaunchSW_DisplayMoney_Offset;
@@ -131,18 +135,17 @@ public:
 		ValueableVector<TechnoTypeClass*> DetonateOnAllMapObjects_IgnoreTypes;
 
 		std::vector<TypeConvertGroup> Convert_Pairs;
+		AEAttachInfoTypeClass AttachEffects;
 
 		Valueable<bool> InflictLocomotor;
 		Valueable<bool> RemoveInflictedLocomotor;
 
 		Valueable<bool> Nonprovocative;
 
-		ValueableVector<AttachEffectTypeClass*> AttachEffect_AttachTypes;
-		ValueableVector<AttachEffectTypeClass*> AttachEffect_RemoveTypes;
-		std::vector<std::string> AttachEffect_RemoveGroups;
-		ValueableVector<int> AttachEffect_CumulativeRemoveMinCounts;
-		ValueableVector<int> AttachEffect_CumulativeRemoveMaxCounts;
-		ValueableVector<int> AttachEffect_DurationOverrides;
+		Nullable<int> CombatLightDetailLevel;
+		Valueable<double> CombatLightChance;
+		Valueable<bool> CLIsBlack;
+		Nullable<bool> Particle_AlphaImageIsLightFlash;
 
 		Valueable<bool> SuppressRevengeWeapons;
 		ValueableVector<WeaponTypeClass*> SuppressRevengeWeapons_Types;
@@ -194,6 +197,7 @@ public:
 			, Conventional_IgnoreUnits { false }
 			, RemoveDisguise { false }
 			, RemoveMindControl { false }
+			, RemoveParasite {}
 			, DecloakDamagedTargets { true }
 			, ShakeIsLocal { false }
 			, ApplyModifiersOnNegativeDamage { false }
@@ -211,6 +215,7 @@ public:
 			, Crit_AffectsHouses { AffectedHouse::All }
 			, Crit_AnimList {}
 			, Crit_AnimList_PickRandom {}
+			, Crit_AnimList_CreateAll {}
 			, Crit_ActiveChanceAnims {}
 			, Crit_AnimOnAffectedTargets { false }
 			, Crit_AffectBelowPercent { 1.0 }
@@ -265,6 +270,8 @@ public:
 			, LaunchSW_RealLaunch { true }
 			, LaunchSW_IgnoreInhibitors { false }
 			, LaunchSW_IgnoreDesignators { true }
+			, LaunchSW_UseDeferment { false }
+			, LaunchSW_ExtraDeferment { 0 }
 			, LaunchSW_DisplayMoney { false }
 			, LaunchSW_DisplayMoney_Houses { AffectedHouse::All }
 			, LaunchSW_DisplayMoney_Offset { { 0, 0 } }
@@ -282,18 +289,17 @@ public:
 			, DetonateOnAllMapObjects_IgnoreTypes {}
 
 			, Convert_Pairs {}
+			, AttachEffects {}
 
 			, InflictLocomotor { false }
 			, RemoveInflictedLocomotor { false }
 
 			, Nonprovocative { false }
 
-			, AttachEffect_AttachTypes {}
-			, AttachEffect_RemoveTypes {}
-			, AttachEffect_RemoveGroups {}
-			, AttachEffect_CumulativeRemoveMinCounts {}
-			, AttachEffect_CumulativeRemoveMaxCounts {}
-			, AttachEffect_DurationOverrides {}
+			, CombatLightDetailLevel {}
+			, CombatLightChance { 1.0 }
+		    , CLIsBlack { false }
+			, Particle_AlphaImageIsLightFlash {}
 
 			, SuppressRevengeWeapons { false }
 			, SuppressRevengeWeapons_Types {}
@@ -343,7 +349,7 @@ public:
 	private:
 		void DetonateOnOneUnit(HouseClass* pHouse, TechnoClass* pTarget, TechnoClass* pOwner = nullptr, bool bulletWasIntercepted = false);
 		void ApplyRemoveDisguise(HouseClass* pHouse, TechnoClass* pTarget);
-		void ApplyRemoveMindControl(HouseClass* pHouse, TechnoClass* pTarget);
+		void ApplyRemoveMindControl(TechnoClass* pTarget);
 		void ApplyCrit(HouseClass* pHouse, TechnoClass* pTarget, TechnoClass* Owner, TechnoExt::ExtData* pTargetExt);
 		void ApplyShieldModifiers(TechnoClass* pTarget, TechnoExt::ExtData* pTargetExt);
 		void ApplyAttachEffects(TechnoClass* pTarget, HouseClass* pInvokerHouse, TechnoClass* pInvoker);
