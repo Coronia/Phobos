@@ -14,6 +14,10 @@ InterceptorTypeClass::InterceptorTypeClass(TechnoTypeClass* OwnedBy)
 	, WeaponReplaceProjectile { false }
 	, WeaponCumulativeDamage { false }
 	, KeepIntact { false }
+	, ChangeOwner { false }
+	, Bounty { false }
+	, Bounty_Display {}
+	, Experience_FromInterceptor { 1.0 }
 { }
 
 void InterceptorTypeClass::LoadFromINI(CCINIClass* pINI, const char* pSection)
@@ -29,6 +33,10 @@ void InterceptorTypeClass::LoadFromINI(CCINIClass* pINI, const char* pSection)
 	this->WeaponReplaceProjectile.Read(exINI, pSection, "Interceptor.WeaponReplaceProjectile");
 	this->WeaponCumulativeDamage.Read(exINI, pSection, "Interceptor.WeaponCumulativeDamage");
 	this->KeepIntact.Read(exINI, pSection, "Interceptor.KeepIntact");
+	this->ChangeOwner.Read(exINI, pSection, "Interceptor.ChangeOwner");
+	this->Bounty.Read(exINI, pSection, "Interceptor.Bounty");
+	this->Bounty_Display.Read(exINI, pSection, "Interceptor.Bounty.Display");
+	this->Experience_FromInterceptor.Read(exINI, pSection, "Experience.FromInterceptor");
 }
 
 #pragma region(save/load)
@@ -47,6 +55,10 @@ bool InterceptorTypeClass::Serialize(T& stm)
 		.Process(this->WeaponReplaceProjectile)
 		.Process(this->WeaponCumulativeDamage)
 		.Process(this->KeepIntact)
+		.Process(this->ChangeOwner)
+		.Process(this->Bounty)
+		.Process(this->Bounty_Display)
+		.Process(this->Experience_FromInterceptor)
 		.Success();
 }
 

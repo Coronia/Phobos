@@ -1,5 +1,6 @@
 #include "Body.h"
 
+#include <Ext/Rules/Body.h>
 #include <Ext/RadSite/Body.h>
 #include <Ext/WeaponType/Body.h>
 #include <Ext/TechnoType/Body.h>
@@ -18,6 +19,8 @@ void BulletExt::ExtData::InterceptBullet(TechnoClass* pSource, WeaponTypeClass* 
 	auto pTypeExt = this->TypeExtData;
 	bool canAffect = false;
 	bool isIntercepted = false;
+	const auto pTechnoTypeExt = TechnoTypeExt::ExtMap.Find(pSource->GetTechnoType());
+	const auto pInterceptorType = pTechnoTypeExt->InterceptorType.get();
 
 	if (pTypeExt->Armor.isset())
 	{
@@ -31,10 +34,33 @@ void BulletExt::ExtData::InterceptBullet(TechnoClass* pSource, WeaponTypeClass* 
 			this->CurrentStrength -= damage;
 
 			if (Phobos::DisplayDamageNumbers && damage != 0)
-				GeneralUtils::DisplayDamageNumberString(damage, DamageDisplayType::Intercept, this->OwnerObject()->GetRenderCoords(), this->DamageNumberOffset);
+				GeneralUtils::DisplayDamageNumberString(damage, DamageDisplayType::Intercept, pThis->GetRenderCoords(), this->DamageNumberOffset);
 
 			if (this->CurrentStrength <= 0)
+			{
+				const auto pHouse = pSource->Owner;
 				isIntercepted = true;
+
+				if (const auto pBulletOwner = pThis->Owner)
+				{
+					if (pTypeExt->Cost && !pBulletOwner->Owner->IsAlliedWith(pSource))
+						pSource->Veterancy.Add(static_cast<int>(pTypeExt->Cost * pInterceptorType->Experience_FromInterceptor));
+
+					if (pInterceptorType->Bounty && pTypeExt->Bounty_Value && !pBulletOwner->Owner->IsAlliedWith(pSource))
+					{
+						const auto& enablers = RulesExt::Global()->BountyEnablers_Interceptor;
+
+						if (enablers.empty() || std::any_of(enablers.begin(), enablers.end(), [pHouse](BuildingTypeClass* pType)
+							{ return pType && pHouse->CountOwnedAndPresent(pType) > 0; }))
+						{
+							pHouse->TransactMoney(pTypeExt->Bounty_Value);
+
+							if (pInterceptorType->Bounty_Display.Get(RulesExt::Global()->BountyDisplay_Interceptor))
+								FlyingStrings::AddMoneyString(pTypeExt->Bounty_Value, pHouse, AffectedHouse::All, pThis->GetRenderCoords());
+						}
+					}
+				}
+			}
 		}
 	}
 	else
@@ -45,11 +71,8 @@ void BulletExt::ExtData::InterceptBullet(TechnoClass* pSource, WeaponTypeClass* 
 
 	if (canAffect)
 	{
-		const auto pTechnoTypeExt = TechnoTypeExt::ExtMap.Find(pSource->GetTechnoType());
-		const auto pInterceptorType = pTechnoTypeExt->InterceptorType.get();
 		const auto pWeaponOverride = pInterceptorType->WeaponOverride.Get(pTypeExt->Interceptable_WeaponOverride);
 		bool detonate = !pInterceptorType->DeleteOnIntercept.Get(pTypeExt->Interceptable_DeleteOnIntercept);
-
 		this->DetonateOnInterception = detonate;
 
 		if (pWeaponOverride)
@@ -80,6 +103,9 @@ void BulletExt::ExtData::InterceptBullet(TechnoClass* pSource, WeaponTypeClass* 
 				// Lose target if the current bullet is no longer interceptable.
 				if (!pTypeExt->Interceptable || (pTypeExt->Armor.isset() && GeneralUtils::GetWarheadVersusArmor(pWeapon->Warhead, pTypeExt->Armor.Get()) == 0.0))
 					pSource->SetTarget(nullptr);
+
+				if (pInterceptorType->ChangeOwner)
+					pThis->Owner = pSource;
 			}
 		}
 

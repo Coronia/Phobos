@@ -33,6 +33,8 @@ void BulletTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	INI_EX exINI(pINI);
 
 	this->Armor.Read(exINI, pSection, "Armor");
+	this->Cost.Read(exINI, pSection, "Cost");
+	this->Bounty_Value.Read(exINI, pSection, "Bounty.Value");
 	this->Interceptable.Read(exINI, pSection, "Interceptable");
 	this->Interceptable_DeleteOnIntercept.Read(exINI, pSection, "Interceptable.DeleteOnIntercept");
 	this->Interceptable_WeaponOverride.Read<true>(exINI, pSection, "Interceptable.WeaponOverride");
@@ -119,6 +121,8 @@ void BulletTypeExt::ExtData::Serialize(T& Stm)
 {
 	Stm
 		.Process(this->Armor)
+		.Process(this->Cost)
+		.Process(this->Bounty_Value)
 		.Process(this->Interceptable)
 		.Process(this->Interceptable_DeleteOnIntercept)
 		.Process(this->Interceptable_WeaponOverride)
