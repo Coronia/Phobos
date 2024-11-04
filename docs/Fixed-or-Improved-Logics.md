@@ -1130,6 +1130,15 @@ CrushOverlayExtraForwardTilt=0.02  ; floating point value
 CrushSlowdownMultiplier=0.2        ; floating point value
 ```
 
+### Customizable DefaultToGuardArea for Gunners
+- `DefaultToGuardArea` can be overridden for specific weapon modes of `Gunner=true` units by setting `DefaultToGuardArea.WeaponN` where `N` stands for 1-based weapon mode index. If not set, defaults to true if it's using `Weapon1`, or `DefaultToGuardArea` otherwise.
+
+In `rulesmd.ini`:
+```ini
+[SOMEVEHICLE]                      ; VehicleType
+DefaultToGuardArea.WeaponN=        ; boolean
+```
+
 ### Destroy animations
 
 - `DestroyAnim` has been extended to work with VehicleTypes, with option to pick random animation if `DestroyAnim.Random` is set to true. These animations store owner and facing information for use with [CreateUnit logic](New-or-Enhanced-Logics.md#anim-to-unit).
