@@ -251,6 +251,7 @@ This page lists all the individual contributions to the project by their author.
   - Build area customizations
   - `Scorch` / `Flamer` fire animation customization
   - EM Pulse cannon logic improvements
+  - `<Player @ X>` as owner for pre-placed objects
 - **Morton (MortonPL)**:
   - `XDrawOffset` for animations
   - Shield passthrough & absorption
@@ -331,6 +332,7 @@ This page lists all the individual contributions to the project by their author.
    - `InfDeath=9` versus jumpjet infantry 0 damage fix
    - Skip rally point line drawing when undeploying a building
    - Ares' `SW.Shots` hint on extended tooltips
+   - Customizable `DefaultToGuardArea` for Gunners
    - Misc code refactor & maintenance, CN doc fixes, bugfixes
 - **FlyStar**
    - Campaign load screen PCX support
@@ -363,7 +365,6 @@ This page lists all the individual contributions to the project by their author.
   - Flashing Technos on selecting
   - Promotion animation
 - **ZivDero**
-  - Allow giving ownership of buildings to players in Skirmish and MP using <Player @ A-H>
   - Re-enable the Veinhole Monster and Weeds from TS
   - Recreate the weed-charging of SWs like the TS Chemical Missile
   - Allow to change the speed of gas particles
@@ -372,6 +373,7 @@ This page lists all the individual contributions to the project by their author.
 - **Ollerus**
   - Build limit group enhancement
   - Customizable rocker amplitude
+  - Customizable `DefaultToGuardArea` for Gunners
 - **handama** - AI script action to jump back to previous script
 - **TaranDahl (航味麻酱)**
   - Skirmish AI "sell all buildings and set all technos to hunt" behavior dehardcode

@@ -126,7 +126,6 @@ This page describes all ingame logics that are fixed or improved in Phobos witho
 - Fixed `DeployToFire` not considering building placement rules for `DeploysInto` buildings and as a result not working properly with `WaterBound` buildings.
 - Fixed `DeployToFire` not recalculating firer's position on land if it cannot currently deploy.
 - `Arcing=true` projectile elevation inaccuracy can now be fixed by setting `Arcing.AllowElevationInaccuracy=false`.
-- You can now specify houses named `<Player @ A>` through `<Player @ H>` as the owner of TechnoTypes preplaced on the map in the editor, and they will be correctly given to players starting on points 1-8. Originally, it was only possible to use these house names in events, actions and teams.
 - Wall overlays are now drawn with the custom palette defined in `Palette` in `artmd.ini` if possible.
 - `Secondary` will now be used against walls if `Primary` weapon Warhead has `Wall=false`, `Secondary` has `Wall=true` and the firer does not have `NoSecondaryWeaponFallback` set to true.
 - Setting `ReloadInTransport` to true on units with `Ammo` will allow the ammo to be reloaded according to `Reload` or `EmptyReload` timers even while the unit is inside a transport.
@@ -174,6 +173,7 @@ This page describes all ingame logics that are fixed or improved in Phobos witho
 - Certain global tileset indices (`ShorePieces`, `WaterSet`, `CliffSet`, `WaterCliffs`, `WaterBridge`, `BridgeSet` and `WoodBridgeSet`) are now correctly parsed for Lunar theater.
 - Fixed infantry `SecondaryFire` / `SecondaryProne` sequences being displayed in water instead of `WetAttack`.
 - Fixed objects with ally target and `AttackFriendlies=true` having their target reset every frame, particularly AI-owned buildings.
+- `<Player @ X>` can now be used as owner for pre-placed objects on skirmish and multiplayer maps.
 
 ## Fixes / interactions with other extensions
 
@@ -1128,6 +1128,15 @@ TiltsWhenCrushes.Overlays=         ; boolean
 CrushForwardTiltPerFrame=          ; floating point value
 CrushOverlayExtraForwardTilt=0.02  ; floating point value
 CrushSlowdownMultiplier=0.2        ; floating point value
+```
+
+### Customizable DefaultToGuardArea for Gunners
+- `DefaultToGuardArea` can be overridden for specific weapon modes of `Gunner=true` units by setting `DefaultToGuardArea.WeaponN` where `N` stands for 1-based weapon mode index. If not set, defaults to true if it's using `Weapon1`, or `DefaultToGuardArea` otherwise.
+
+In `rulesmd.ini`:
+```ini
+[SOMEVEHICLE]                      ; VehicleType
+DefaultToGuardArea.WeaponN=        ; boolean
 ```
 
 ### Destroy animations

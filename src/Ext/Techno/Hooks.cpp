@@ -475,3 +475,23 @@ DEFINE_HOOK(0x70EFE0, TechnoClass_GetMaxSpeed, 0x6)
 	return SkipGameCode;
 }
 
+DEFINE_HOOK(0x738B90, UnitClass_EnterIdleMode_DefaultToGuardArea, 0x6)
+{
+	enum { SkipGameCode = 0x738B9C };
+
+    GET(UnitClass*, pThis, ESI);
+
+	auto const pType = pThis->GetTechnoType();
+	bool guardArea = pThis->Type->DefaultToGuardArea;
+
+	if (pType->Gunner)
+	{
+		auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
+		int weaponIndex = pThis->CurrentWeaponNumber;
+		guardArea = (weaponIndex == 1) ? true : guardArea;
+		guardArea = pTypeExt->DefaultToGuardArea_Weapon[weaponIndex].Get(guardArea);
+	}
+
+    R->CL(guardArea);
+    return SkipGameCode;
+}
