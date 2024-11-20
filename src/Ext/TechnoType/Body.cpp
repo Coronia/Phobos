@@ -572,16 +572,20 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	}
 
 	// Parasitic types
-	this->AttachEffects.LoadFromINI(pINI, pSection);
+	if (!this->AttachEffects)
+		this->AttachEffects = std::make_unique<AEAttachInfoTypeClass>();
 
-	auto [canParse, resetValue] = PassengerDeletionTypeClass::CanParse(exINI, pSection);
+	this->AttachEffects->LoadFromINI(pINI, pSection);
 
-	if (canParse && !this->PassengerDeletionType)
+	Nullable<int> passengerDeletionRate;
+	passengerDeletionRate.Read(exINI, pSection, "PassengerDeletion.Rate");
+
+	if (passengerDeletionRate.Get(0) > 0 && !this->PassengerDeletionType)
 		this->PassengerDeletionType = std::make_unique<PassengerDeletionTypeClass>(this->OwnerObject());
 
 	if (this->PassengerDeletionType)
 	{
-		if (resetValue)
+		if (passengerDeletionRate.isset() && passengerDeletionRate.Get(0) <= 0)
 			this->PassengerDeletionType.reset();
 		else
 			this->PassengerDeletionType->LoadFromINI(pINI, pSection);

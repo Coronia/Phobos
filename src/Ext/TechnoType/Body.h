@@ -213,7 +213,7 @@ public:
 		Valueable<WeaponTypeClass*> RevengeWeapon;
 		Valueable<AffectedHouse> RevengeWeapon_AffectsHouses;
 
-		AEAttachInfoTypeClass AttachEffects;
+		std::unique_ptr<AEAttachInfoTypeClass> AttachEffects;
 
 		ValueableVector<TechnoTypeClass*> BuildLimitGroup_Types;
 		ValueableVector<int> BuildLimitGroup_Nums;

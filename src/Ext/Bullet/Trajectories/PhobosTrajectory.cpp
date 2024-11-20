@@ -8,7 +8,7 @@
 #include "BombardTrajectory.h"
 #include "StraightTrajectory.h"
 
-TrajectoryTypePointer::TrajectoryTypePointer(TrajectoryFlag flag)
+TrajectoryTypePointer::TrajectoryTypePointer(TrajectoryFlag flag, double speed)
 {
 	switch (flag)
 	{
@@ -20,6 +20,9 @@ TrajectoryTypePointer::TrajectoryTypePointer(TrajectoryFlag flag)
 		return;
 	}
 	_ptr.reset();
+
+	if (speed > 0.0)
+		_ptr->Trajectory_Speed = speed;
 }
 
 namespace detail
@@ -56,8 +59,10 @@ void TrajectoryTypePointer::LoadFromINI(CCINIClass* pINI, const char* pSection)
 	flag.Read(exINI, pSection, "Trajectory");// I assume this shit is parsed once and only once, so I keep the impl here
 	if (flag.isset())
 	{
-		if (!_ptr || _ptr->Flag() != flag.Get())
+		if (!_ptr)
 			std::construct_at(this, flag.Get());
+		else if (_ptr->Flag() != flag.Get())
+			std::construct_at(this, flag.Get(), _ptr->Trajectory_Speed);// inherit speed
 	}
 	if (_ptr)
 	{

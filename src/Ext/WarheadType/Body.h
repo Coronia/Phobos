@@ -133,7 +133,7 @@ public:
 		ValueableVector<TechnoTypeClass*> DetonateOnAllMapObjects_IgnoreTypes;
 
 		std::vector<TypeConvertGroup> Convert_Pairs;
-		AEAttachInfoTypeClass AttachEffects;
+		std::unique_ptr<AEAttachInfoTypeClass> AttachEffects;
 
 		Valueable<bool> InflictLocomotor;
 		Valueable<bool> RemoveInflictedLocomotor;

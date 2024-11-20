@@ -3,18 +3,6 @@
 #include <Utilities/SavegameDef.h>
 #include <Utilities/TemplateDef.h>
 
-std::pair<bool, bool> PassengerDeletionTypeClass::CanParse(INI_EX exINI, const char* pSection)
-{
-	Nullable<int> rate;
-	rate.Read(exINI, pSection, "PassengerDeletion.Rate");
-	Nullable<bool> useCost;
-	useCost.Read(exINI, pSection, "PassengerDeletion.UseCostAsRate");
-
-	bool canParse = rate.Get(0) > 0 || useCost.Get(false);
-	bool shouldResetValue = rate.isset() && rate.Get() == 0 && !(useCost.isset() && useCost.Get());
-	return std::make_pair(canParse, shouldResetValue);
-}
-
 PassengerDeletionTypeClass::PassengerDeletionTypeClass(TechnoTypeClass* pOwnerType)
 	: OwnerType(pOwnerType)
 	, Rate { 0 }

@@ -167,7 +167,7 @@ void WarheadTypeExt::ExtData::DetonateOnOneUnit(HouseClass* pHouse, TechnoClass*
 	if (this->Convert_Pairs.size() > 0)
 		this->ApplyConvert(pHouse, pTarget);
 
-	if (this->AttachEffects.AttachTypes.size() > 0 || this->AttachEffects.RemoveTypes.size() > 0 || this->AttachEffects.RemoveGroups.size() > 0)
+	if (this->AttachEffects->AttachTypes.size() > 0 || this->AttachEffects->RemoveTypes.size() > 0 || this->AttachEffects->RemoveGroups.size() > 0)
 		this->ApplyAttachEffects(pTarget, pHouse, pOwner);
 
 #ifdef LOCO_TEST_WARHEADS
@@ -463,7 +463,7 @@ void WarheadTypeExt::ExtData::ApplyAttachEffects(TechnoClass* pTarget, HouseClas
 		return;
 
 	std::vector<int> dummy = std::vector<int>();
-	auto const& info = this->AttachEffects;
+	auto const info = this->AttachEffects.get();
 	AttachEffectClass::Attach(pTarget, pInvokerHouse, pInvoker, this->OwnerObject(), info);
 	AttachEffectClass::Detach(pTarget, info);
 	AttachEffectClass::DetachByGroups(pTarget, info);

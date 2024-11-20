@@ -888,7 +888,7 @@ void TechnoExt::ExtData::UpdateSelfOwnedAttachEffects()
 		auto const attachEffect = it->get();
 		auto const pType = attachEffect->GetType();
 		bool selfOwned = attachEffect->IsSelfOwned();
-		bool remove = selfOwned && !pTypeExt->AttachEffects.AttachTypes.Contains(pType);
+		bool remove = selfOwned && !pTypeExt->AttachEffects->AttachTypes.Contains(pType);
 
 		if (remove)
 		{
@@ -916,7 +916,7 @@ void TechnoExt::ExtData::UpdateSelfOwnedAttachEffects()
 	}
 
 	// Add new ones.
-	int count = AttachEffectClass::Attach(pThis, pThis->Owner, pThis, pThis, pTypeExt->AttachEffects);
+	int count = AttachEffectClass::Attach(pThis, pThis->Owner, pThis, pThis, pTypeExt->AttachEffects.get());
 
 	if (!count)
 		this->RecalculateStatMultipliers();
