@@ -36,9 +36,9 @@ public:
 	bool Load(PhobosStreamReader& Stm, bool RegisterForChange);
 	bool Save(PhobosStreamWriter& Stm) const;
 
-	static int Attach(TechnoClass* pTarget, HouseClass* pInvokerHouse, TechnoClass* pInvoker, AbstractClass* pSource, AEAttachInfoTypeClass const& attachEffectInfo);
-	static int Detach(TechnoClass* pTarget, AEAttachInfoTypeClass const& attachEffectInfo);
-	static int DetachByGroups(TechnoClass* pTarget, AEAttachInfoTypeClass const& attachEffectInfo);
+	static int Attach(TechnoClass* pTarget, HouseClass* pInvokerHouse, TechnoClass* pInvoker, AbstractClass* pSource, AEAttachInfoTypeClass* const attachEffectInfo);
+	static int Detach(TechnoClass* pTarget, AEAttachInfoTypeClass* const attachEffectInfo);
+	static int DetachByGroups(TechnoClass* pTarget, AEAttachInfoTypeClass* const attachEffectInfo);
 	static void TransferAttachedEffects(TechnoClass* pSource, TechnoClass* pTarget);
 
 private:
@@ -49,7 +49,7 @@ private:
 	static AttachEffectClass* CreateAndAttach(AttachEffectTypeClass* pType, TechnoClass* pTarget, std::vector<std::unique_ptr<AttachEffectClass>>& targetAEs, HouseClass* pInvokerHouse, TechnoClass* pInvoker,
 		AbstractClass* pSource, AEAttachParams const& attachInfo);
 
-	static int DetachTypes(TechnoClass* pTarget, AEAttachInfoTypeClass const& attachEffectInfo, std::vector<AttachEffectTypeClass*> const& types);
+	static int DetachTypes(TechnoClass* pTarget, AEAttachInfoTypeClass* const attachEffectInfo, std::vector<AttachEffectTypeClass*> const& types);
 	static int RemoveAllOfType(AttachEffectTypeClass* pType, TechnoClass* pTarget, int minCount, int maxCount);
 
 	template <typename T>

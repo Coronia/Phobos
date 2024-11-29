@@ -486,9 +486,9 @@ bool AttachEffectClass::IsFromSource(TechnoClass* pInvoker, AbstractClass* pSour
 /// <param name="pSource">Source object for the attachment e.g a Warhead or Techno.</param>
 /// <param name="attachEffectInfo">AttachEffect attach info.</param>
 /// <returns>Number of AttachEffect instances created and attached.</returns>
-int AttachEffectClass::Attach(TechnoClass* pTarget, HouseClass* pInvokerHouse, TechnoClass* pInvoker, AbstractClass* pSource, AEAttachInfoTypeClass const& attachEffectInfo)
+int AttachEffectClass::Attach(TechnoClass* pTarget, HouseClass* pInvokerHouse, TechnoClass* pInvoker, AbstractClass* pSource, AEAttachInfoTypeClass* const attachEffectInfo)
 {
-	auto const& types = attachEffectInfo.AttachTypes;
+	auto const& types = attachEffectInfo->AttachTypes;
 
 	if (types.size() < 1 || !pTarget)
 		return false;
@@ -502,7 +502,7 @@ int AttachEffectClass::Attach(TechnoClass* pTarget, HouseClass* pInvokerHouse, T
 	for (size_t i = 0; i < types.size(); i++)
 	{
 		auto const pType = types[i];
-		auto const params = attachEffectInfo.GetAttachParams(i, selfOwned);
+		auto const& params = attachEffectInfo->GetAttachParams(i, selfOwned);
 
 		if (auto const pAE = AttachEffectClass::CreateAndAttach(pType, pTarget, pTargetExt->AttachedEffects, pInvokerHouse, pInvoker, pSource, params))
 		{
@@ -644,12 +644,14 @@ AttachEffectClass* AttachEffectClass::CreateAndAttach(AttachEffectTypeClass* pTy
 /// <param name="pTarget">Target techno.</param>
 /// <param name="attachEffectInfo">AttachEffect attach info.</param>
 /// <returns>Number of AttachEffect instances removed.</returns>
-int AttachEffectClass::Detach(TechnoClass* pTarget, AEAttachInfoTypeClass const& attachEffectInfo)
+int AttachEffectClass::Detach(TechnoClass* pTarget, AEAttachInfoTypeClass* const attachEffectInfo)
 {
-	if (attachEffectInfo.RemoveTypes.size() < 1 || !pTarget)
+	auto const& types = attachEffectInfo->RemoveTypes;
+
+	if (types.size() < 1 || !pTarget)
 		return 0;
 
-	return DetachTypes(pTarget, attachEffectInfo, attachEffectInfo.RemoveTypes);
+	return DetachTypes(pTarget, attachEffectInfo, types);
 }
 
 /// <summary>
@@ -658,9 +660,9 @@ int AttachEffectClass::Detach(TechnoClass* pTarget, AEAttachInfoTypeClass const&
 /// <param name="pTarget">Target techno.</param>
 /// <param name="attachEffectInfo">AttachEffect attach info.</param>
 /// <returns>Number of AttachEffect instances removed.</returns>
-int AttachEffectClass::DetachByGroups(TechnoClass* pTarget, AEAttachInfoTypeClass const& attachEffectInfo)
+int AttachEffectClass::DetachByGroups(TechnoClass* pTarget, AEAttachInfoTypeClass* const attachEffectInfo)
 {
-	auto const& groups = attachEffectInfo.RemoveGroups;
+	auto const& groups = attachEffectInfo->RemoveGroups;
 
 	if (groups.size() < 1 || !pTarget)
 		return 0;
@@ -686,13 +688,13 @@ int AttachEffectClass::DetachByGroups(TechnoClass* pTarget, AEAttachInfoTypeClas
 /// <param name="attachEffectInfo">AttachEffect attach info.</param>
 /// <param name="types">AttachEffect types.</param>
 /// <returns>Number of AttachEffect instances removed.</returns>
-int AttachEffectClass::DetachTypes(TechnoClass* pTarget, AEAttachInfoTypeClass const& attachEffectInfo, std::vector<AttachEffectTypeClass*> const& types)
+int AttachEffectClass::DetachTypes(TechnoClass* pTarget, AEAttachInfoTypeClass* const attachEffectInfo, std::vector<AttachEffectTypeClass*> const& types)
 {
 	auto const pTargetExt = TechnoExt::ExtMap.Find(pTarget);
 	int detachedCount = 0;
 	bool markForRedraw = false;
-	auto const& minCounts = attachEffectInfo.CumulativeRemoveMinCounts;
-	auto const& maxCounts = attachEffectInfo.CumulativeRemoveMaxCounts;
+	auto const& minCounts = attachEffectInfo->CumulativeRemoveMinCounts;
+	auto const& maxCounts = attachEffectInfo->CumulativeRemoveMaxCounts;
 	size_t index = 0, minSize = minCounts.size(), maxSize = maxCounts.size();
 
 	for (auto const pType : types)

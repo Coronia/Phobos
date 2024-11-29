@@ -270,7 +270,10 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	TypeConvertGroup::Parse(this->Convert_Pairs, exINI, pSection, AffectedHouse::All);
 
 	// AttachEffect
-	this->AttachEffects.LoadFromINI(pINI, pSection);
+	if (!this->AttachEffects)
+		this->AttachEffects = std::make_unique<AEAttachInfoTypeClass>();
+
+	this->AttachEffects->LoadFromINI(pINI, pSection);
 
 #ifdef LOCO_TEST_WARHEADS // Enable warheads parsing
 	this->InflictLocomotor.Read(exINI, pSection, "InflictLocomotor");
@@ -315,9 +318,9 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 		|| this->Convert_Pairs.size() > 0
 		|| this->InflictLocomotor
 		|| this->RemoveInflictedLocomotor
-		|| this->AttachEffects.AttachTypes.size() > 0
-		|| this->AttachEffects.RemoveTypes.size() > 0
-		|| this->AttachEffects.RemoveGroups.size() > 0
+		|| this->AttachEffects->AttachTypes.size() > 0
+		|| this->AttachEffects->RemoveTypes.size() > 0
+		|| this->AttachEffects->RemoveGroups.size() > 0
 	);
 
 	char tempBuffer[32];

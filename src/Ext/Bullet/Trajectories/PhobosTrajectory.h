@@ -126,7 +126,7 @@ class TrajectoryTypePointer
 {
 	std::unique_ptr<PhobosTrajectoryType> _ptr {};
 public:
-	explicit TrajectoryTypePointer(TrajectoryFlag flag);
+	explicit TrajectoryTypePointer(TrajectoryFlag flag, double speed = 0.0);
 	explicit TrajectoryTypePointer() { }
 	TrajectoryTypePointer(const TrajectoryTypePointer&) = delete;
 	TrajectoryTypePointer& operator=(const TrajectoryTypePointer&) = delete;
