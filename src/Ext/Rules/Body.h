@@ -165,6 +165,9 @@ public:
 		Valueable<int> CombatLightDetailLevel;
 		Valueable<int> LightFlashAlphaImageDetailLevel;
 
+		ValueableVector<BuildingTypeClass*> BountyEnablers_Interceptor;
+		Valueable<bool> BountyDisplay_Interceptor;
+
 		ExtData(RulesClass* OwnerObject) : Extension<RulesClass>(OwnerObject)
 			, Storage_TiberiumIndex { -1 }
 			, InfantryGainSelfHealCap {}
@@ -284,6 +287,9 @@ public:
 			, WarheadParticleAlphaImageIsLightFlash { false }
 			, CombatLightDetailLevel { 0 }
 			, LightFlashAlphaImageDetailLevel { 0 }
+
+			, BountyEnablers_Interceptor {}
+			, BountyDisplay_Interceptor { false }
 		{ }
 
 		virtual ~ExtData() = default;

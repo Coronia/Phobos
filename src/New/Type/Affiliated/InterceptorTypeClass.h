@@ -23,6 +23,10 @@ public:
 	Valueable<bool> WeaponCumulativeDamage;
 	Valueable<bool> KeepIntact;
 	Nullable<bool> DeleteOnIntercept;
+	Valueable<bool> ChangeOwner;
+	Valueable<bool> Bounty;
+	Nullable<bool> Bounty_Display;
+	Valueable<double> Experience_FromInterceptor;
 
 	void LoadFromINI(CCINIClass* pINI, const char* pSection);
 	bool Load(PhobosStreamReader& stm, bool registerForChange);

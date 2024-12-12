@@ -691,6 +691,11 @@ OnlyUseLandSequences=false  ; boolean
     - On interceptors, `Interceptor.WeaponReplaceProjectile` can be set to true to make `Interceptor.WeaponOverride` also replace the intercepted projectile's type (including `Image` and other projectile characteristics) and `Speed` with its own. Does not replace particle systems (`AttachedSystem`, *Ares feature*).
     - On interceptors, `Interceptor.WeaponCumulativeDamage` can be set to true to make `Damage` from `Interceptor.WeaponOverride` weapon be added on the projectile's damage rather than override it.
   - `Interceptor.KeepIntact` can be set to true to allow intercepted projectiles to continue traveling as if they were not intercepted, but effects such as `Interceptor.WeaponOverride` will still be applied.
+  - `Interceptor.ChangeOwner` can be set to true to change the intercepted projectiles' `Owner` into the interceptor TechnoType.
+  - `Interceptor.Bounty` can be set to true to allow the interceptor TechnoType's house to acquire a certain amount of credits if it destroys an enemy projectile. Credits amount is determined by the projectile's `Bounty.Value`.
+    - `BountyEnablers.Intercpetor` in `[General]` can define a list of building types. Bounty will only be enabled if the interceptor TechnoType's house owns a building in the list. If the list is empty, bounty will always be enabled.
+    - `Interceptor.Bounty.Display` can be set to true to display the amount of credits being acquired, default to `BountyDisplay.Intercpetor` in `[AudioVisual]`. This is displayed to all houses and without offset like Ares's `Bounty.Display` did.
+  - `Experience.FromInterceptor` can be set to allow the interceptor TechnoType to gain a percentage of experience based on an enemy projectile's `Cost`, if the said projectile is destroyed.
 
 In `rulesmd.ini`:
 ```ini
@@ -709,13 +714,25 @@ Interceptor.WeaponOverride=                ; WeaponType
 Interceptor.WeaponReplaceProjectile=false  ; boolean
 Interceptor.WeaponCumulativeDamage=false   ; boolean
 Interceptor.KeepIntact=false               ; boolean
+Interceptor.ChangeOwner=false              ; boolean
+Interceptor.Bounty=false                   ; boolean
+Interceptor.Bounty.Display=                ; boolean
+Experience.FromInterceptor=0.0             ; floating point value, percents or absolute
 
-[SOMEPROJECTILE] ; Projectile
+[SOMEPROJECTILE]                       ; Projectile
 Interceptable=false                    ; boolean
 Interceptable.DeleteOnIntercept=false  ; boolean
 Interceptable.WeaponOverride=          ; WeaponType
 Strength=0                             ; integer
 Armor=                                 ; ArmorType
+Cost=0                                 ; integer
+Bounty.Value=0                         ; integer
+
+[General]
+BountyEnablers.Intercpetor=            ; List of BuildingTypes
+
+[AudioVisual]
+BountyDisplay.Intercpetor=false        ; boolean
 ```
 
 ```{note}

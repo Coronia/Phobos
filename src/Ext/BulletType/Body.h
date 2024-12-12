@@ -22,6 +22,8 @@ public:
 	public:
 		// Valueable<int> Strength; //Use OwnerObject()->ObjectTypeClass::Strength
 		Nullable<ArmorType> Armor;
+		Valueable<int> Cost;
+		Valueable<int> Bounty_Value;
 		Valueable<bool> Interceptable;
 		Valueable<bool> Interceptable_DeleteOnIntercept;
 		Valueable<WeaponTypeClass*> Interceptable_WeaponOverride;
@@ -64,6 +66,8 @@ public:
 
 		ExtData(BulletTypeClass* OwnerObject) : Extension<BulletTypeClass>(OwnerObject)
 			, Armor {}
+			, Cost { 0 }
+			, Bounty_Value { 0 }
 			, Interceptable { false }
 			, Interceptable_DeleteOnIntercept { false }
 			, Interceptable_WeaponOverride {}
