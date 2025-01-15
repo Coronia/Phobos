@@ -335,17 +335,25 @@ void WarheadTypeExt::ExtData::ApplyCrit(HouseClass* pHouse, TechnoClass* pTarget
 			int idx = this->OwnerObject()->EMEffect || this->Crit_AnimList_PickRandom.Get(false) ?
 				ScenarioClass::Instance->Random.RandomRanged(0, this->Crit_AnimList.size() - 1) : 0;
 
-			auto const pAnim = GameCreate<AnimClass>(this->Crit_AnimList[idx], pTarget->Location);
-			pAnim->Owner = pHouse;
-			AnimExt::ExtMap.Find(pAnim)->SetInvoker(pOwner, pHouse);
+			if (auto const pAnim = GameCreate<AnimClass>(this->Crit_AnimList[idx], pTarget->Location))
+			{
+				AnimExt::SetAnimOwnerHouseKind(pAnim, pHouse, nullptr, false, true);
+
+				if (auto const pAnimExt = AnimExt::ExtMap.Find(pAnim))
+					pAnimExt->SetInvoker(pOwner, pHouse);
+			}
 		}
 		else
 		{
 			for (auto const& pType : this->Crit_AnimList)
 			{
-				auto const pAnim = GameCreate<AnimClass>(pType, pTarget->Location);
-				pAnim->Owner = pHouse;
-				AnimExt::ExtMap.Find(pAnim)->SetInvoker(pOwner, pHouse);
+				if (auto const pAnim = GameCreate<AnimClass>(pType, pTarget->Location))
+				{
+					AnimExt::SetAnimOwnerHouseKind(pAnim, pHouse, nullptr, false, true);
+
+					if (auto const pAnimExt = AnimExt::ExtMap.Find(pAnim))
+						pAnimExt->SetInvoker(pOwner, pHouse);
+				}
 			}
 		}
 	}

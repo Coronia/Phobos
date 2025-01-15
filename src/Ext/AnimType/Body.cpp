@@ -53,13 +53,23 @@ void AnimTypeExt::ProcessDestroyAnims(UnitClass* pThis, TechnoClass* pKiller)
 			//auto VictimOwner = pThis->IsMindControlled() && pThis->GetOriginalOwner()
 			//	? pThis->GetOriginalOwner() : pThis->Owner;
 
-			auto const pAnimTypeExt = AnimTypeExt::ExtMap.Find(pAnim->Type);
-			auto const pAnimExt = AnimExt::ExtMap.Find(pAnim);
+			if (!pAnim)
+				return;
 
 			AnimExt::SetAnimOwnerHouseKind(pAnim, pInvoker, pThis->Owner);
 
+			auto const pAnimExt = AnimExt::ExtMap.Find(pAnim);
+
+			if (!pAnimExt)
+				return;
+
 			pAnimExt->SetInvoker(pThis);
 			pAnimExt->FromDeathUnit = true;
+
+			auto const pAnimTypeExt = AnimTypeExt::ExtMap.Find(pAnim->Type);
+
+			if (!pAnimTypeExt)
+				return;
 
 			if (pAnimTypeExt->CreateUnit_InheritDeathFacings.Get())
 				pAnimExt->DeathUnitFacing = facing;

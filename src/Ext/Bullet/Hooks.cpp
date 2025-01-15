@@ -103,12 +103,14 @@ DEFINE_HOOK(0x466897, BulletClass_AI_Trailer, 0x6)
 	GET(BulletClass*, pThis, EBP);
 	GET_STACK(CoordStruct, coords, STACK_OFFSET(0x1A8, -0x184));
 
-	auto const pTrailerAnim = GameCreate<AnimClass>(pThis->Type->Trailer, coords, 1, 1);
+	if (auto const pTrailerAnim = GameCreate<AnimClass>(pThis->Type->Trailer, coords, 1, 1))
+	{
+		auto const pOwner = pThis->Owner ? pThis->Owner->Owner : BulletAITemp::ExtData->FirerHouse;
+		AnimExt::SetAnimOwnerHouseKind(pTrailerAnim, pOwner, nullptr, false, true);
 
-	auto const pTrailerAnimExt = AnimExt::ExtMap.Find(pTrailerAnim);
-	auto const pOwner = pThis->Owner ? pThis->Owner->Owner : BulletAITemp::ExtData->FirerHouse;
-	AnimExt::SetAnimOwnerHouseKind(pTrailerAnim, pOwner, nullptr, false, true);
-	pTrailerAnimExt->SetInvoker(pThis->Owner);
+		if (auto const pTrailerExt = AnimExt::ExtMap.Find(pTrailerAnim))
+			pTrailerExt->SetInvoker(pThis->Owner);
+	}
 
 	return SkipGameCode;
 }

@@ -91,7 +91,10 @@ DEFINE_HOOK(0x423420, AnimClass_Draw_TintColor, 0x6)
 	REF_STACK(int, intensity, STACK_OFFSET(0x110, -0xD8));
 
 	if (!pBuilding)
-		pBuilding = AnimExt::ExtMap.Find(pThis)->ParentBuilding;
+	{
+		if (const auto pExt = AnimExt::ExtMap.Find(pThis))
+			pBuilding = pExt->ParentBuilding;
+	}
 
 	if (pBuilding)
 	{

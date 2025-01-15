@@ -176,8 +176,8 @@ DEFINE_HOOK(0x469E34, BulletClass_Logics_DebrisAnims, 0x5)
 		int debrisIndex = ScenarioClass::Instance->Random.RandomRanged(0, debrisAnims.size() - 1);
 		auto const pAnim = GameCreate<AnimClass>(debrisAnims[debrisIndex], pThis->GetCoords());
 
-		if (pThis->Owner)
-			pAnim->Owner = pThis->Owner->Owner;
+		if (pAnim && pThis->Owner)
+			AnimExt::SetAnimOwnerHouseKind(pAnim, pThis->Owner->Owner, nullptr, false, true);
 
 		debrisCount--;
 	}
@@ -267,17 +267,16 @@ DEFINE_HOOK(0x469C46, BulletClass_Logics_DamageAnimSelected, 0x8)
 					animCoords = MapClass::GetRandomCoordsNear(animCoords, distance, false);
 				}
 
-				auto const pAnim = GameCreate<AnimClass>(pType, animCoords, 0, 1, 0x2600, -15, false);
-				createdAnim = true;
-				AnimExt::SetAnimOwnerHouseKind(pAnim, pInvoker, pVictim, pInvoker);
-
-				if (!pAnim->Owner)
-					pAnim->Owner = pInvoker;
-
-				if (pThis->Owner)
+				if (auto const pAnim = GameCreate<AnimClass>(pType, animCoords, 0, 1, 0x2600, -15, false))
 				{
-					auto pExt = AnimExt::ExtMap.Find(pAnim);
-					pExt->SetInvoker(pThis->Owner);
+					createdAnim = true;
+					AnimExt::SetAnimOwnerHouseKind(pAnim, pInvoker, pVictim, pInvoker);
+
+					if (!pAnim->Owner)
+						pAnim->Owner = pInvoker;
+
+					if (pThis->Owner)
+						AnimExt::ExtMap.Find(pAnim)->SetInvoker(pThis->Owner);
 				}
 			}
 		}
