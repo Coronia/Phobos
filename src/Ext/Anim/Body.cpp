@@ -202,8 +202,8 @@ void AnimExt::HandleDebrisImpact(AnimTypeClass* pExpireAnim, AnimTypeClass* pWak
 
 		if (pExpireAnim)
 		{
-			auto pAnim = GameCreate<AnimClass>(pExpireAnim, nLocation, 0, 1, 0x2600u, 0, 0);
-			AnimExt::SetAnimOwnerHouseKind(pAnim, pOwner, nullptr, false, true);
+			if (auto pAnim = GameCreate<AnimClass>(pExpireAnim, nLocation, 0, 1, 0x2600u, 0, 0))
+				AnimExt::SetAnimOwnerHouseKind(pAnim, pOwner, nullptr, false, true);
 		}
 	}
 	else
@@ -227,14 +227,14 @@ void AnimExt::HandleDebrisImpact(AnimTypeClass* pExpireAnim, AnimTypeClass* pWak
 
 	if (pWakeAnimToUse)
 	{
-		auto const pWakeAnimCreated = GameCreate<AnimClass>(pWakeAnimToUse, nLocation, 0, 1, 0x600u, false);
-		AnimExt::SetAnimOwnerHouseKind(pWakeAnimCreated, pOwner, nullptr, false, true);
+		if (auto const pWakeAnimCreated = GameCreate<AnimClass>(pWakeAnimToUse, nLocation, 0, 1, 0x600u, false))
+			AnimExt::SetAnimOwnerHouseKind(pWakeAnimCreated, pOwner, nullptr, false, true);
 	}
 
 	if (pSplashAnimToUse)
 	{
-		auto const pSplashAnimCreated = GameCreate<AnimClass>(pSplashAnimToUse, nLocation, 0, 1, 0x600u, false);
-		AnimExt::SetAnimOwnerHouseKind(pSplashAnimCreated, pOwner, nullptr, false, true);
+		if (auto const pSplashAnimCreated = GameCreate<AnimClass>(pSplashAnimToUse, nLocation, 0, 1, 0x600u, false))
+			AnimExt::SetAnimOwnerHouseKind(pSplashAnimCreated, pOwner, nullptr, false, true);
 	}
 }
 
@@ -244,6 +244,9 @@ void AnimExt::SpawnFireAnims(AnimClass* pThis)
 	auto const pExt = AnimExt::ExtMap.Find(pThis);
 	auto const pTypeExt = AnimTypeExt::ExtMap.Find(pType);
 	auto const coords = pThis->GetCoords();
+
+	if (!pTypeExt)
+		return;
 
 	auto SpawnAnim = [&coords, pThis, pExt](AnimTypeClass* pType, int distance, bool constrainToCellSpots, bool attach)
 		{
@@ -262,10 +265,13 @@ void AnimExt::SpawnFireAnims(AnimClass* pThis)
 
 			auto const loopCount = ScenarioClass::Instance->Random.RandomRanged(1, 2);
 			auto const pAnim = GameCreate<AnimClass>(pType, newCoords, 0, loopCount, 0x600u, 0, false);
-			pAnim->Owner = pThis->Owner;
-			auto const pExtNew = AnimExt::ExtMap.Find(pAnim);
-			pExtNew->Invoker = pExt->Invoker;
-			pExtNew->InvokerHouse = pExt->InvokerHouse;
+			AnimExt::SetAnimOwnerHouseKind(pAnim, pThis->Owner, nullptr, false, true);
+
+			if (pExt)
+			{
+				if (auto const pAnimExt = AnimExt::ExtMap.Find(pAnim))
+					pAnimExt->SetInvoker(pExt->Invoker, pExt->InvokerHouse);
+			}
 
 			if (attach && pThis->OwnerObject)
 				pAnim->SetOwnerObject(pThis->OwnerObject);

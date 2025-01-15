@@ -687,10 +687,11 @@ void ShieldClass::BreakShield(AnimTypeClass* pBreakAnim, WeaponTypeClass* pBreak
 
 		if (pAnimType)
 		{
-			auto const pAnim = GameCreate<AnimClass>(pAnimType, this->Techno->Location);
-
-			pAnim->SetOwnerObject(this->Techno);
-			pAnim->Owner = this->Techno->Owner;
+			if (auto const pAnim = GameCreate<AnimClass>(pAnimType, this->Techno->Location))
+			{
+				pAnim->SetOwnerObject(this->Techno);
+				AnimExt::SetAnimOwnerHouseKind(pAnim, this->Techno->Owner, nullptr, false, true);
+			}
 		}
 	}
 
@@ -776,12 +777,13 @@ void ShieldClass::CreateAnim()
 
 	if (!this->IdleAnim && idleAnimType)
 	{
-		auto const pAnim = GameCreate<AnimClass>(idleAnimType, this->Techno->Location);
-
-		pAnim->SetOwnerObject(this->Techno);
-		AnimExt::SetAnimOwnerHouseKind(pAnim, this->Techno->Owner, nullptr, false, true);
-		pAnim->RemainingIterations = 0xFFu;
-		this->IdleAnim = pAnim;
+		if (auto const pAnim = GameCreate<AnimClass>(idleAnimType, this->Techno->Location))
+		{
+			pAnim->SetOwnerObject(this->Techno);
+			AnimExt::SetAnimOwnerHouseKind(pAnim, this->Techno->Owner, nullptr, false, true);
+			pAnim->RemainingIterations = 0xFFu;
+			this->IdleAnim = pAnim;
+		}
 	}
 }
 

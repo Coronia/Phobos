@@ -14,7 +14,7 @@ DEFINE_HOOK(0x74A70E, VoxelAnimClass_AI_Additional, 0xC)
 	//auto pTypeExt = VoxelAnimTypeExt::ExtMap.Find(pThis->Type);
 	auto pThisExt = VoxelAnimExt::ExtMap.Find(pThis);
 
-	if (!pThisExt->LaserTrails.empty())
+	if (pThisExt && !pThisExt->LaserTrails.empty())
 	{
 		CoordStruct location = pThis->GetCoords();
 		CoordStruct drawnCoords = location;

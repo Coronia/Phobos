@@ -98,16 +98,18 @@ DEFINE_HOOK(0x42453E, AnimClass_AI_Damage, 0x6)
 
 	if (pTypeExt->Damage_DealtByInvoker)
 	{
-		auto const pExt = AnimExt::ExtMap.Find(pThis);
-		pInvoker = pExt->Invoker;
-		pOwner = pExt->InvokerHouse;
-
-		if (!pInvoker)
+		if (auto const pExt = AnimExt::ExtMap.Find(pThis))
 		{
-			pInvoker = pThis->OwnerObject ? abstract_cast<TechnoClass*>(pThis->OwnerObject) : nullptr;
+			pInvoker = pExt->Invoker;
+			pOwner = pExt->InvokerHouse;
 
-			if (pInvoker && !pOwner)
-				pOwner = pInvoker->Owner;
+			if (!pInvoker)
+			{
+				pInvoker = pThis->OwnerObject ? abstract_cast<TechnoClass*>(pThis->OwnerObject) : nullptr;
+
+				if (pInvoker && !pOwner)
+					pOwner = pInvoker->Owner;
+			}
 		}
 	}
 
@@ -133,8 +135,11 @@ DEFINE_HOOK(0x42453E, AnimClass_AI_Damage, 0x6)
 			}
 			else if (pThis->IsBuildingAnim)
 			{
-				auto const pBuilding = AnimExt::ExtMap.Find(pThis)->ParentBuilding;
-				pOwner = pBuilding ? pBuilding->Owner : nullptr;
+				if (auto const pAnimExt = AnimExt::ExtMap.Find(pThis))
+				{
+					auto const pBuilding = pAnimExt->ParentBuilding;
+					pOwner = pBuilding ? pBuilding->Owner : nullptr;
+				}
 			}
 		}
 
@@ -181,11 +186,13 @@ DEFINE_HOOK(0x4242E1, AnimClass_AI_TrailerAnim, 0x5)
 	GET(AnimClass*, pThis, ESI);
 
 	auto const pTrailerAnim = GameCreate<AnimClass>(pThis->Type->TrailerAnim, pThis->GetCoords(), 1, 1);
-
-	auto const pTrailerAnimExt = AnimExt::ExtMap.Find(pTrailerAnim);
-	auto const pExt = AnimExt::ExtMap.Find(pThis);
 	AnimExt::SetAnimOwnerHouseKind(pTrailerAnim, pThis->Owner, nullptr, false, true);
-	pTrailerAnimExt->SetInvoker(pExt->Invoker, pExt->InvokerHouse);
+
+	if (auto const pExt = AnimExt::ExtMap.Find(pThis))
+	{
+		if (auto const pTrailerExt = AnimExt::ExtMap.Find(pTrailerAnim))
+			pTrailerExt->SetInvoker(pExt->Invoker, pExt->InvokerHouse);
+	}
 
 	return SkipGameCode;
 }
@@ -195,7 +202,8 @@ DEFINE_HOOK(0x423939, AnimClass_BounceAI_AttachedSystem, 0x6)
 {
 	GET(AnimClass*, pThis, EBP);
 
-	AnimExt::ExtMap.Find(pThis)->CreateAttachedSystem();
+	if (auto const pExt = AnimExt::ExtMap.Find(pThis))
+		pExt->CreateAttachedSystem();
 
 	return 0;
 }
@@ -237,6 +245,9 @@ DEFINE_HOOK(0x424807, AnimClass_AI_Next, 0x6)
 
 	const auto pExt = AnimExt::ExtMap.Find(pThis);
 	const auto pTypeExt = AnimTypeExt::ExtMap.Find(pThis->Type);
+
+	if (!pExt || !pTypeExt)
+		return 0;
 
 	if (pExt->AttachedSystem && pExt->AttachedSystem->Type != pTypeExt->AttachedSystem.Get())
 		pExt->DeleteAttachedSystem();
@@ -380,7 +391,7 @@ DEFINE_HOOK(0x423061, AnimClass_DrawIt_Visibility, 0x6)
 	{
 		auto const pExt = AnimExt::ExtMap.Find(pThis);
 
-		if (pExt->IsTechnoTrailerAnim)
+		if (pExt && pExt->IsTechnoTrailerAnim)
 			pTechno = pExt->Invoker;
 	}
 
@@ -398,12 +409,13 @@ DEFINE_HOOK(0x423061, AnimClass_DrawIt_Visibility, 0x6)
 
 	if (pTypeExt->VisibleTo_ConsiderInvokerAsOwner)
 	{
-		auto const pExt = AnimExt::ExtMap.Find(pThis);
-
-		if (pExt->Invoker)
-			pOwner = pExt->Invoker->Owner;
-		else if (pExt->InvokerHouse)
-			pOwner = pExt->InvokerHouse;
+		if (auto const pExt = AnimExt::ExtMap.Find(pThis))
+		{
+			if (pExt->Invoker)
+				pOwner = pExt->Invoker->Owner;
+			else if (pExt->InvokerHouse)
+				pOwner = pExt->InvokerHouse;
+		}
 	}
 
 	if (!HouseClass::IsCurrentPlayerObserver() && !EnumFunctions::CanTargetHouse(pTypeExt->VisibleTo, pCurrentHouse, pOwner))

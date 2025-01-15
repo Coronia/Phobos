@@ -305,19 +305,20 @@ void AttachEffectClass::CreateAnim()
 
 	if (!this->Animation && pAnimType)
 	{
-		auto const pAnim = GameCreate<AnimClass>(pAnimType, this->Techno->Location);
-
-		pAnim->SetOwnerObject(this->Techno);
-		pAnim->Owner = this->Type->Animation_UseInvokerAsOwner ? InvokerHouse : this->Techno->Owner;
-		pAnim->RemainingIterations = 0xFFu;
-		this->Animation = pAnim;
-
-		if (this->Type->Animation_UseInvokerAsOwner)
+		if (auto const pAnim = GameCreate<AnimClass>(pAnimType, this->Techno->Location))
 		{
-			auto const pAnimExt = AnimExt::ExtMap.Find(pAnim);
-			pAnimExt->SetInvoker(Invoker);
-		}
+			pAnim->SetOwnerObject(this->Techno);
+			auto const pHouse = this->Type->Animation_UseInvokerAsOwner ? InvokerHouse : this->Techno->Owner;
+			AnimExt::SetAnimOwnerHouseKind(pAnim, pHouse, nullptr, false, true);
+			pAnim->RemainingIterations = 0xFFu;
+			this->Animation = pAnim;
 
+			if (this->Type->Animation_UseInvokerAsOwner)
+			{
+				if (auto const pAnimExt = AnimExt::ExtMap.Find(pAnim))
+					pAnimExt->SetInvoker(Invoker);
+			}
+		}
 	}
 }
 

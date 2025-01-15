@@ -506,19 +506,17 @@ static DamageAreaResult __fastcall _BombClass_Detonate_DamageArea
 
 	if (auto pAnimType = MapClass::SelectDamageAnimation(nDamage, pWarhead, nLandType, nCoord))
 	{
-		auto pAnim = GameCreate<AnimClass>(pAnimType, nCoord, 0, 1, 0x2600, -15, false);
-
-		AnimExt::SetAnimOwnerHouseKind(pAnim, pThisBomb->OwnerHouse,
-			pThisBomb->Target ? pThisBomb->Target->GetOwningHouse() : nullptr, false);
-
-		if (!pAnim->Owner)
+		if (auto pAnim = GameCreate<AnimClass>(pAnimType, nCoord, 0, 1, 0x2600, -15, false))
 		{
-			pAnim->Owner = pThisBomb->OwnerHouse;
+			AnimExt::SetAnimOwnerHouseKind(pAnim, pThisBomb->OwnerHouse,
+				pThisBomb->Target ? pThisBomb->Target->GetOwningHouse() : nullptr, false);
+
+			if (!pAnim->Owner)
+				pAnim->Owner = pThisBomb->OwnerHouse;
+
+			if (const auto pExt = AnimExt::ExtMap.Find(pAnim))
+				pExt->SetInvoker(pThisBomb->Owner);
 		}
-
-		if (const auto pExt = AnimExt::ExtMap.Find(pAnim))
-			pExt->SetInvoker(pThisBomb->Owner);
-
 	}
 
 	return nDamageAreaResult;

@@ -36,13 +36,20 @@ TechnoExt::ExtData::~ExtData()
 
 bool TechnoExt::IsActive(TechnoClass* pThis)
 {
+	return IsMostlyActive(pThis)
+		&& !pThis->Deactivated
+		&& !pThis->IsUnderEMP()
+		;
+}
+
+bool TechnoExt::IsMostlyActive(TechnoClass* pThis)
+{
 	return pThis
 		&& pThis->IsAlive
 		&& pThis->Health > 0
 		&& !pThis->InLimbo
 		&& !pThis->TemporalTargetingMe
 		&& !pThis->BeingWarpedOut
-		&& !pThis->IsUnderEMP()
 		;
 }
 
