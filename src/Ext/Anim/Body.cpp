@@ -383,7 +383,8 @@ void AnimExt::InvalidateTechnoPointers(TechnoClass* pTechno)
 		if (!pExt)
 		{
 			auto const ID = pAnim->Type ? pAnim->Type->get_ID() : "N/A";
-			Debug::FatalErrorAndExit(__FUNCTION__": Animation of type[%s] has no ExtData!", ID);
+			auto const technoID = pTechno->GetTechnoType()->get_ID();
+			Debug::FatalErrorAndExit(__FUNCTION__": Animation has no ExtData! Techno is [%s]", technoID);
 		}
 
 		if (pExt->Invoker == pTechno)
@@ -403,7 +404,8 @@ void AnimExt::InvalidateParticleSystemPointers(ParticleSystemClass* pParticleSys
 		if (!pExt)
 		{
 			auto const ID = pAnim->Type ? pAnim->Type->get_ID() : "N/A";
-			Debug::FatalErrorAndExit(__FUNCTION__": Animation of type[%s] has no ExtData!", ID);
+			auto const particleID = pParticleSystem->Type->get_ID();
+			Debug::FatalErrorAndExit(__FUNCTION__": Animation has no ExtData! Particle system is [%s]", particleID);
 		}
 
 		if (pExt->AttachedSystem == pParticleSystem)
