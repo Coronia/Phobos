@@ -11,6 +11,7 @@
 #include <Ext/BuildingType/Body.h>
 #include <Ext/BulletType/Body.h>
 #include <Ext/Techno/Body.h>
+#include <New/Type/InsigniaTypeClass.h>
 
 #include <Utilities/GeneralUtils.h>
 
@@ -403,9 +404,23 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->DeployFireWeapon.Read(exINI, pSection, "DeployFireWeapon");
 	this->TargetZoneScanType.Read(exINI, pSection, "TargetZoneScanType");
 
-	this->Insignia.Read(exINI, pSection, "Insignia.%s");
-	this->InsigniaFrames.Read(exINI, pSection, "InsigniaFrames");
-	this->InsigniaFrame.Read(exINI, pSection, "InsigniaFrame.%s");
+	// insignia type
+	Nullable<InsigniaTypeClass*> InsigniaType;
+	InsigniaType.Read(exINI, pSection, "InsigniaType");
+
+	if (InsigniaType.isset())
+	{
+		this->Insignia = InsigniaType.Get()->Insignia;
+		this->InsigniaFrame = InsigniaType.Get()->InsigniaFrame;
+		this->InsigniaFrames = Vector3D<int>(-1, -1, -1); // override it so only InsigniaFrame will be used
+	}
+	else
+	{
+		this->Insignia.Read(exINI, pSection, "Insignia.%s");
+		this->InsigniaFrames.Read(exINI, pSection, "InsigniaFrames");
+		this->InsigniaFrame.Read(exINI, pSection, "InsigniaFrame.%s");
+	}
+
 	this->Insignia_ShowEnemy.Read(exINI, pSection, "Insignia.ShowEnemy");
 
 	this->TiltsWhenCrushes_Vehicles.Read(exINI, pSection, "TiltsWhenCrushes.Vehicles");
@@ -458,6 +473,11 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->Wake_Grapple.Read(exINI, pSection, "Wake.Grapple");
 	this->Wake_Sinking.Read(exINI, pSection, "Wake.Sinking");
 
+	this->KeepTargetOnMove.Read(exINI, pSection, "KeepTargetOnMove");
+	this->KeepTargetOnMove_ExtraDistance.Read(exINI, pSection, "KeepTargetOnMove.ExtraDistance");
+
+	this->Power.Read(exINI, pSection, "Power");
+
 	// Ares 0.2
 	this->RadarJamRadius.Read(exINI, pSection, "RadarJamRadius");
 
@@ -474,30 +494,40 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 
 	char tempBuffer[32];
 
-	if (this->OwnerObject()->Gunner && this->Insignia_Weapon.empty())
+	if (this->OwnerObject()->Gunner)
 	{
-		int weaponCount = this->OwnerObject()->WeaponCount;
-		this->Insignia_Weapon.resize(weaponCount);
-		this->InsigniaFrame_Weapon.resize(weaponCount);
-		this->InsigniaFrames_Weapon.resize(weaponCount);
+		size_t weaponCount = this->OwnerObject()->WeaponCount;
+
+		if (this->Insignia_Weapon.empty() || this->Insignia_Weapon.size() != weaponCount)
+		{
+			this->Insignia_Weapon.resize(weaponCount);
+			this->InsigniaFrame_Weapon.resize(weaponCount);
+			this->InsigniaFrames_Weapon.resize(weaponCount);
+		}
 
 		for (int i = 0; i < weaponCount; i++)
 		{
-			Promotable<SHPStruct*> insignia;
-			_snprintf_s(tempBuffer, sizeof(tempBuffer), "Insignia.Weapon%d.%s", i + 1, "%s");
-			insignia.Read(exINI, pSection, tempBuffer);
-			this->Insignia_Weapon[i] = insignia;
+			Nullable<InsigniaTypeClass*> InsigniaType_Weapon;
+			_snprintf_s(tempBuffer, sizeof(tempBuffer), "InsigniaType.Weapon%d", i + 1);
+			InsigniaType_Weapon.Read(exINI, pSection, tempBuffer);
 
-			Promotable<int> frame = Promotable<int>(-1);
-			_snprintf_s(tempBuffer, sizeof(tempBuffer), "InsigniaFrame.Weapon%d.%s", i + 1, "%s");
-			frame.Read(exINI, pSection, tempBuffer);
-			this->InsigniaFrame_Weapon[i] = frame;
+			if (InsigniaType_Weapon.isset())
+			{
+				this->Insignia_Weapon[i] = InsigniaType_Weapon.Get()->Insignia;
+				this->InsigniaFrame_Weapon[i] = InsigniaType_Weapon.Get()->InsigniaFrame;
+				this->InsigniaFrames_Weapon[i] = Vector3D<int>(-1, -1, -1); // override it so only InsigniaFrame will be used
+			}
+			else
+			{
+				_snprintf_s(tempBuffer, sizeof(tempBuffer), "Insignia.Weapon%d.%s", i + 1, "%s");
+				this->Insignia_Weapon[i].Read(exINI, pSection, tempBuffer);
 
-			Valueable<Vector3D<int>> frames;
-			frames = Vector3D<int>(-1, -1, -1);
-			_snprintf_s(tempBuffer, sizeof(tempBuffer), "InsigniaFrames.Weapon%d", i + 1);
-			frames.Read(exINI, pSection, tempBuffer);
-			this->InsigniaFrames_Weapon[i] = frames;
+				_snprintf_s(tempBuffer, sizeof(tempBuffer), "InsigniaFrame.Weapon%d.%s", i + 1, "%s");
+				this->InsigniaFrame_Weapon[i].Read(exINI, pSection, tempBuffer);
+
+				_snprintf_s(tempBuffer, sizeof(tempBuffer), "InsigniaFrames.Weapon%d", i + 1);
+				this->InsigniaFrames_Weapon[i].Read(exINI, pSection, tempBuffer);
+			}
 		}
 	}
 
@@ -828,6 +858,11 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->Wake)
 		.Process(this->Wake_Grapple)
 		.Process(this->Wake_Sinking)
+
+		.Process(this->KeepTargetOnMove)
+		.Process(this->KeepTargetOnMove_ExtraDistance)
+
+		.Process(this->Power)
 		;
 }
 void TechnoTypeExt::ExtData::LoadFromStream(PhobosStreamReader& Stm)

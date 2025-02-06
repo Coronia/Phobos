@@ -9,6 +9,7 @@
 #include <New/Type/LaserTrailTypeClass.h>
 #include <New/Type/DigitalDisplayTypeClass.h>
 #include <New/Type/AttachEffectTypeClass.h>
+#include <New/Type/InsigniaTypeClass.h>
 
 std::unique_ptr<RulesExt::ExtData> RulesExt::Data = nullptr;
 
@@ -34,6 +35,7 @@ void RulesExt::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	ShieldTypeClass::LoadFromINIList(pINI);
 	LaserTrailTypeClass::LoadFromINIList(&CCINIClass::INI_Art);
 	AttachEffectTypeClass::LoadFromINIList(pINI);
+	InsigniaTypeClass::LoadFromINIList(pINI);
 
 	Data->LoadBeforeTypeData(pThis, pINI);
 }
@@ -136,6 +138,10 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	if (AirShadowBaseScale.isset() && AirShadowBaseScale.Get() > 0.98 && this->HeightShadowScaling.Get())
 		this->HeightShadowScaling = false;
 	this->HeightShadowScaling_MinScale.Read(exINI, GameStrings::AudioVisual, "HeightShadowScaling.MinScale");
+
+	this->ExtendedAircraftMissions.Read(exINI, GameStrings::General, "ExtendedAircraftMissions");
+
+	this->BuildingProductionQueue.Read(exINI, GameStrings::General, "BuildingProductionQueue");
 
 	this->AllowParallelAIQueues.Read(exINI, "GlobalControls", "AllowParallelAIQueues");
 	this->ForbidParallelAIQueues_Aircraft.Read(exINI, "GlobalControls", "ForbidParallelAIQueues.Aircraft");
@@ -330,6 +336,8 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->AirShadowBaseScale_log)
 		.Process(this->HeightShadowScaling)
 		.Process(this->HeightShadowScaling_MinScale)
+		.Process(this->ExtendedAircraftMissions)
+		.Process(this->BuildingProductionQueue)
 		.Process(this->AllowParallelAIQueues)
 		.Process(this->ForbidParallelAIQueues_Aircraft)
 		.Process(this->ForbidParallelAIQueues_Building)
