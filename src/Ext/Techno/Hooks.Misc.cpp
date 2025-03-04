@@ -524,8 +524,8 @@ void __fastcall DisplayClass_Submit_Wrapper(DisplayClass* pThis, void* _, Object
 {
 	pThis->Submit(pObject);
 
-	if (auto const pTechno = abstract_cast<TechnoClass*>(pObject))
-		TechnoExt::UpdateAttachedAnimLayers(pTechno);
+	/*if (auto const pTechno = abstract_cast<TechnoClass*>(pObject))
+		TechnoExt::UpdateAttachedAnimLayers(pTechno);*/
 }
 
 DEFINE_JUMP(CALL, 0x54B18E, GET_OFFSET(DisplayClass_Submit_Wrapper));  // JumpjetLocomotionClass_Process
