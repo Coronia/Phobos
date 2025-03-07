@@ -69,6 +69,7 @@ DEFINE_HOOK(0x4690C1, BulletClass_Logics_DetonateOnAllMapObjects, 0x8)
 		auto const originalLocation = pThis->Location;
 		auto const pOriginalTarget = pThis->Target;
 		auto const pExt = BulletExt::ExtMap.Find(pThis);
+		auto const isFull = pWHExt->DetonateOnAllMapObjects_Full;
 		auto pOwner = pThis->Owner ? pThis->Owner->Owner : pExt->FirerHouse;
 
 		auto copy_dvc = []<typename T>(const DynamicVectorClass<T>&dvc)
@@ -78,23 +79,21 @@ DEFINE_HOOK(0x4690C1, BulletClass_Logics_DetonateOnAllMapObjects, 0x8)
 			return vec;
 		};
 
-		std::function<void(TechnoClass*)> tryDetonate = [pThis, pWHExt, pOwner](TechnoClass* pTechno)
+		auto tryDetonate = [pThis, pWHExt, pOwner, isFull](TechnoClass* pTechno)
 			{
 				if (pWHExt->EligibleForFullMapDetonation(pTechno, pOwner))
 				{
-					pThis->Target = pTechno;
-					pThis->Location = pTechno->GetCoords();
-					pThis->Detonate(pTechno->GetCoords());
-				}
-			};
-
-		if (!pWHExt->DetonateOnAllMapObjects_Full)
-			tryDetonate = [pThis, pWHExt, pOwner](TechnoClass* pTechno)
-			{
-				if (pWHExt->EligibleForFullMapDetonation(pTechno, pOwner))
-				{
-					int damage = (pThis->Health * pThis->DamageMultiplier) >> 8;
-					pWHExt->DamageAreaWithTarget(pTechno->GetCoords(), damage, pThis->Owner, pThis->WH, true, pOwner, pTechno);
+					if (isFull)
+					{
+						pThis->Target = pTechno;
+						pThis->Location = pTechno->GetCoords();
+						pThis->Detonate(pTechno->GetCoords());
+					}
+					else
+					{
+						int damage = (pThis->Health * pThis->DamageMultiplier) >> 8;
+						pWHExt->DamageAreaWithTarget(pTechno->GetCoords(), damage, pThis->Owner, pThis->WH, true, pOwner, pTechno);
+					}
 				}
 			};
 
@@ -505,7 +504,8 @@ DEFINE_HOOK(0x469EC0, BulletClass_Logics_AirburstWeapon, 0x6)
 		}
 		else
 		{
-			auto const cellSpread = pTypeExt->Splits_TargetingDistance.Get() / Unsorted::LeptonsPerCell;
+			float cellSpread = static_cast<float>(pTypeExt->Splits_TargetingDistance.Get());
+			cellSpread /= Unsorted::LeptonsPerCell;
 
 			for (auto const pTechno : Helpers::Alex::getCellSpreadItems(coordsTarget, cellSpread, true))
 			{
