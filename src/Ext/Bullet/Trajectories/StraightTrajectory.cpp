@@ -838,7 +838,7 @@ void StraightTrajectory::PrepareForDetonateAt(BulletClass* pBullet, HouseClass* 
 				validTechnos.reserve(vectSize);
 			}
 
-			validTechnos.push_back(pTechno);
+			validTechnos.emplace_back(pTechno);
 			thisSize += 1;
 		}
 	}
@@ -884,7 +884,7 @@ void StraightTrajectory::PrepareForDetonateAt(BulletClass* pBullet, HouseClass* 
 				validTechnos.reserve(vectSize);
 			}
 
-			validTechnos.push_back(pTechno);
+			validTechnos.emplace_back(pTechno);
 			thisSize += 1;
 		}
 	}
@@ -914,7 +914,7 @@ void StraightTrajectory::PrepareForDetonateAt(BulletClass* pBullet, HouseClass* 
 	for (const auto& pTechno : validTechnos)
 	{
 		if (!this->TheCasualty.contains(pTechno->UniqueID))
-			validTargets.push_back(pTechno);
+			validTargets.emplace_back(pTechno);
 
 		this->TheCasualty[pTechno->UniqueID] = 20;
 	}

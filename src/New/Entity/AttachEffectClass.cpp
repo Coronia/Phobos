@@ -490,7 +490,7 @@ int AttachEffectClass::Attach(TechnoClass* pTarget, HouseClass* pInvokerHouse, T
 {
 	auto const& types = attachEffectInfo.AttachTypes;
 
-	if (types.size() < 1 || !pTarget)
+	if (types.size() < 1)
 		return false;
 
 	auto const pTargetExt = TechnoExt::ExtMap.Find(pTarget);
@@ -553,9 +553,6 @@ int AttachEffectClass::Attach(TechnoClass* pTarget, HouseClass* pInvokerHouse, T
 AttachEffectClass* AttachEffectClass::CreateAndAttach(AttachEffectTypeClass* pType, TechnoClass* pTarget, std::vector<std::unique_ptr<AttachEffectClass>>& targetAEs,
 	HouseClass* pInvokerHouse, TechnoClass* pInvoker, AbstractClass* pSource, AEAttachParams const& attachParams)
 {
-	if (!pType || !pTarget)
-		return nullptr;
-
 	if (pTarget->IsIronCurtained())
 	{
 		bool penetrates = pTarget->ForceShielded ? pType->PenetratesForceShield.Get(pType->PenetratesIronCurtain) : pType->PenetratesIronCurtain;
@@ -567,6 +564,7 @@ AttachEffectClass* AttachEffectClass::CreateAndAttach(AttachEffectTypeClass* pTy
 	int currentTypeCount = 0;
 	AttachEffectClass* match = nullptr;
 	std::vector<AttachEffectClass*> cumulativeMatches;
+	cumulativeMatches.reserve(targetAEs.size());
 
 	for (auto const& aePtr : targetAEs)
 	{
@@ -578,7 +576,7 @@ AttachEffectClass* AttachEffectClass::CreateAndAttach(AttachEffectTypeClass* pTy
 			match = attachEffect;
 
 			if (pType->Cumulative && (!attachParams.CumulativeRefreshSameSourceOnly || (attachEffect->Source == pSource && attachEffect->Invoker == pInvoker)))
-				cumulativeMatches.push_back(attachEffect);
+				cumulativeMatches.emplace_back(attachEffect);
 		}
 	}
 
@@ -626,7 +624,7 @@ AttachEffectClass* AttachEffectClass::CreateAndAttach(AttachEffectTypeClass* pTy
 	}
 	else
 	{
-		targetAEs.push_back(std::make_unique<AttachEffectClass>(pType, pTarget, pInvokerHouse, pInvoker, pSource, attachParams.DurationOverride, attachParams.Delay, attachParams.InitialDelay, attachParams.RecreationDelay));
+		targetAEs.emplace_back(std::make_unique<AttachEffectClass>(pType, pTarget, pInvokerHouse, pInvoker, pSource, attachParams.DurationOverride, attachParams.Delay, attachParams.InitialDelay, attachParams.RecreationDelay));
 		auto const pAE = targetAEs.back().get();
 
 		if (!currentTypeCount && pType->Cumulative && pType->CumulativeAnimations.size() > 0)
@@ -660,20 +658,24 @@ int AttachEffectClass::Detach(TechnoClass* pTarget, AEAttachInfoTypeClass const&
 /// <returns>Number of AttachEffect instances removed.</returns>
 int AttachEffectClass::DetachByGroups(TechnoClass* pTarget, AEAttachInfoTypeClass const& attachEffectInfo)
 {
-	auto const& groups = attachEffectInfo.RemoveGroups;
-
-	if (groups.size() < 1 || !pTarget)
+	if (!pTarget)
 		return 0;
 
-	auto const pTargetExt = TechnoExt::ExtMap.Find(pTarget);
-	std::vector<AttachEffectTypeClass*> types;
+	auto const& groups = attachEffectInfo.RemoveGroups;
 
-	for (auto const& attachEffect : pTargetExt->AttachedEffects)
+	if (groups.size() < 1)
+		return 0;
+
+	auto const& attachEffects = TechnoExt::ExtMap.Find(pTarget)->AttachedEffects;
+	std::vector<AttachEffectTypeClass*> types;
+	types.reserve(attachEffects.size());
+
+	for (auto const& attachEffect : attachEffects)
 	{
 		auto const pType = attachEffect->Type;
 
 		if (pType->HasGroups(groups, false))
-			types.push_back(pType);
+			types.emplace_back(pType);
 	}
 
 	return DetachTypes(pTarget, attachEffectInfo, types);
@@ -744,6 +746,7 @@ int AttachEffectClass::RemoveAllOfType(AttachEffectTypeClass* pType, TechnoClass
 	auto const targetAEs = &pTargetExt->AttachedEffects;
 	std::vector<std::unique_ptr<AttachEffectClass>>::iterator it;
 	std::vector<WeaponTypeClass*> expireWeapons;
+	expireWeapons.reserve(targetAEs->size());
 
 	for (it = targetAEs->begin(); it != targetAEs->end(); )
 	{
@@ -759,7 +762,7 @@ int AttachEffectClass::RemoveAllOfType(AttachEffectTypeClass* pType, TechnoClass
 			if (pType->ExpireWeapon && (pType->ExpireWeapon_TriggerOn & ExpireWeaponCondition::Remove) != ExpireWeaponCondition::None)
 			{
 				if (!pType->Cumulative || !pType->ExpireWeapon_CumulativeOnlyOnce || pTargetExt->GetAttachedEffectCumulativeCount(pType) < 2)
-					expireWeapons.push_back(pType->ExpireWeapon);
+					expireWeapons.emplace_back(pType->ExpireWeapon);
 			}
 
 			if (pType->Cumulative && pType->CumulativeAnimations.size() > 0)
@@ -798,11 +801,11 @@ int AttachEffectClass::RemoveAllOfType(AttachEffectTypeClass* pType, TechnoClass
 /// <param name="pTarget">Target techno.</param>
 void AttachEffectClass::TransferAttachedEffects(TechnoClass* pSource, TechnoClass* pTarget)
 {
-	const auto pSourceExt = TechnoExt::ExtMap.Find(pSource);
-	const auto pTargetExt = TechnoExt::ExtMap.Find(pTarget);
+	auto& attachEffects = TechnoExt::ExtMap.Find(pSource)->AttachedEffects;
+	auto& targetAttachEffects = TechnoExt::ExtMap.Find(pTarget)->AttachedEffects;
 	std::vector<std::unique_ptr<AttachEffectClass>>::iterator it;
 
-	for (it = pSourceExt->AttachedEffects.begin(); it != pSourceExt->AttachedEffects.end(); )
+	for (it = attachEffects.begin(); it != attachEffects.end(); )
 	{
 		auto const attachEffect = it->get();
 
@@ -817,7 +820,7 @@ void AttachEffectClass::TransferAttachedEffects(TechnoClass* pSource, TechnoClas
 		AttachEffectClass* match = nullptr;
 		AttachEffectClass* sourceMatch = nullptr;
 
-		for (auto const& aePtr : pTargetExt->AttachedEffects)
+		for (auto const& aePtr : targetAttachEffects)
 		{
 			auto const targetAttachEffect = aePtr.get();
 
@@ -844,11 +847,11 @@ void AttachEffectClass::TransferAttachedEffects(TechnoClass* pSource, TechnoClas
 			AEAttachParams info {};
 			info.DurationOverride = attachEffect->DurationOverride;
 
-			if (auto const pAE = AttachEffectClass::CreateAndAttach(type, pTarget, pTargetExt->AttachedEffects, attachEffect->InvokerHouse, attachEffect->Invoker, attachEffect->Source, info))
+			if (auto const pAE = AttachEffectClass::CreateAndAttach(type, pTarget, targetAttachEffects, attachEffect->InvokerHouse, attachEffect->Invoker, attachEffect->Source, info))
 				pAE->Duration = attachEffect->Duration;
 		}
 
-		it = pSourceExt->AttachedEffects.erase(it);
+		it = attachEffects.erase(it);
 	}
 }
 

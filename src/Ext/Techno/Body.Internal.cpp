@@ -13,6 +13,8 @@ void TechnoExt::ExtData::InitializeLaserTrails()
 
 	if (auto pTypeExt = this->TypeExtData)
 	{
+		this->LaserTrails.reserve(pTypeExt->LaserTrailData.size());
+
 		for (auto const& entry : pTypeExt->LaserTrailData)
 		{
 			this->LaserTrails.emplace_back(entry.GetType(), this->OwnerObject()->Owner, entry.FLH, entry.IsOnTurret);
@@ -98,6 +100,7 @@ CoordStruct TechnoExt::GetBurstFLH(TechnoClass* pThis, int weaponIndex, bool& FL
 		else if (pInf && pInf->Crawling)
 			pickedFLHs = pExt->CrouchedWeaponBurstFLHs;
 	}
+
 	if ((int)pickedFLHs[weaponIndex].size() > pThis->CurrentBurstIndex)
 	{
 		FLHFound = true;
@@ -161,15 +164,14 @@ int TechnoExt::GetTintColor(TechnoClass* pThis, bool invulnerability, bool airst
 {
 	int tintColor = 0;
 
-	if (pThis)
-	{
-		if (invulnerability && pThis->IsIronCurtained())
-			tintColor |= GeneralUtils::GetColorFromColorAdd(pThis->ForceShielded ? RulesClass::Instance->ForceShieldColor : RulesClass::Instance->IronCurtainColor);
-		if (airstrike && pThis->Airstrike && pThis->Airstrike->Target == pThis)
-			tintColor |= GeneralUtils::GetColorFromColorAdd(RulesClass::Instance->LaserTargetColor);
-		if (berserk && pThis->Berzerk)
-			tintColor |= GeneralUtils::GetColorFromColorAdd(RulesClass::Instance->BerserkColor);
-	}
+	if (invulnerability && pThis->IsIronCurtained())
+		tintColor |= GeneralUtils::GetColorFromColorAdd(pThis->ForceShielded ? RulesClass::Instance->ForceShieldColor : RulesClass::Instance->IronCurtainColor);
+
+	if (airstrike && pThis->Airstrike && pThis->Airstrike->Target == pThis)
+		tintColor |= GeneralUtils::GetColorFromColorAdd(RulesClass::Instance->LaserTargetColor);
+
+	if (berserk && pThis->Berzerk)
+		tintColor |= GeneralUtils::GetColorFromColorAdd(RulesClass::Instance->BerserkColor);
 
 	return tintColor;
 }
@@ -264,7 +266,7 @@ void TechnoExt::ChangeOwnerMissionFix(FootClass* pThis)
 void TechnoExt::UpdateAttachedAnimLayers(TechnoClass* pThis)
 {
 	// Skip if has no attached animations.
-	if (!pThis || !pThis->HasParachute)
+	if (!pThis->HasParachute)
 		return;
 
 	// Could possibly be faster to track the attached anims in TechnoExt but the profiler doesn't show this as a performance hog so whatever.
