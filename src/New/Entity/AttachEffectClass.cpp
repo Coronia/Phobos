@@ -576,7 +576,7 @@ AttachEffectClass* AttachEffectClass::CreateAndAttach(AttachEffectTypeClass* pTy
 			match = attachEffect;
 
 			if (pType->Cumulative && (!attachParams.CumulativeRefreshSameSourceOnly || (attachEffect->Source == pSource && attachEffect->Invoker == pInvoker)))
-				cumulativeMatches.push_back(attachEffect);
+				cumulativeMatches.emplace_back(attachEffect);
 		}
 	}
 
@@ -675,7 +675,7 @@ int AttachEffectClass::DetachByGroups(TechnoClass* pTarget, AEAttachInfoTypeClas
 		auto const pType = attachEffect->Type;
 
 		if (pType->HasGroups(groups, false))
-			types.push_back(pType);
+			types.emplace_back(pType);
 	}
 
 	return DetachTypes(pTarget, attachEffectInfo, types);
@@ -762,7 +762,7 @@ int AttachEffectClass::RemoveAllOfType(AttachEffectTypeClass* pType, TechnoClass
 			if (pType->ExpireWeapon && (pType->ExpireWeapon_TriggerOn & ExpireWeaponCondition::Remove) != ExpireWeaponCondition::None)
 			{
 				if (!pType->Cumulative || !pType->ExpireWeapon_CumulativeOnlyOnce || pTargetExt->GetAttachedEffectCumulativeCount(pType) < 2)
-					expireWeapons.push_back(pType->ExpireWeapon);
+					expireWeapons.emplace_back(pType->ExpireWeapon);
 			}
 
 			if (pType->Cumulative && pType->CumulativeAnimations.size() > 0)

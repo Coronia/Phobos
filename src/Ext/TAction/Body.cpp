@@ -85,7 +85,7 @@ bool TActionExt::PlayAudioAtRandomWP(TActionClass* pThis, HouseClass* pHouse, Ob
 
 	for (auto pair : ScenarioExt::Global()->Waypoints)
 		if (pScen->IsDefinedWaypoint(pair.first))
-			waypoints.emplace_back(pair.first);
+			waypoints.push_back(pair.first);
 
 	if (waypoints.size() > 0)
 	{
@@ -301,7 +301,7 @@ bool TActionExt::RunSuperWeaponAt(TActionClass* pThis, int X, int Y)
 					&& !pHouse->IsObserver()
 					&& !pHouse->Type->MultiplayPassive)
 				{
-					housesList.push_back(pHouse);
+					housesList.emplace_back(pHouse);
 				}
 			}
 
@@ -333,7 +333,7 @@ bool TActionExt::RunSuperWeaponAt(TActionClass* pThis, int X, int Y)
 					&& !pHouse->Defeated
 					&& !pHouse->IsObserver())
 				{
-					housesList.push_back(pHouse);
+					housesList.emplace_back(pHouse);
 				}
 			}
 

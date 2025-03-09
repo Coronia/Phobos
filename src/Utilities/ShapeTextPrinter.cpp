@@ -35,7 +35,7 @@ void ShapeTextPrinter::PrintShape
 				return;
 		}
 
-		frames.emplace_back(frame);
+		frames.push_back(frame);
 	}
 
 	for (int frame : frames)

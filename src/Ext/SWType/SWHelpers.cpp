@@ -16,9 +16,12 @@ std::vector<int> SWTypeExt::ExtData::WeightedRollsHandler(ValueableVector<float>
 		rollOnce = true;
 	}
 
+	indices.reserve(rollsSize);
+	auto& random = ScenarioClass::Instance->Random;
+
 	for (size_t i = 0; i < rollsSize; i++)
 	{
-		this->RandomBuffer = ScenarioClass::Instance->Random.RandomDouble();
+		this->RandomBuffer = random.RandomDouble();
 		if (!rollOnce && this->RandomBuffer > (*rolls)[i])
 			continue;
 
@@ -235,7 +238,7 @@ std::vector<BuildingClass*> SWTypeExt::ExtData::GetEMPulseCannons(HouseClass* pO
 			if ((minRange < 0.0 || distance >= minRange)
 				&& (maxRange < 0.0 || distance <= maxRange))
 			{
-				emCannons.push_back(pBuilding);
+				emCannons.emplace_back(pBuilding);
 			}
 		}
 	}

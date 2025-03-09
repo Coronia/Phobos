@@ -988,7 +988,7 @@ void TechnoExt::ExtData::UpdateAttachEffects()
 				|| (shouldDiscard && (pType->ExpireWeapon_TriggerOn & ExpireWeaponCondition::Discard) != ExpireWeaponCondition::None)))
 			{
 				if (!pType->Cumulative || !pType->ExpireWeapon_CumulativeOnlyOnce || this->GetAttachedEffectCumulativeCount(pType) < 1)
-					expireWeapons.push_back(pType->ExpireWeapon);
+					expireWeapons.emplace_back(pType->ExpireWeapon);
 			}
 
 			if (shouldDiscard && attachEffect->ResetIfRecreatable())
@@ -1053,7 +1053,7 @@ void TechnoExt::ExtData::UpdateSelfOwnedAttachEffects()
 			if (pType->ExpireWeapon && (pType->ExpireWeapon_TriggerOn & ExpireWeaponCondition::Expire) != ExpireWeaponCondition::None)
 			{
 				if (!pType->Cumulative || !pType->ExpireWeapon_CumulativeOnlyOnce || this->GetAttachedEffectCumulativeCount(pType) < 1)
-					expireWeapons.push_back(pType->ExpireWeapon);
+					expireWeapons.emplace_back(pType->ExpireWeapon);
 			}
 
 			markForRedraw |= pType->HasTint();
