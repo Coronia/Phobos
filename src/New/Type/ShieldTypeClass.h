@@ -58,6 +58,8 @@ public:
 	Valueable<double> Tint_Intensity;
 	Valueable<AffectedHouse> Tint_VisibleToHouses;
 
+	Valueable<int> ArmorBonus;
+
 public:
 	ShieldTypeClass(const char* const pTitle) : Enumerable<ShieldTypeClass>(pTitle)
 		, Strength { 0 }
@@ -104,6 +106,7 @@ public:
 		, Tint_Color {}
 		, Tint_Intensity { 0.0 }
 		, Tint_VisibleToHouses { AffectedHouse::All }
+		, ArmorBonus { 0 }
 	{ };
 
 	void LoadFromINI(CCINIClass* pINI);

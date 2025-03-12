@@ -102,6 +102,11 @@ DEFINE_HOOK(0x6F3428, TechnoClass_WhatWeaponShouldIUse_ForceWeapon, 0x6)
 		{
 			forceWeaponIndex = pTypeExt->ForceWeapon_Disguised;
 		}
+		else if (pTypeExt->ForceWeapon_UnderEMP >= 0 &&
+			pTarget->IsUnderEMP())
+		{
+			forceWeaponIndex = pTypeExt->ForceWeapon_UnderEMP;
+		}
 
 		if (forceWeaponIndex >= 0)
 		{
@@ -787,7 +792,7 @@ DEFINE_HOOK(0x6FD0B5, TechnoClass_RearmDelay_ROF, 0x6)
 	auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pWeapon);
 	auto const pExt = TechnoExt::ExtMap.Find(pThis);
 	auto range = pWeaponExt->ROF_RandomDelay.Get(RulesExt::Global()->ROF_RandomDelay);
-	double rof = pWeapon->ROF * pExt->AE.ROFMultiplier;
+	double rof = Math::max(pWeapon->ROF * pExt->AE.ROFMultiplier - pExt->AE.ROFBonus, 1);
 	pExt->LastRearmWasFullDelay = true;
 
 	R->EAX(GeneralUtils::GetRangedRandomOrSingleValue(range));

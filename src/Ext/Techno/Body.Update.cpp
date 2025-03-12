@@ -292,7 +292,8 @@ void TechnoExt::ExtData::EatPassengers()
 					{
 						auto const pAnim = GameCreate<AnimClass>(pAnimType, pThis->Location);
 						pAnim->SetOwnerObject(pThis);
-						pAnim->Owner = pThis->Owner;
+						AnimExt::SetAnimOwnerHouseKind(pAnim, pThis->Owner, nullptr, false, true);
+						AnimExt::ExtMap.Find(pAnim)->SetInvoker(pThis);
 					}
 
 					// Check if there is money refund
@@ -599,16 +600,11 @@ void TechnoExt::ExtData::UpdateMindControlAnim()
 				offset = pThis->GetTechnoType()->MindControlRingOffset;
 
 			coords.Z += offset;
-			auto anim = GameCreate<AnimClass>(this->MindControlRingAnimType, coords, 0, 1);
+			pThis->MindControlRingAnim = GameCreate<AnimClass>(this->MindControlRingAnimType, coords, 0, 1);
+			pThis->MindControlRingAnim->SetOwnerObject(pThis);
 
-			if (anim)
-			{
-				pThis->MindControlRingAnim = anim;
-				pThis->MindControlRingAnim->SetOwnerObject(pThis);
-
-				if (pThis->WhatAmI() == AbstractType::Building)
-					pThis->MindControlRingAnim->ZAdjust = -1024;
-			}
+			if (pThis->WhatAmI() == AbstractType::Building)
+				pThis->MindControlRingAnim->ZAdjust = -1024;
 		}
 	}
 	else if (this->MindControlRingAnimType)
@@ -780,12 +776,9 @@ void TechnoExt::KillSelf(TechnoClass* pThis, AutoDeathBehavior deathOption, Anim
 	{
 		if (pVanishAnimation)
 		{
-			if (auto const pAnim = GameCreate<AnimClass>(pVanishAnimation, pThis->GetCoords()))
-			{
-				auto const pAnimExt = AnimExt::ExtMap.Find(pAnim);
-				pAnim->Owner = pThis->Owner;
-				pAnimExt->SetInvoker(pThis);
-			}
+			auto const pAnim = GameCreate<AnimClass>(pVanishAnimation, pThis->GetCoords());
+			AnimExt::SetAnimOwnerHouseKind(pAnim, pThis->Owner, nullptr, false, true);
+			AnimExt::ExtMap.Find(pAnim)->SetInvoker(pThis);
 		}
 
 		pThis->KillPassengers(pThis);
@@ -1081,10 +1074,18 @@ void TechnoExt::ExtData::RecalculateStatMultipliers()
 {
 	auto const pThis = this->OwnerObject();
 
-	double firepower = 1.0;
-	double armor = 1.0;
-	double speed = 1.0;
-	double ROF = 1.0;
+	double firepowerMult = 1.0;
+	double armorMult = 1.0;
+	double speedMult = 1.0;
+	double ROFMult = 1.0;
+	int firepowerBonus = 0;
+	int armorBonus = 0;
+	double speedBonus = 0.0;
+	int ROFBonus = 0;
+	int minReceivedDamage = INT32_MIN;
+	int maxReceivedDamage = INT32_MAX;
+	double minSpeed = 0.0;
+	double maxSpeed = INT32_MAX;
 	bool cloak = false;
 	bool forceDecloak = false;
 	bool disableWeapons = false;
@@ -1100,10 +1101,18 @@ void TechnoExt::ExtData::RecalculateStatMultipliers()
 			continue;
 
 		auto const type = attachEffect->GetType();
-		firepower *= type->FirepowerMultiplier;
-		speed *= type->SpeedMultiplier;
-		armor *= type->ArmorMultiplier;
-		ROF *= type->ROFMultiplier;
+		firepowerMult *= type->FirepowerMultiplier;
+		speedMult *= type->SpeedMultiplier;
+		armorMult *= type->ArmorMultiplier;
+		ROFMult *= type->ROFMultiplier;
+		firepowerBonus += type->FirepowerBonus;
+		armorBonus += type->ArmorBonus;
+		speedBonus += type->SpeedBonus;
+		ROFBonus += type->ROFBonus;
+		minReceivedDamage = Math::max(minReceivedDamage, type->ReceivedDamage_Minimum);
+		maxReceivedDamage = Math::min(maxReceivedDamage, type->ReceivedDamage_Maximum);
+		minSpeed = Math::max(minSpeed, type->Speed_Minimum);
+		maxSpeed = Math::min(maxSpeed, type->Speed_Maximum);
 		cloak |= type->Cloakable;
 		forceDecloak |= type->ForceDecloak;
 		disableWeapons |= type->DisableWeapons;
@@ -1114,10 +1123,18 @@ void TechnoExt::ExtData::RecalculateStatMultipliers()
 		hasRestrictedArmorMultipliers |= (type->ArmorMultiplier != 1.0 && (type->ArmorMultiplier_AllowWarheads.size() > 0 || type->ArmorMultiplier_DisallowWarheads.size() > 0));
 	}
 
-	this->AE.FirepowerMultiplier = firepower;
-	this->AE.ArmorMultiplier = armor;
-	this->AE.SpeedMultiplier = speed;
-	this->AE.ROFMultiplier = ROF;
+	this->AE.FirepowerMultiplier = firepowerMult;
+	this->AE.ArmorMultiplier = armorMult;
+	this->AE.SpeedMultiplier = speedMult;
+	this->AE.ROFMultiplier = ROFMult;
+	this->AE.FirepowerBonus = firepowerBonus;
+	this->AE.ArmorBonus = armorBonus;
+	this->AE.SpeedBonus = speedBonus;
+	this->AE.ROFBonus = ROFBonus;
+	this->AE.ReceivedDamage_Minimum = minReceivedDamage;
+	this->AE.ReceivedDamage_Maximum = maxReceivedDamage;
+	this->AE.Speed_Minimum = minSpeed;
+	this->AE.Speed_Maximum = maxSpeed;
 	this->AE.Cloakable = cloak;
 	this->AE.ForceDecloak = forceDecloak;
 	this->AE.DisableWeapons = disableWeapons;
