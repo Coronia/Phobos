@@ -155,6 +155,7 @@ void AttachEffectTypeClass::LoadFromINI(CCINIClass* pINI)
 
 	this->ReviveAnim.Read(exINI, pSection, "ReviveAnim");
 	this->ReviveAs.Read(exINI, pSection, "ReviveAs");
+	this->ReviveChance.Read(exINI, pSection, "ReviveChance");
 
 	// Groups
 	exINI.ParseStringList(this->Groups, pSection, "Groups");
@@ -214,6 +215,7 @@ void AttachEffectTypeClass::Serialize(T& Stm)
 		.Process(this->DisableWeapons)
 		.Process(this->ReviveAnim)
 		.Process(this->ReviveAs)
+		.Process(this->ReviveChance)
 		.Process(this->Groups)
 		;
 }

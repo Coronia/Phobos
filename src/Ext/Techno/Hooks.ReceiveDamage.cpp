@@ -284,7 +284,7 @@ DEFINE_HOOK(0x702050, TechnoClass_ReceiveDamage_AttachEffectExpireWeapon, 0x6)
 			}
 		}
 
-		if (pType->ReviveAnim)
+		if (pType->ReviveAnim && pType->ReviveChance >= ScenarioClass::Instance->Random.RandomDouble())
 		{
 			auto const pAnim = GameCreate<AnimClass>(pType->ReviveAnim, coords, 1, 1);
 			auto const pAnimExt = AnimExt::ExtMap.Find(pAnim);

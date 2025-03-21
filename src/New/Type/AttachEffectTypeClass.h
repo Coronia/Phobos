@@ -89,6 +89,7 @@ public:
 	Valueable<bool> DisableWeapons;
 	Valueable<AnimTypeClass*> ReviveAnim;
 	Nullable<TechnoTypeClass*> ReviveAs;
+	Valueable<double> ReviveChance;
 
 	std::vector<std::string> Groups;
 
@@ -142,6 +143,7 @@ public:
 		, DisableWeapons { false }
 		, ReviveAnim {}
 		, ReviveAs {}
+		, ReviveChance { 1.0 }
 		, Groups {}
 	{};
 
