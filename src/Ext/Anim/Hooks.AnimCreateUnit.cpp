@@ -43,9 +43,7 @@ DEFINE_HOOK(0x4226F0, AnimClass_CTOR_CreateUnit_MarkOccupationBits, 0x6)
 {
 	GET(AnimClass* const, pThis, ESI);
 
-	auto const pTypeExt = AnimTypeExt::ExtMap.Find(pThis->Type);
-
-	if (pTypeExt->CreateUnit.Get())
+	if (AnimTypeExt::ExtMap.Find(pThis->Type)->CreateUnit.Get(AnimExt::ExtMap.Find(pThis)->CreateUnit))
 		pThis->MarkAllOccupationBits(pThis->GetCell()->GetCoordsWithBridge());
 
 	return 0; //return (pThis->Type->MakeInfantry != -1) ? 0x423BD6 : 0x423C03;
@@ -55,11 +53,11 @@ DEFINE_HOOK(0x424932, AnimClass_AI_CreateUnit_ActualEffects, 0x6)
 {
 	GET(AnimClass* const, pThis, ESI);
 
+	auto const pExt = AnimExt::ExtMap.Find(pThis);
 	auto const pTypeExt = AnimTypeExt::ExtMap.Find(pThis->Type);
 
-	if (auto const pUnitType = pTypeExt->CreateUnit.Get())
+	if (auto const pUnitType = pTypeExt->CreateUnit.Get(pExt->CreateUnit))
 	{
-		auto const pExt = AnimExt::ExtMap.Find(pThis);
 		pThis->UnmarkAllOccupationBits(pThis->GetCell()->GetCoordsWithBridge());
 
 		auto facing = pTypeExt->CreateUnit_RandomFacing

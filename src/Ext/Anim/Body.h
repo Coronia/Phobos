@@ -28,6 +28,7 @@ public:
 		ParticleSystemClass* AttachedSystem;
 		BuildingClass* ParentBuilding; // Only set on building anims, used for tinting the anims etc. especially when not on same cell as building
 		bool IsTechnoTrailerAnim;
+		TechnoTypeClass* CreateUnit;
 
 		ExtData(AnimClass* OwnerObject) : Extension<AnimClass>(OwnerObject)
 			, DeathUnitFacing { 0 }
@@ -39,6 +40,7 @@ public:
 			, AttachedSystem {}
 			, ParentBuilding {}
 			, IsTechnoTrailerAnim { false }
+			, CreateUnit {}
 		{ }
 
 		void SetInvoker(TechnoClass* pInvoker);

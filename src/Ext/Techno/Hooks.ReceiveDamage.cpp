@@ -3,6 +3,7 @@
 #include <TacticalClass.h>
 #include <RadarEventClass.h>
 
+#include <Ext/Anim/Body.h>
 #include <Ext/WarheadType/Body.h>
 #include <Ext/WeaponType/Body.h>
 #include <Ext/TEvent/Body.h>
@@ -264,6 +265,7 @@ DEFINE_HOOK(0x702050, TechnoClass_ReceiveDamage_AttachEffectExpireWeapon, 0x6)
 	GET(TechnoClass*, pThis, ESI);
 
 	auto const pExt = TechnoExt::ExtMap.Find(pThis);
+	auto const coords = pThis->GetCoords();
 	std::set<AttachEffectTypeClass*> cumulativeTypes;
 	std::vector<WeaponTypeClass*> expireWeapons;
 
@@ -281,9 +283,17 @@ DEFINE_HOOK(0x702050, TechnoClass_ReceiveDamage_AttachEffectExpireWeapon, 0x6)
 				expireWeapons.push_back(pType->ExpireWeapon);
 			}
 		}
+
+		if (pType->ReviveAnim)
+		{
+			auto const pAnim = GameCreate<AnimClass>(pType->ReviveAnim, coords, 1, 1);
+			auto const pAnimExt = AnimExt::ExtMap.Find(pAnim);
+			pAnimExt->CreateUnit = pType->ReviveAs.Get(pThis->GetTechnoType());
+			AnimExt::SetAnimOwnerHouseKind(pAnim, pThis->Owner, nullptr, false, true);
+			pAnimExt->SetInvoker(pThis);
+		}
 	}
 
-	auto const coords = pThis->GetCoords();
 	auto const pOwner = pThis->Owner;
 
 	for (auto const& pWeapon : expireWeapons)

@@ -87,6 +87,8 @@ public:
 	Valueable<double> ReflectDamage_Multiplier;
 	Valueable<AffectedHouse> ReflectDamage_AffectsHouses;
 	Valueable<bool> DisableWeapons;
+	Valueable<AnimTypeClass*> ReviveAnim;
+	Nullable<TechnoTypeClass*> ReviveAs;
 
 	std::vector<std::string> Groups;
 
@@ -138,6 +140,8 @@ public:
 		, ReflectDamage_Multiplier { 1.0 }
 		, ReflectDamage_AffectsHouses { AffectedHouse::All }
 		, DisableWeapons { false }
+		, ReviveAnim {}
+		, ReviveAs {}
 		, Groups {}
 	{};
 
