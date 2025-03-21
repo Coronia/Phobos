@@ -49,6 +49,9 @@ This page describes all the engine features that are either new and introduced b
     - Warheads can prevent reflect damage from occuring by setting `SuppressReflectDamage` to true. `SuppressReflectDamage.Types` can control which AttachEffectTypes' reflect damage is suppressed, if none are listed then all of them are suppressed.
   - `DisableWeapons` can be used to disable ability to fire any and all weapons.
     - On TechnoTypes with `OpenTopped=true`, `OpenTopped.CheckTransportDisableWeapons` can be set to true to make passengers not be able to fire out if transport's weapons are disabled by `DisableWeapons`.
+  - If `ReviveAnim` is set, an anim of the set type will be played and created a unit when the attached techno is destroyed. Other than `CreateUnit`, it'll make use of the other [Anim-to-Unitate](#Anim-to-Unit) settings of the anim's type.
+    - `ReviveAs` can be used to set the reviving TechnoType. If not set, it'll default to the TechnoType of attached techno.
+    - `ReviveChance` determines chance for this revival to occur.
   - It is possible to set groups for attach effect types by defining strings in `Groups`.
     - Groups can be used instead of types for removing effects and weapon filters.
 
@@ -127,6 +130,9 @@ ReflectDamage.Warhead.Detonate=false               ; WarheadType
 ReflectDamage.Multiplier=1.0                       ; floating point value, percents or absolute
 ReflectDamage.AffectsHouses=all                    ; List of Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
 DisableWeapons=false                               ; boolean
+ReviveAnim=                                        ; AnimationType
+ReviveAs=                                          ; TechnoType
+ReviveChance=1.0                                   ; floating point value, percents or absolute (0.0-1.0)
 Groups=                                            ; comma-separated list of strings (group IDs)
 
 [SOMETECHNO]                                       ; TechnoType
