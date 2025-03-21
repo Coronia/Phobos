@@ -70,7 +70,7 @@ bool AnimExt::SetAnimOwnerHouseKind(AnimClass* pAnim, HouseClass* pInvoker, Hous
 {
 	auto const pTypeExt = AnimTypeExt::ExtMap.Find(pAnim->Type);
 	bool makeInf = pAnim->Type->MakeInfantry > -1;
-	bool createUnit = pTypeExt->CreateUnit.Get(AnimExt::ExtMap.Find(pAnim)->CreateUnit);
+	bool createUnit = pTypeExt->CreateUnit.Get() || AnimExt::ExtMap.Find(pAnim)->CreateUnit;
 	auto ownerKind = OwnerHouseKind::Default;
 	HouseClass* pDefaultOwner = nullptr;
 

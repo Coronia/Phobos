@@ -40,7 +40,7 @@ public:
 			, AttachedSystem {}
 			, ParentBuilding {}
 			, IsTechnoTrailerAnim { false }
-			, CreateUnit {}
+			, CreateUnit { nullptr }
 		{ }
 
 		void SetInvoker(TechnoClass* pInvoker);

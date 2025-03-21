@@ -18,7 +18,7 @@ public:
 	{
 	public:
 		CustomPalette Palette;
-		Nullable<TechnoTypeClass*> CreateUnit;
+		Valueable<TechnoTypeClass*> CreateUnit;
 		Valueable<DirType> CreateUnit_Facing;
 		Valueable<bool> CreateUnit_InheritDeathFacings;
 		Valueable<bool> CreateUnit_InheritTurretFacings;
