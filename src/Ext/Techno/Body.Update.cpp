@@ -46,6 +46,10 @@ void TechnoExt::ExtData::OnEarlyUpdate()
 	this->UpdateRecountBurst();
 	this->UpdateRearmInEMPState();
 	this->UpdateGattlingRateDownReset();
+
+	// Process radar jammer every 2 sec
+	if (Unsorted::CurrentFrame % 30 == this->RandomFactor)
+		this->UpdateRadarJammer();
 }
 
 void TechnoExt::ExtData::ApplyInterceptor()
@@ -451,6 +455,13 @@ void TechnoExt::ExtData::UpdateTypeData(TechnoTypeClass* pCurrentType)
 	if (pOldTypeExt->Harvester_Counted && !!this->TypeExtData->Harvester_Counted)
 	{
 		auto& vec = HouseExt::ExtMap.Find(pThis->Owner)->OwnedCountedHarvesters;
+		vec.erase(std::remove(vec.begin(), vec.end(), pThis), vec.end());
+	}
+
+	// Remove from radar jammed objects list if no longer has EligibleForRadarJam
+	if (pOldTypeExt->EligibleForRadarJam && !!this->TypeExtData->EligibleForRadarJam)
+	{
+		auto& vec = HouseExt::ExtMap.Find(pThis->Owner)->OwnedRadarJammedObjects;
 		vec.erase(std::remove(vec.begin(), vec.end(), pThis), vec.end());
 	}
 
@@ -907,6 +918,41 @@ void TechnoExt::ExtData::UpdateRearmInTemporal()
 
 	if (pThis->ReloadTimer.InProgress() && pTypeExt->NoReload_Temporal.Get(RulesExt::Global()->NoReload_Temporal))
 		pThis->ReloadTimer.StartTime++;
+}
+
+void TechnoExt::ExtData::UpdateRadarJammer()
+{
+	int distance = this->TypeExtData->radarJamRadius;
+
+	if (distance > 0)
+	{
+		const auto pThis = this->OwnerObject();
+		const auto pOwner = pThis->Owner;
+		distance *= Unsorted::LeptonsPerCell;
+
+		for (auto pHouse : *HouseClass::Array)
+		{
+			const auto pHouseExt = HouseExt::ExtMap.Find(pHouse);
+			const bool isAllied = pOwner->IsAlliedWith(pHouse);
+
+			for (auto pTarget : pHouseExt->OwnedRadarJammedObjects)
+			{
+				auto& map = this->AffectedJammers;
+				const int currentDistance = pThis->DistanceFrom(pTarget);
+
+				if (!isAllied && map.find(pThis) == map.end() && currentDistance <= distance)
+				{
+					map[pThis] = true;
+					pTarget->Owner->RecheckRadar = true;
+				}
+				else if (map.find(pThis) != map.end() && (isAllied || currentDistance > distance))
+				{
+					map.erase(pThis);
+					pTarget->Owner->RecheckRadar = true;
+				}
+			}
+		}
+	}
 }
 
 // Updates state of all AttachEffects on techno.

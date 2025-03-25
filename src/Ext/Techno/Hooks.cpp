@@ -150,6 +150,9 @@ DEFINE_HOOK(0x6F42F7, TechnoClass_Init, 0x2)
 	if (pExt->TypeExtData->Harvester_Counted)
 		HouseExt::ExtMap.Find(pThis->Owner)->OwnedCountedHarvesters.push_back(pThis);
 
+	if (pExt->TypeExtData->EligibleForRadarJam)
+		HouseExt::ExtMap.Find(pThis->Owner)->OwnedRadarJammedObjects.push_back(pThis);
+
 	return 0;
 }
 

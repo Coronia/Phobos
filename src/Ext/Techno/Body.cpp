@@ -40,6 +40,27 @@ TechnoExt::ExtData::~ExtData()
 		auto& vec = HouseExt::ExtMap.Find(pThis->Owner)->OwnedCountedHarvesters;
 		vec.erase(std::remove(vec.begin(), vec.end(), pThis), vec.end());
 	}
+
+	if (this->TypeExtData->EligibleForRadarJam)
+	{
+		auto& vec = HouseExt::ExtMap.Find(pThis->Owner)->OwnedRadarJammedObjects;
+		vec.erase(std::remove(vec.begin(), vec.end(), pThis), vec.end());
+	}
+
+	if (this->TypeExtData->RadarJamRadius)
+	{
+		auto const pOwner = pThis->Owner;
+
+		for (auto pHouse : *HouseClass::Array)
+		{
+			auto const pHouseExt = HouseExt::ExtMap.Find(pHouse);
+
+			for (auto pVictim : pHouseExt->OwnedRadarJammedObjects)
+			{
+				TechnoExt::ExtMap.Find(pVictim)->AffectedJammers.erase(pThis);
+			}
+		}
+	}
 }
 
 bool TechnoExt::IsActiveIgnoreEMP(TechnoClass* pThis)
@@ -583,6 +604,8 @@ void TechnoExt::ExtData::Serialize(T& Stm)
 		.Process(this->IsBeingChronoSphered)
 		.Process(this->KeepTargetOnMove)
 		.Process(this->LastSensorsMapCoords)
+		.Process(this->RandomFactor)
+		.Process(this->AffectedJammers)
 		;
 }
 

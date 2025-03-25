@@ -269,7 +269,9 @@ public:
 		Valueable<AnimTypeClass*> Spawner_RecycleAnim;
 		Valueable<CoordStruct> Spawner_RecycleCoord;
 		Valueable<bool> Spawner_RecycleOnTurret;
-		
+
+		Nullable<bool> EligibleForRadarJam;
+
 		struct LaserTrailDataEntry
 		{
 			ValueableIdx<LaserTrailTypeClass> idxType;
@@ -527,11 +529,13 @@ public:
 
 			, InitialSpawnsNumber { }
 			, Spawns_Queue { }
-			
+
 			, Spawner_RecycleRange { Leptons(-1) }
 			, Spawner_RecycleAnim { }
 			, Spawner_RecycleCoord { {0,0,0} }
 			, Spawner_RecycleOnTurret { false }
+
+			, EligibleForRadarJam { }
 		{ }
 
 		virtual ~ExtData() = default;

@@ -497,6 +497,18 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->Spawner_RecycleCoord.Read(exINI, pSection, "Spawner.RecycleCoord");
 	this->Spawner_RecycleOnTurret.Read(exINI, pSection, "Spawner.RecycleOnTurret");
 
+	// EligibleForRadarJam
+	if (!this->EligibleForRadarJam.isset())
+	{
+		if (auto const pBuildingType = abstract_cast<BuildingTypeClass*>(pThis))
+		{
+			if (pBuildingType->Radar || pBuildingType->SpySat)
+				this->EligibleForRadarJam = true;
+		}
+	}
+
+	this->EligibleForRadarJam.Read(exINI, pSection, "EligibleForRadarJam");
+
 	// Ares 0.2
 	this->RadarJamRadius.Read(exINI, pSection, "RadarJamRadius");
 
@@ -893,7 +905,7 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->KeepTargetOnMove_ExtraDistance)
 
 		.Process(this->Power)
-		
+
     	.Process(this->Image_ConditionYellow)
 		.Process(this->Image_ConditionRed)
 		.Process(this->WaterImage_ConditionYellow)
@@ -901,12 +913,13 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 
 		.Process(this->InitialSpawnsNumber)
 		.Process(this->Spawns_Queue)
-		
+
 		.Process(this->Spawner_RecycleRange)
 		.Process(this->Spawner_RecycleAnim)
 		.Process(this->Spawner_RecycleCoord)
 		.Process(this->Spawner_RecycleOnTurret)
 
+		.Process(this->EligibleForRadarJam)
 		;
 }
 void TechnoTypeExt::ExtData::LoadFromStream(PhobosStreamReader& Stm)

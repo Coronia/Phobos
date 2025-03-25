@@ -27,6 +27,7 @@ public:
 		std::unique_ptr<ShieldClass> Shield;
 		std::vector<LaserTrailClass> LaserTrails;
 		std::vector<std::unique_ptr<AttachEffectClass>> AttachedEffects;
+		std::unordered_map<TechnoClass*, bool> AffectedJammers;
 		AttachEffectTechnoProperties AE;
 		int AnimRefCount; // Used to keep track of how many times this techno is referenced in anims f.ex Invoker, ParentBuilding etc., for pointer invalidation.
 		bool ReceiveDamage;
@@ -57,6 +58,7 @@ public:
 		DWORD LastTargetID;
 		int AccumulatedGattlingValue;
 		bool ShouldUpdateGattlingValue;
+		int RandomFactor;
 
 		// Used for Passengers.SyncOwner.RevertOnExit instead of TechnoClass::InitialOwner / OriginallyOwnedByHouse,
 		// as neither is guaranteed to point to the house the TechnoClass had prior to entering transport and cannot be safely overridden.
@@ -108,6 +110,8 @@ public:
 			, IsBeingChronoSphered { false }
 			, KeepTargetOnMove { false }
 			, LastSensorsMapCoords { CellStruct::Empty }
+			, RandomFactor { ScenarioClass::Instance->Random.RandomRanged(0, 29) }
+			, AffectedJammers {}
 		{ }
 
 		void OnEarlyUpdate();
@@ -133,6 +137,7 @@ public:
 		void InitializeLaserTrails();
 		void InitializeAttachEffects();
 		void UpdateSelfOwnedAttachEffects();
+		void UpdateRadarJammer();
 		bool HasAttachedEffects(std::vector<AttachEffectTypeClass*> attachEffectTypes, bool requireAll, bool ignoreSameSource, TechnoClass* pInvoker, AbstractClass* pSource, std::vector<int> const* minCounts, std::vector<int> const* maxCounts) const;
 		int GetAttachedEffectCumulativeCount(AttachEffectTypeClass* pAttachEffectType, bool ignoreSameSource = false, TechnoClass* pInvoker = nullptr, AbstractClass* pSource = nullptr) const;
 

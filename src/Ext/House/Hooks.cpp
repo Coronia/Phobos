@@ -260,6 +260,14 @@ DEFINE_HOOK(0x7015C9, TechnoClass_Captured_UpdateTracking, 0x6)
 		pNewOwnerExt->OwnedCountedHarvesters.push_back(pThis);
 	}
 
+	if (pExt->TypeExtData->EligibleForRadarJam)
+	{
+		auto& vec = pOwnerExt->OwnedRadarJammedObjects;
+		vec.erase(std::remove(vec.begin(), vec.end(), pThis), vec.end());
+
+		pNewOwnerExt->OwnedRadarJammedObjects.push_back(pThis);
+	}
+
 	if (auto pMe = generic_cast<FootClass*>(pThis))
 	{
 		bool I_am_human = pThis->Owner->IsControlledByHuman();
