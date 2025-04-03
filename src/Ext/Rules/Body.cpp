@@ -139,6 +139,8 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->HeightShadowScaling_MinScale.Read(exINI, GameStrings::AudioVisual, "HeightShadowScaling.MinScale");
 
 	this->ExtendedAircraftMissions.Read(exINI, GameStrings::General, "ExtendedAircraftMissions");
+	this->NoQueueUpToEnter.Read(exINI, GameStrings::General, "NoQueueUpToEnter");
+	this->NoQueueUpToUnload.Read(exINI, GameStrings::General, "NoQueueUpToUnload");
 
 	this->BuildingProductionQueue.Read(exINI, GameStrings::General, "BuildingProductionQueue");
 
@@ -190,6 +192,9 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 
 	this->BuildingWaypoints.Read(exINI, GameStrings::General, "BuildingWaypoints");
 
+	this->VisualScatter_Min.Read(exINI, GameStrings::AudioVisual, "VisualScatter.Min");
+	this->VisualScatter_Max.Read(exINI, GameStrings::AudioVisual, "VisualScatter.Max");
+
 	this->Buildings_DefaultDigitalDisplayTypes.Read(exINI, GameStrings::AudioVisual, "Buildings.DefaultDigitalDisplayTypes");
 	this->Infantry_DefaultDigitalDisplayTypes.Read(exINI, GameStrings::AudioVisual, "Infantry.DefaultDigitalDisplayTypes");
 	this->Vehicles_DefaultDigitalDisplayTypes.Read(exINI, GameStrings::AudioVisual, "Vehicles.DefaultDigitalDisplayTypes");
@@ -219,6 +224,8 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 	this->ReplaceVoxelLightSources();
 
 	this->UseFixedVoxelLighting.Read(exINI, GameStrings::AudioVisual, "UseFixedVoxelLighting");
+
+	this->MindControl_ThreatDelay.Read(exINI, GameStrings::General, "MindControl.ThreatDelay");
 
 	this->RecountBurst.Read(exINI, GameStrings::General, "RecountBurst");
 	this->NoRearm_UnderEMP.Read(exINI, GameStrings::General, "NoRearm.UnderEMP");
@@ -362,6 +369,8 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->HeightShadowScaling)
 		.Process(this->HeightShadowScaling_MinScale)
 		.Process(this->ExtendedAircraftMissions)
+		.Process(this->NoQueueUpToEnter)
+		.Process(this->NoQueueUpToUnload)
 		.Process(this->BuildingProductionQueue)
 		.Process(this->AllowParallelAIQueues)
 		.Process(this->ForbidParallelAIQueues_Aircraft)
@@ -407,6 +416,8 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->Infantry_DefaultDigitalDisplayTypes)
 		.Process(this->Vehicles_DefaultDigitalDisplayTypes)
 		.Process(this->Aircraft_DefaultDigitalDisplayTypes)
+		.Process(this->VisualScatter_Min)
+		.Process(this->VisualScatter_Max)
 		.Process(this->ShowDesignatorRange)
 		.Process(this->DropPodTrailer)
 		.Process(this->PodImage)
@@ -429,6 +440,7 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->CombatAlert_UseAttackVoice)
 		.Process(this->CombatAlert_UseEVA)
 		.Process(this->UseFixedVoxelLighting)
+		.Process(this->MindControl_ThreatDelay)
 		.Process(this->RecountBurst)
 		.Process(this->NoRearm_UnderEMP)
 		.Process(this->NoRearm_Temporal)
