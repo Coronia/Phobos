@@ -194,6 +194,7 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->Crit_SuppressWhenIntercepted.Read(exINI, pSection, "Crit.SuppressWhenIntercepted");
 
 	this->MindControl_Anim.Read(exINI, pSection, "MindControl.Anim");
+	this->MindControl_ThreatDelay.Read(exINI, pSection, "MindControl.ThreatDelay");
 
 	// Shields
 	this->Shield_Penetrate.Read(exINI, pSection, "Shield.Penetrate");
@@ -277,6 +278,13 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->BuildingUndeploy_Leave.Read(exINI, pSection, "BuildingUndeploy.Leave");
 
 	this->CombatAlert_Suppress.Read(exINI, pSection, "CombatAlert.Suppress");
+
+	this->KillWeapon.Read(exINI, pSection, "KillWeapon");
+	this->KillWeapon_OnFirer.Read(exINI, pSection, "KillWeapon.OnFirer");
+	this->KillWeapon_AffectsHouses.Read(exINI, pSection, "KillWeapon.AffectsHouses");
+	this->KillWeapon_OnFirer_AffectsHouses.Read(exINI, pSection, "KillWeapon.OnFirer.AffectsHouses");
+
+  	this->ElectricAssaultLevel.Read(exINI, pSection, "ElectricAssaultLevel");
 
 	// Convert.From & Convert.To
 	TypeConvertGroup::Parse(this->Convert_Pairs, exINI, pSection, AffectedHouse::All);
@@ -426,6 +434,7 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->Crit_SuppressWhenIntercepted)
 
 		.Process(this->MindControl_Anim)
+		.Process(this->MindControl_ThreatDelay)
 
 		.Process(this->Shield_Penetrate)
 		.Process(this->Shield_Break)
@@ -515,6 +524,13 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->BuildingUndeploy_Leave)
 
 		.Process(this->CombatAlert_Suppress)
+
+		.Process(this->KillWeapon)
+		.Process(this->KillWeapon_OnFirer)
+		.Process(this->KillWeapon_AffectsHouses)
+		.Process(this->KillWeapon_OnFirer_AffectsHouses)
+
+    	.Process(this->ElectricAssaultLevel)
 
 		// Ares tags
 		.Process(this->AffectsEnemies)
