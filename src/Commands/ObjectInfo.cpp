@@ -74,12 +74,26 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 
 	auto printFoots = [&append, &display, &getTargetInfo](FootClass* pFoot)
 	{
-		append("[Phobos] Dump ObjectInfo runs.\n");
+		append("[Phobos] Dump ObjectInfo runs. Current Frame = %d\n", Unsorted::CurrentFrame);
 		auto pType = pFoot->GetTechnoType();
 		append("ID = %s, ", pType->ID);
 		append("Owner = %s (%s), ", pFoot->Owner->get_ID(), pFoot->Owner->PlainName);
 		append("Location = (%d, %d), ", pFoot->GetMapCoords().X, pFoot->GetMapCoords().Y);
 		append("Mission = %d (%s), Status = %d\n", pFoot->CurrentMission, MissionControlClass::FindName(pFoot->CurrentMission), pFoot->MissionStatus);
+
+		if (pFoot->SuspendedMission != Mission::None || pFoot->QueuedMission != Mission::None || pFoot->MegaMission != Mission::None)
+		{
+			if (pFoot->SuspendedMission != Mission::None)
+				append("SuspendedMission = %d (%s)", pFoot->SuspendedMission, MissionControlClass::FindName(pFoot->SuspendedMission));
+
+			if (pFoot->QueuedMission != Mission::None)
+				append("QueuedMission = %d (%s)", pFoot->QueuedMission, MissionControlClass::FindName(pFoot->QueuedMission));
+
+			if (pFoot->MegaMission != Mission::None)
+				append("MegaMission = %d (%s)", pFoot->MegaMission, MissionControlClass::FindName(pFoot->MegaMission));
+
+			append("\n");
+		}
 
 		if (pFoot->BelongsToATeam())
 		{
@@ -113,6 +127,26 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 			display();
 		}
 
+		append("Current HP = (%d / %d)", pFoot->Health, pType->Strength);
+
+		int rearmTimerLeft = pFoot->RearmTimer.GetTimeLeft();
+		append(", Rearm = (%d / %d)", rearmTimerLeft, pFoot->RearmTimer.CurrentTime - pFoot->RearmTimer.StartTime + rearmTimerLeft);
+
+		auto pTechnoExt = TechnoExt::ExtMap.Find(pFoot);
+		auto pShieldData = pTechnoExt->Shield.get();
+
+		if (pTechnoExt->CurrentShieldType && pShieldData)
+			append(", Current Shield HP = (%d / %d)", pShieldData->GetHP(), pTechnoExt->CurrentShieldType->Strength);
+
+		if (pType->Ammo > 0)
+		{
+			append(", Ammo = (%d / %d)", pFoot->Ammo, pType->Ammo);
+			int reloadTimerLeft = pFoot->ReloadTimer.GetTimeLeft();
+			append(", Reload = (%d / %d)", reloadTimerLeft, pFoot->ReloadTimer.CurrentTime - pFoot->ReloadTimer.StartTime + reloadTimerLeft);
+		}
+
+		append("\n");
+
 		if (pFoot->Passengers.NumPassengers > 0)
 		{
 			FootClass* pCurrent = pFoot->Passengers.FirstPassenger;
@@ -131,6 +165,24 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 			append("Target = %s, Distance = %d, Location = (%d, %d)\n", ID, distance, mapCoords.X, mapCoords.Y);
 		}
 
+		if (pFoot->LastTarget)
+		{
+			auto mapCoords = CellStruct::Empty;
+			auto ID = "N/A";
+			int distance = 0;
+			getTargetInfo(pFoot, pFoot->LastTarget, distance, ID, mapCoords);
+			append("LastTarget = %s, Distance = %d, Location = (%d, %d)\n", ID, distance, mapCoords.X, mapCoords.Y);
+		}
+
+		if (pFoot->MegaTarget)
+		{
+			auto mapCoords = CellStruct::Empty;
+			auto ID = "N/A";
+			int distance = 0;
+			getTargetInfo(pFoot, pFoot->MegaTarget, distance, ID, mapCoords);
+			append("MegaTarget = %s, Distance = %d, Location = (%d, %d)\n", ID, distance, mapCoords.X, mapCoords.Y);
+		}
+
 		if (pFoot->Destination)
 		{
 			auto mapCoords = CellStruct::Empty;
@@ -140,18 +192,24 @@ void ObjectInfoCommandClass::Execute(WWKey eInput) const
 			append("Destination = %s, Distance = %d, Location = (%d, %d)\n", ID, distance, mapCoords.X, mapCoords.Y);
 		}
 
-		append("Current HP = (%d / %d)", pFoot->Health, pType->Strength);
+		if (pFoot->LastDestination)
+		{
+			auto mapCoords = CellStruct::Empty;
+			auto ID = "N/A";
+			int distance = 0;
+			getTargetInfo(pFoot, pFoot->LastDestination, distance, ID, mapCoords);
+			append("LastDestination = %s, Distance = %d, Location = (%d, %d)\n", ID, distance, mapCoords.X, mapCoords.Y);
+		}
 
-		auto pTechnoExt = TechnoExt::ExtMap.Find(pFoot);
-		auto pShieldData = pTechnoExt->Shield.get();
+		if (pFoot->MegaDestination)
+		{
+			auto mapCoords = CellStruct::Empty;
+			auto ID = "N/A";
+			int distance = 0;
+			getTargetInfo(pFoot, pFoot->MegaDestination, distance, ID, mapCoords);
+			append("MegaDestination = %s, Distance = %d, Location = (%d, %d)\n", ID, distance, mapCoords.X, mapCoords.Y);
+		}
 
-		if (pTechnoExt->CurrentShieldType && pShieldData)
-			append(", Current Shield HP = (%d / %d)", pShieldData->GetHP(), pTechnoExt->CurrentShieldType->Strength);
-
-		if (pType->Ammo > 0)
-			append(", Ammo = (%d / %d)", pFoot->Ammo, pType->Ammo);
-
-		append("\n");
 		display();
 	};
 
