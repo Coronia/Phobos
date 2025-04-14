@@ -1498,12 +1498,14 @@ AutoDeath.TechnosExist.Houses=owner            ; Affected House Enumeration (non
 *Multiple Mind Control unit auto-releases the first victim in [Fantasy ADVENTURE](https://www.moddb.com/mods/fantasy-adventure)*
 
 - Mind controllers now can have the upper limit of the control distance. Tag values greater than 0 will activate this feature.
+- Mind controllers now can decide whether a link should be drawn between itself and the controlled units.
 - Mind controllers with multiple controlling slots can now release the first controlled unit when they have reached the control limit and are ordered to control a new target.
 
 In `rulesmd.ini`:
 ```ini
 [SOMETECHNO]                          ; TechnoType
 MindControlRangeLimit=-1.0            ; floating point value
+MindControlDrawLink=true              ; boolean
 MultiMindControl.ReleaseVictim=false  ; boolean
 ```
 
@@ -1539,6 +1541,22 @@ NoRearm.UnderEMP=        ; boolean
 NoRearm.Temporal=        ; boolean
 NoReload.UnderEMP=       ; boolean
 NoReload.Temporal=       ; boolean
+```
+
+### Overload characteristic dehardcoded
+
+- It is now possible to customize `Overload` behaviors for a TechnoType with `InfiniteMindControl=yes` weapon.
+
+In `rulesmd.ini`:
+```ini
+
+[SOMETECHNO]                  ; TechnoType
+Overload.Count=               ; list of integer, default to OverloadCount in [CombatDamage]
+Overload.Damage=              ; list of integer, default to OverloadDamage in [CombatDamage]
+Overload.Frames=              ; list of integer, default to OverloadFrames in [CombatDamage]
+Overload.DeathSound=          ; Sound entry, default to MasterMindOverloadDeathSound in [AudioVisual]
+Overload.ParticleSys=         ; ParticleSystemType, default to DefaultSparkSystem in [CombatDamage]
+Overload.ParticleSysCount=5   ; integer
 ```
 
 ### Promoted Spawns
@@ -1948,7 +1966,7 @@ KillWeapon.AffectsHouses=all          ; List of Affected House Enumeration (none
 KillWeapon.OnFirer.AffectsHouses=all  ; List of Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
 KillWeapon.Affects=all                ; List of Affected Target Enumeration (none|land|water|empty|infantry|units|buildings|all)
 KillWeapon.OnFirer.Affects=all        ; List of Affected Target Enumeration (none|land|water|empty|infantry|units|buildings|all)
-     
+
 [SOMETECHNO]                          ; TechnoType
 SuppressKillWeapons=false             ; boolean
 SuppressKillWeapons.Types=            ; List of WeaponTypes
