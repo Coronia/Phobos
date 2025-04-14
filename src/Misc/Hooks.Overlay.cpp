@@ -151,6 +151,7 @@ DEFINE_HOOK(0x5FD2E0, OverlayClass_ReadINI, 0x7)
 			{
 				CellStruct mapCoord{ j,i };
 				size_t nOvl = reader.Get();
+
 				if (nOvl != 0xFFFFFFFF)
 				{
 					auto const pType = OverlayTypeClass::Array->GetItem(nOvl);
@@ -174,6 +175,7 @@ DEFINE_HOOK(0x5FD2E0, OverlayClass_ReadINI, 0x7)
 
 		auto pBuffer = YRMemory::Allocate(256000);
 		size_t uuLength = pINI->ReadUUBlock("OverlayDataPack", pBuffer, 256000);
+
 		if (uuLength > 0)
 		{
 			BufferStraw bs(pBuffer, uuLength);
@@ -196,6 +198,7 @@ DEFINE_HOOK(0x5FD2E0, OverlayClass_ReadINI, 0x7)
 				}
 			}
 		}
+
 		YRMemory::Deallocate(pBuffer);
 	}
 
