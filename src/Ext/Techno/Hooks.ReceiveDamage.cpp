@@ -29,8 +29,8 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 
 	const auto pSourceHouse = args->SourceHouse;
 	const auto pTargetHouse = pThis->Owner;
-	const bool unkillable = pWHExt->CanKill || pExt->AE.Unkillable;
-	int nDamageLeft = *arg->Damage;
+	const bool unkillable = !pWHExt->CanKill || pExt->AE.Unkillable;
+	int nDamageLeft = *args->Damage;
 
 	// Calculate Damage Multiplier
 	if (!args->IgnoreDefenses && *args->Damage)
@@ -113,7 +113,7 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 				int nDamageTotal = MapClass::GetTotalDamage(nDamageLeft, args->WH, pShieldData->GetArmorType(), 0);
 
 				// Check if the warhead can not kill targets
-				if (pThis->Health > 0 && !unkillable && nDamageTotal >= pThis->Health)
+				if (pThis->Health > 0 && unkillable && nDamageTotal >= pThis->Health)
 				{
 					*args->Damage = 0;
 					pThis->Health = 1;
@@ -137,17 +137,17 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 			if (nDamageLeft == 0)
 				ReceiveDamageTemp::SkipLowDamageCheck = true;
 		}
-	}
 
-	// Update remaining damage and check if the target will die and should be avoided
-	int nDamageTotal = MapClass::GetTotalDamage(nDamageLeft, args->WH, pThis->GetTechnoType()->Armor, 0);
+		// Update remaining damage and check if the target will die and should be avoided
+		int nDamageTotal = MapClass::GetTotalDamage(nDamageLeft, args->WH, pThis->GetTechnoType()->Armor, 0);
 
-	if (pThis->Health > 0 && !unkillable && nDamageTotal >= pThis->Health)
-	{
-		*args->Damage = 0;
-		pThis->Health = 1;
-		pThis->EstimatedHealth = 1;
-		ReceiveDamageTemp::SkipLowDamageCheck = true;
+		if (pThis->Health > 0 && unkillable && nDamageTotal >= pThis->Health)
+		{
+			*args->Damage = 0;
+			pThis->Health = 1;
+			pThis->EstimatedHealth = 1;
+			ReceiveDamageTemp::SkipLowDamageCheck = true;
+		}
 	}
 
 	return 0;
