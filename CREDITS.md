@@ -135,6 +135,7 @@ This page lists all the individual contributions to the project by their author.
   - Customizable FLH when infantry is prone or deployed
   - Initial strength for cloned infantry
   - Map Events 604 & 605 for checking if a specific Techno enters in a cell
+  - Warhead that can not kill
 - **Starkku**:
   - Misc. minor bugfixes & improvements
   - AI script actions:
@@ -350,28 +351,29 @@ This page lists all the individual contributions to the project by their author.
    - Fix `AltNextScenario` not taking effect
    - Fix `Hospital=yes` building can't kick out infantry after loading a save
 - **NetsuNegi**:
-  - Forbidding parallel AI queues by type
-  - Jumpjet crash speed fix when crashing onto building
-  - Disguised units not using the correct palette if target has custom palette bugfix
-  - Tunnel/Walk/Mech locomotor being stuck when moving too fast bugfix
-  - Assign Super Weapon cameo to any sidebar tab
-  - Fix impassable invisible barrier created by chronosphere on uncrushable unit
-  - `FreeUnit` uses its own `SpeedType` to determine where to spawn
-  - Fix the bug where naval ships set to `AllowedToStartInMultiplayer=yes` may spawn incorrectly on land
-  - Fix the bug where pathfinding issues occur when a building performs undeploy
-  - Fix amphibious harvesters can not automatically return to refineries with `WaterBound`
-  - Fix [EIP 004C2C19](https://modenc.renegadeprojects.com/Internal_Error#eip_004C2C19) concerning the electric bolt
-  - Fix `DefaultDisguise` showing wrong house colors for different players
-  - Taking over Ares' AlphaImage respawn logic to reduce lags from it
-  - Allow voxel projectiles to use `AnimPalette` and `FirersPalette`
-  - Customize damaged speed ratio of drive/ship loco
-  - Customize overpower logic
-  - Fix the bug that `EnterBioReactorSound`, `LeaveBioReactorSound`, `EnterGrinderSound` on technotype does not used
-  - Fix the bug that harvester dont stop unloading and cannot unload cargos anymore when lifting by `IsLocomotor=yes` warhead
-  - Fix an issue that units on the slope tilted at an excessive angle
-  - Enhanced reveal & gap warhead
-  - Fix an issue that teleport units board transport vehicles on the bridge will create an impassable invisible barrier, which may cause the game to freeze or even crash
-  - Fix wrong shadow when a vehicle has hover locomotor and is being lifted by `IsLocomotor=yes` warhead
+    - Forbidding parallel AI queues by type
+    - Jumpjet crash speed fix when crashing onto building
+    - Disguised units not using the correct palette if target has custom palette bugfix
+    - Tunnel/Walk/Mech locomotor being stuck when moving too fast bugfix
+    - Assign Super Weapon cameo to any sidebar tab
+    - Fix impassable invisible barrier created by chronosphere on uncrushable unit
+    - `FreeUnit` uses its own `SpeedType` to determine where to spawn
+    - Fix the bug where naval ships set to `AllowedToStartInMultiplayer=yes` may spawn incorrectly on land
+    - Fix the bug where pathfinding issues occur when a building performs undeploy
+    - Fix amphibious harvesters can not automatically return to refineries with `WaterBound`
+    - Fix [EIP 004C2C19](https://modenc.renegadeprojects.com/Internal_Error#eip_004C2C19) concerning the electric bolt
+    - Fix `DefaultDisguise` showing wrong house colors for different players
+    - Taking over Ares' AlphaImage respawn logic to reduce lags from it
+    - Allow voxel projectiles to use `AnimPalette` and `FirersPalette`
+    - Customize damaged speed ratio of drive/ship loco
+    - Customize overpower logic
+    - Fix the bug that `EnterBioReactorSound`, `LeaveBioReactorSound`, `EnterGrinderSound` on technotype does not used
+    - Fix the bug that harvester dont stop unloading and cannot unload cargos anymore when lifting by `IsLocomotor=yes` warhead
+    - Fix an issue that units on the slope tilted at an excessive angle
+    - Enhanced reveal & gap warhead
+    - Fix an issue that teleport units board transport vehicles on the bridge will create an impassable invisible barrier, which may cause the game to freeze or even crash
+    - Fix wrong shadow when a vehicle has hover locomotor and is being lifted by `IsLocomotor=yes` warhead
+    - Fix the bug that a unit can overlap with `Teleport` units after it's been damaged by a fallen unit lifted by `IsLocomotor=yes` warheads
 - **Apollo** - Translucent SHP drawing patches
 - **ststl**:
    - Customizable `ShowTimer` priority of superweapons
@@ -439,9 +441,6 @@ This page lists all the individual contributions to the project by their author.
   - Fix an issue that MCV will self-destruct when using trigger 107 to teleport
   - Fix an issue that moving MCV with Teleport locomotion will cause reconnection error
   - Jumpjet Tilts While Moving
-- **Noble Fish (DeathFish, DeathFishAtEase)**
-  - Documentation maintenance
-  - Chinese documentation maintenance and translation
 - **Ollerus**:
   - Build limit group enhancement
   - Customizable rocker amplitude
@@ -498,6 +497,7 @@ This page lists all the individual contributions to the project by their author.
 - **E1 Elite** - TileSet 255 and above bridge repair fix
 - **AutoGavy** - interceptor logic, Warhead critical hit logic
 - **Chasheen (Chasheenburg)** - CN docs help for Build#24
+- **Noble Fish** - some minor fixes, established Community Chinese docs, took over and completely rewrite the Official Chinese docs during Build#46
 - **tomsons26** - all-around help, assistance and guidance in reverse-engineering, YR binary mappings
 - **CCHyper** - all-around help, current project logo, assistance and guidance in reverse-engineering, YR binary mappings, custom locomotors example implementation
 - **AlexB** - Original FlyingStrings implementation
