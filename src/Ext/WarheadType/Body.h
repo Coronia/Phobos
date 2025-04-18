@@ -175,6 +175,12 @@ public:
 
     	Valueable<int> ElectricAssaultLevel;
 
+		Valueable<bool> Taunt;
+		Valueable<AffectedHouse> Taunt_AffectsHouses;
+		Valueable<bool> Taunt_AffectsControlledAllies;
+		Valueable<bool> Taunt_AffectsBerserk;
+		Valueable<bool> Taunt_BreakMission;
+
 		// Ares tags
 		// http://ares-developers.github.io/Ares-docs/new/warheads/general.html
 		Valueable<bool> AffectsEnemies;
@@ -348,6 +354,12 @@ public:
 
 			, ElectricAssaultLevel { 1 }
 
+			, Taunt { false }
+			, Taunt_AffectsHouses { AffectedHouse::Enemies }
+			, Taunt_AffectsControlledAllies { true }
+			, Taunt_AffectsBerserk { true }
+			, Taunt_BreakMission { false }
+
 			, AffectsEnemies { true }
 			, AffectsOwner {}
 			, EffectsRequireVerses { true }
@@ -406,6 +418,7 @@ public:
 		void ApplyShieldModifiers(TechnoClass* pTarget, TechnoExt::ExtData* pTargetExt);
 		void ApplyAttachEffects(TechnoClass* pTarget, HouseClass* pInvokerHouse, TechnoClass* pInvoker);
 		void ApplyBuildingUndeploy(TechnoClass* pTarget);
+		void ApplyTaunt(HouseClass* pHouse, TechnoClass* pTarget, TechnoClass* pOwner);
 		double GetCritChance(TechnoClass* pFirer) const;
 	};
 

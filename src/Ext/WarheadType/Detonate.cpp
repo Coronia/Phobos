@@ -222,6 +222,9 @@ void WarheadTypeExt::ExtData::DetonateOnOneUnit(HouseClass* pHouse, TechnoClass*
 	if (this->BuildingSell || this->BuildingUndeploy)
 		this->ApplyBuildingUndeploy(pTarget);
 
+	if (this->Taunt)
+		this->ApplyTaunt(pHouse, pTarget, pOwner);
+
 #ifdef LOCO_TEST_WARHEADS
 	if (this->InflictLocomotor)
 		this->ApplyLocomotorInfliction(pTarget);
@@ -624,6 +627,53 @@ void WarheadTypeExt::ExtData::ApplyAttachEffects(TechnoClass* pTarget, HouseClas
 	AttachEffectClass::Attach(pTarget, pInvokerHouse, pInvoker, this->OwnerObject(), info);
 	AttachEffectClass::Detach(pTarget, info);
 	AttachEffectClass::DetachByGroups(pTarget, info);
+}
+
+void WarheadTypeExt::ExtData::ApplyTaunt(HouseClass* pHouse, TechnoClass* pTarget, TechnoClass* pOwner)
+{
+	if (!pTarget)
+		return;
+
+	if (!this->Taunt_AffectsBerserk && pTarget->Berzerk)
+		return;
+
+	auto const pTargetExt = TechnoExt::ExtMap.Find(pTarget);
+
+	if (pTargetExt->TypeExtData->ImmuneToTaunt || (pTargetExt->Shield && pTargetExt->Shield->IsActive() && pTargetExt->Shield->GetType()->ImmuneToTaunt))
+		return;
+
+	if (!TechnoExt::IsActive(pTarget))
+		return;
+
+	if (!this->Taunt_AffectsControlledAllies)
+	{
+		if (auto const pController = pTarget->MindControlledBy)
+		{
+			for (auto const pNode : pController->CaptureManager->ControlNodes)
+			{
+				if (pNode->Unit == pTarget)
+				{
+					if (pHouse && pHouse->IsAlliedWith(pNode->OriginalOwner))
+						return;
+
+					break;
+				}
+			}
+		}
+	}
+
+	if (pHouse && !EnumFunctions::CanTargetHouse(this->Crit_AffectsHouses, pHouse, pTarget->Owner))
+		return;
+
+	if (this->Taunt_BreakMission || !pOwner)
+	{
+		pTarget->QueueMission(pTarget->GetTechnoType()->DefaultToGuardArea ? Mission::Area_Guard : Mission::Guard, true);
+	}
+	else
+	{
+		pTarget->SetTarget(pOwner);
+		pTarget->QueueMission(Mission::Attack, true);
+	}
 }
 
 double WarheadTypeExt::ExtData::GetCritChance(TechnoClass* pFirer) const

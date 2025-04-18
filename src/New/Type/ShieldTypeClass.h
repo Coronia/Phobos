@@ -53,6 +53,7 @@ public:
 	Nullable<int> Pips_Building_Empty;
 	Valueable<bool> ImmuneToCrit;
 	Valueable<bool> ImmuneToBerserk;
+	Valueable<bool> ImmuneToTaunt;
 
 	Nullable<ColorStruct> Tint_Color;
 	Valueable<double> Tint_Intensity;
@@ -101,6 +102,7 @@ public:
 		, Pips_Building_Empty { }
 		, ImmuneToBerserk { false }
 		, ImmuneToCrit { false }
+		, ImmuneToTaunt { false }
 		, Tint_Color {}
 		, Tint_Intensity { 0.0 }
 		, Tint_VisibleToHouses { AffectedHouse::All }

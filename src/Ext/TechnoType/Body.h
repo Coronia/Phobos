@@ -299,6 +299,8 @@ public:
 		Nullable<AnimTypeClass*> Promote_VeteranAnimation;
 		Nullable<AnimTypeClass*> Promote_EliteAnimation;
 
+		Valueable<bool> ImmuneToTaunt;
+
 		struct LaserTrailDataEntry
 		{
 			ValueableIdx<LaserTrailTypeClass> idxType;
@@ -597,6 +599,8 @@ public:
 
 			, Promote_VeteranAnimation { }
 			, Promote_EliteAnimation { }
+
+			, ImmuneToTaunt { false }
 		{ }
 
 		virtual ~ExtData() = default;

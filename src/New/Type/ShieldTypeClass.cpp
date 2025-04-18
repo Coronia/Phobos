@@ -92,6 +92,7 @@ void ShieldTypeClass::LoadFromINI(CCINIClass* pINI)
 
 	this->ImmuneToBerserk.Read(exINI, pSection, "ImmuneToBerserk");
 	this->ImmuneToCrit.Read(exINI, pSection, "ImmuneToCrit");
+	this->ImmuneToTaunt.Read(exINI, pSection, "ImmuneToTaunt");
 
 	this->Tint_Color.Read(exINI, pSection, "Tint.Color");
 	this->Tint_Intensity.Read(exINI, pSection, "Tint.Intensity");
@@ -142,6 +143,7 @@ void ShieldTypeClass::Serialize(T& Stm)
 		.Process(this->Pips_Building_Empty)
 		.Process(this->ImmuneToBerserk)
 		.Process(this->ImmuneToCrit)
+		.Process(this->ImmuneToTaunt)
 		.Process(this->Tint_Color)
 		.Process(this->Tint_Intensity)
 		.Process(this->Tint_VisibleToHouses)

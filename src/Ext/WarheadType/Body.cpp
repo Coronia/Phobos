@@ -293,6 +293,12 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 
   	this->ElectricAssaultLevel.Read(exINI, pSection, "ElectricAssaultLevel");
 
+	this->Taunt.Read(exINI, pSection, "Taunt");
+	this->Taunt_AffectsHouses.Read(exINI, pSection, "Taunt.AffectsHouses");
+	this->Taunt_AffectsControlledAllies.Read(exINI, pSection, "Taunt.AffectsControlledAllies");
+	this->Taunt_AffectsBerserk.Read(exINI, pSection, "Taunt.AffectsBerserk");
+	this->Taunt_BreakMission.Read(exINI, pSection, "Taunt.BreakMission");
+
 	// Convert.From & Convert.To
 	TypeConvertGroup::Parse(this->Convert_Pairs, exINI, pSection, AffectedHouse::All);
 
@@ -543,6 +549,12 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->KillWeapon_OnFirer_Affects)
 
     	.Process(this->ElectricAssaultLevel)
+
+		.Process(this->Taunt)
+		.Process(this->Taunt_AffectsHouses)
+		.Process(this->Taunt_AffectsControlledAllies)
+		.Process(this->Taunt_AffectsBerserk)
+		.Process(this->Taunt_BreakMission)
 
 		// Ares tags
 		.Process(this->AffectsEnemies)

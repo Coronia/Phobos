@@ -327,6 +327,7 @@ ReceivedDamage.Maximum=2147483647           ; integer
 AllowTransfer=                              ; boolean
 ImmuneToBerserk=no                          ; boolean
 ImmuneToCrit=no                             ; boolean
+ImmuneToTaunt=no                            ; boolean
 Tint.Color=                                 ; integer - R,G,B
 Tint.Intensity=0.0                          ; floating point value
 Tint.VisibleToHouses=all                    ; List of Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
@@ -2114,6 +2115,27 @@ In `rulesmd.ini`:
 [SOMEWARHEAD]            ; WarheadType
 SpawnsCrate(N).Type=     ; Powerup crate type enum (money|unit|healbase|cloak|explosion|napalm|squad|reveal|armor|speed|firepower|icbm|invulnerability|veteran|ionstorm|gas|tiberium|pod)
 SpawnsCrate(N).Weight=1  ; integer
+```
+
+### Taunt
+- Warheads with `Taunt=true` are now able to force the target to attack the firer.
+  - `Taunt.AffectsHouses` can be used to customize houses that this Warhead can taunt.
+  - `Taunt.AffectsControlledAllies` can be used to customize whether the target can be taunted if it's an allied techno that's been mind controlled.
+  - `Taunt.AffectsBerserk` can be used to customize whether the target can be taunted if it's under the effect of a `Psychedelic=yes` warhead.
+  - If `Taunt_BreakMission` set to true, the target will stop current mission while not forced-attacking the firer.
+- `ImmuneToTaunt` can be set on TechnoTypes and ShieldTypes to make them immune to taunt effects.
+
+In `rulesmd.ini`:
+```ini
+[SOMEWARHEAD]                          ; WarheadType
+Taunt=false                            ; boolean
+Taunt.AffectsHouses=enemy              ; List of Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
+Taunt.AffectsControlledAllies=true     ; boolean
+Taunt.AffectsBerserk=true              ; boolean
+Taunt.BreakMission=false               ; boolean
+
+[SOMETECHNO]                           ; TechnoType
+ImmuneToTaunt=false                    ; boolean
 ```
 
 ### Trigger specific NotHuman infantry Death anim sequence
