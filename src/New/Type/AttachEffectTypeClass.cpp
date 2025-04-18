@@ -142,6 +142,9 @@ void AttachEffectTypeClass::LoadFromINI(CCINIClass* pINI)
 	this->Crit_AllowWarheads.Read(exINI, pSection, "Crit.AllowWarheads");
 	this->Crit_DisallowWarheads.Read(exINI, pSection, "Crit.DisallowWarheads");
 
+	this->Block_ChanceMultiplier.Read(exINI, pSection, "Block.ChanceMultiplier");
+	this->Block_ExtraChance.Read(exINI, pSection, "Block.ExtraChance");
+
 	this->RevengeWeapon.Read<true>(exINI, pSection, "RevengeWeapon");
 	this->RevengeWeapon_AffectsHouses.Read(exINI, pSection, "RevengeWeapon.AffectsHouses");
 
@@ -150,8 +153,11 @@ void AttachEffectTypeClass::LoadFromINI(CCINIClass* pINI)
 	this->ReflectDamage_Warhead_Detonate.Read(exINI, pSection, "ReflectDamage.Warhead.Detonate");
 	this->ReflectDamage_Multiplier.Read(exINI, pSection, "ReflectDamage.Multiplier");
 	this->ReflectDamage_AffectsHouses.Read(exINI, pSection, "ReflectDamage.AffectsHouses");
+	this->ReflectDamage_Chance.Read(exINI, pSection, "ReflectDamage.Chance");
+	this->ReflectDamage_Override.Read(exINI, pSection, "ReflectDamage.Override");
 
 	this->DisableWeapons.Read(exINI, pSection, "DisableWeapons");
+	this->Unkillable.Read(exINI, pSection, "Unkillable");
 
 	// Groups
 	exINI.ParseStringList(this->Groups, pSection, "Groups");
@@ -201,6 +207,8 @@ void AttachEffectTypeClass::Serialize(T& Stm)
 		.Process(this->Crit_ExtraChance)
 		.Process(this->Crit_AllowWarheads)
 		.Process(this->Crit_DisallowWarheads)
+		.Process(this->Block_ChanceMultiplier)
+		.Process(this->Block_ExtraChance)
 		.Process(this->RevengeWeapon)
 		.Process(this->RevengeWeapon_AffectsHouses)
 		.Process(this->ReflectDamage)
@@ -208,7 +216,10 @@ void AttachEffectTypeClass::Serialize(T& Stm)
 		.Process(this->ReflectDamage_Warhead_Detonate)
 		.Process(this->ReflectDamage_Multiplier)
 		.Process(this->ReflectDamage_AffectsHouses)
+		.Process(this->ReflectDamage_Chance)
+		.Process(this->ReflectDamage_Override)
 		.Process(this->DisableWeapons)
+		.Process(this->Unkillable)
 		.Process(this->Groups)
 		;
 }

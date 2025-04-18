@@ -43,12 +43,14 @@ This page describes all the engine features that are either new and introduced b
     - On TechnoTypes with `OpenTopped=true`, `OpenTopped.UseTransportRangeModifiers` can be set to true to make passengers firing out use the transport's active range bonuses instead.
   - `Crit.Multiplier` and `Crit.ExtraChance` can be used to multiply the [critical hit](#chance-based-extra-damage-or-warhead-detonation--critical-hits) chance or grant a fixed bonus to it for the object the effect is attached to, respectively.
     - `Crit.AllowWarheads` can be used to list only Warheads that can benefit from this critical hit chance multiplier and `Crit.DisallowWarheads` weapons that are not allowed to, respectively.
+  - `Block.ChanceMultiplier` and `Block.ExtraChance` can be used to multiply the [block](#block-damage) chance or grant a fixed bonus to it for the object the effect is attached to, respectively.
   - `RevengeWeapon` can be used to temporarily grant the specified weapon as a [revenge weapon](#revenge-weapon) for the attached object.
     - `RevengeWeapon.AffectsHouses` customizes which houses can trigger the revenge weapon.
-  - `ReflectDamage` can be set to true to have any positive damage dealt to the object the effect is attached to be reflected back to the attacker. `ReflectDamage.Warhead` determines which Warhead is used to deal the damage, defaults to `[CombatDamage] -> C4Warhead`. If `ReflectDamage.Warhead.Detonate` is set to true, the Warhead is fully detonated instead of used to simply deal damage. `ReflectDamage.Multiplier` is a multiplier to the damage received and then reflected back. Already reflected damage cannot be further reflected back.
-    - Warheads can prevent reflect damage from occuring by setting `SuppressReflectDamage` to true. `SuppressReflectDamage.Types` can control which AttachEffectTypes' reflect damage is suppressed, if none are listed then all of them are suppressed.
+  - `ReflectDamage` can be set to true to have any positive damage dealt to the object the effect is attached to be reflected back to the attacker. `ReflectDamage.Warhead` determines which Warhead is used to deal the damage, defaults to `[CombatDamage] -> C4Warhead`. If `ReflectDamage.Warhead.Detonate` is set to true, the Warhead is fully detonated instead of used to simply deal damage. `ReflectDamage.Chance` determines the chance of reflection. `ReflectDamage.Multiplier` is a multiplier to the damage received and then reflected back, while `ReflectDamage.Override` directly overrides the damage. Already reflected damage cannot be further reflected back.
+    - Warheads can prevent reflect damage from occuring by setting `SuppressReflectDamage` to true. `SuppressReflectDamage.Types` can control which AttachEffectTypes' reflect damage is suppressed, if none are listed then all of them are suppressed. `SuppressReflectDamage.Groups` does the same thing but for all AttachEffectTypes in the listed groups.
   - `DisableWeapons` can be used to disable ability to fire any and all weapons.
     - On TechnoTypes with `OpenTopped=true`, `OpenTopped.CheckTransportDisableWeapons` can be set to true to make passengers not be able to fire out if transport's weapons are disabled by `DisableWeapons`.
+  - `Unkillable` can be used to prevent the techno from being killed by taken damage (minimum health will be 1).
   - It is possible to set groups for attach effect types by defining strings in `Groups`.
     - Groups can be used instead of types for removing effects and weapon filters.
 
@@ -119,14 +121,19 @@ Crit.Multiplier=1.0                                ; floating point value
 Crit.ExtraChance=0.0                               ; floating point value
 Crit.AllowWarheads=                                ; List of WarheadTypes
 Crit.DisallowWarheads=                             ; List of WarheadTypes
+Block.ChanceMultiplier=1.0                         ; floating point value
+Block.ExtraChance=0.0                              ; floating point value
 RevengeWeapon=                                     ; WeaponType
 RevengeWeapon.AffectsHouses=all                    ; List of Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
 ReflectDamage=false                                ; boolean
 ReflectDamage.Warhead=                             ; WarheadType
 ReflectDamage.Warhead.Detonate=false               ; WarheadType
 ReflectDamage.Multiplier=1.0                       ; floating point value, percents or absolute
-ReflectDamage.AffectsHouses=all                    ; List of Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
+ReflectDamage.AffectsHouses=all                    ; list of Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
+ReflectDamage.Chance=1.0                           ; floating point value
+ReflectDamage.Override=                            ; integer
 DisableWeapons=false                               ; boolean
+Unkillable=false                                   ; boolean
 Groups=                                            ; comma-separated list of strings (group IDs)
 
 [SOMETECHNO]                                       ; TechnoType
@@ -162,6 +169,7 @@ AttachEffect.CumulativeRemoveMaxCounts=            ; integer - maximum removed i
 AttachEffect.DurationOverrides=                    ; integer - duration overrides (comma-separated) for AttachTypes in order from first to last.
 SuppressReflectDamage=false                        ; boolean
 SuppressReflectDamage.Types=                       ; List of AttachEffectTypes
+SuppressReflectDamage.Groups=                      ; comma-separated list of strings (group IDs)
 ```
 
 ### Custom Radiation Types
@@ -325,6 +333,7 @@ ImmuneToCrit=no                             ; boolean
 Tint.Color=                                 ; integer - R,G,B
 Tint.Intensity=0.0                          ; floating point value
 Tint.VisibleToHouses=all                    ; List of Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
+CanBlock=true                               ; boolean
 
 [SOMETECHNO]                                ; TechnoType
 ShieldType=SOMESHIELDTYPE                   ; ShieldType; none by default
@@ -585,6 +594,10 @@ In `artmd.ini`:
 ```ini
 [SOMEBUILDING]                     ; BuildingType
 IsAnimDelayedBurst=true            ; boolean
+```
+
+```{note}
+The prism towers' fire is hardcoded to be delayed. Their fire will ignore this flag, just as they ignore IsAnimDelayedFire.
 ```
 
 ### Spy Effects
@@ -1092,6 +1105,9 @@ Remember that Limbo Delivered buildings don't exist physically! This means they 
 
 ### Next
 
+![image](_static/images/swnext.gif)
+*Use `SW.Next` to link multiple ChronoSphere and ChronoWarp superweapons into a chained SuperWeapon system in [Cylearun](https://www.moddb.com/mods/Cylearun)*
+
 - Superweapons can now launch other superweapons at the same target. Launched types can be additionally randomized using the same rules as with LimboDelivery (see above).
   - `SW.Next.RealLaunch` controls whether the owner who fired the initial superweapon must own all listed superweapons and sufficient funds to support `Money.Amout`. Otherwise they will be launched forcibly.
   - `SW.Next.IgnoreInhibitors` ignores `SW.Inhibitors`/`SW.AnyInhibitor` of each superweapon, otherwise only non-inhibited superweapons are launched.
@@ -1223,6 +1239,103 @@ In `rulesmd.ini`:
 [SOMETECHNO]               ; TechnoType
 AutoFire=false             ; boolean
 AutoFire.TargetSelf=false  ; boolean
+```
+
+### Block damage
+
+- You can now make techno have a chance to block the incoming damage, which will make it multiply by a set percentage.
+  - `CanBlock`, if set to false, make this TechnoType can't trigger a block, even if the block settings are from warheads, or affected by [attached effects](#attached-effects) with block chance modifiers.
+- `Block.Chances` determines chance for a block to occur. Value from position matching the position from `Block.AffectBelowPercents` is used if found, or 0.0 if not found.
+- `Block.DamageMultipliers` determines the multiplier of received damage. Value from position matching the position from `Block.AffectBelowPercents` is used if found, or 1.0 if not found.
+- `Block.AffectBelowPercents`, if set to a single value, determines minimum percentage of their maximum `Strength` that targets must have left to be affected by a critical hit. If set to a list of values, it'll further determine `Block.Chances` and `Block.DamageMultipliers` when target health is below the certain percentage listed here.
+- `Block.AffectsHouses` can be used to customize houses that damage from this firer can be blocked. Notice that not all damage has a firer, such as damage dealt by anims.
+- Following conditions determine whether a block can be triggered.
+  - `Block.CanActive.NoFirer` determines if the block can be triggered when the damage has no firer.
+  - `Block.CanActive.Powered` determines if the block can be triggered when the techno is deactivated (`PoweredUnit` or affected by EMP) or on low power.
+  - `Block.CanActive.ShieldActive` determines if the block can be triggered when the techno has an active [shield](#shields). If you only want it to be triggered by certain type of shield, you can further set `CanBlock` for them.
+  - `Block.CanActive.ShieldInactive` determines if the block can be triggered when the techno doesn't have an active shield.
+  - `Block.CanActive.ZeroDamage` and `Block.CanActive.NegativeDamage` determine if the block can be triggered when the damage is equal to or below 0.  determines if the block can be triggered when the damage is below 0, respectively.
+  - `Block.CanActive.Move` and `Block.CanActive.Stationary`determines the block can be triggered when the techno is moving or not, respectively.
+- `Block.Flash`, if set to true, makes it so that a light flash is generated when a block is triggered. Size of the flash is determined by damage dealt (based on original damage instead of the blocked one), unless `Block.Flash.FixedSize` is set to a number, in which case that value is used instead (range of values that produces visible effect are increments of 4 from 81 to 252, anything higher or below does not have effect). Color can be customized via `Block.Flash.Red/Green/Blue`. If `Block.Flash.Black` is set to true, the generated flash will be black regardless of other color settings.
+- `Block.Anims` can be used to set animation to be displayed if a block is triggered. If more than one animation is listed, a random one is selected.
+- `Block.Weapon`, if set, will be fired at the techno once a block is triggered.
+- `Block.ReflectDamage` can be set to true to have positive damage dealt to the object to be reflected back to the attacker, if a block is triggered and there is a firer of the damage. `Block.ReflectDamage.Warhead` determines which Warhead is used to deal the damage, defaults to `[CombatDamage]`->`C4Warhead`. If `Block.ReflectDamage.Warhead.Detonate` is set to true, the Warhead is fully detonated instead of used to simply deal damage. `Block.ReflectDamage.Chance` determines the chance of reflection. - `Block.ReflectDamage.AffectsHouses` customizes which houses can trigger the reflect damage, default to `Block.AffectsHouses`. `Block.ReflectDamage.Multiplier` is a multiplier to the damage received and then reflected back (based on original damage instead of the blocked one), while `Block.ReflectDamage.Override` directly overrides the damage. Already reflected damage cannot be further reflected back.
+  - Warheads can prevent reflect damage from occuring by setting `SuppressReflectDamage` to true.
+
+- Warheads can also use the above settings to determine their own block behaviors when hitting the target.
+  - Despite all block settings can be overridden, if you want to override `Block.Chances` or `Block.DamageMultipliers`, it's recommended to override `Block.AffectBelowPercents` in the meantime since they're lists with values in correpsonding positions.
+- `Block.BasedOnWarhead`, if set to true, makes the warhead block settings as a base when calculating a block. If set to false, block settings on techno is used as a base.
+- `Block.AllowOverride`, if set to true, allows the block settings from techno or warhead to override the other, if set. If `Block.BasedOnWarhead` is set to true, then it'll uses the set values from techno to override warheads', while keeping the unset values as the same. If it's set to false, then it'll do the override from warhead to techno with the same rule.
+- `Block.IgnoreChanceModifier` can be set on WarheadTypes to make their attack ignore modifiers of `Block.Chances` from the [attached effects](#attached-effects) on the techno.
+- `Block.ChanceMultiplier` and `Block.ExtraChance` can be set on WarheadTypes to multiply the block chance or grant a fixed bonus to it when these warheads hit their targets, respectively.
+- `ImmuneToBlock` can be set on WarheadTypes to make them can't trigger a block.
+
+In `rulesmd.ini`:
+```ini
+[SOMETECHNO]                                         ; TechnoType
+CanBlock=true                                        ; boolean
+Block.Chances=                                       ; list of floating-point values (percentage or absolute) (0.0-1.0)
+Block.DamageMultipliers=                             ; list of floating-point values (percentage or absolute)
+Block.AffectBelowPercents=                           ; list of floating-point values (percentage or absolute) (0.0-1.0)
+Block.AffectsHouses=all                              ; list of Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
+Block.CanActive.NoFirer=true                         ; boolean
+Block.CanActive.Powered=false                        ; boolean
+Block.CanActive.ShieldActive=true                    ; boolean
+Block.CanActive.ShieldInactive=true                  ; boolean
+Block.CanActive.ZeroDamage=false                     ; boolean
+Block.CanActive.NegativeDamage=false                 ; boolean
+Block.CanActive.Move=true                            ; boolean
+Block.CanActive.Stationary=true                      ; boolean
+Block.Flash=false                                    ; boolean
+Block.Flash.FixedSize=                               ; integer
+Block.Flash.Red=true                                 ; boolean
+Block.Flash.Green=true                               ; boolean
+Block.Flash.Blue=true                                ; boolean
+Block.Flash.Black=false                              ; boolean
+Block.Anims=                                         ; list of animations
+Block.Weapon=                                        ; WeaponType
+Block.ReflectDamage=false                            ; boolean
+Block.ReflectDamage.Chance=1.0                       ; floating point value
+Block.ReflectDamage.Warhead=                         ; WarheadType
+Block.ReflectDamage.Warhead.Detonate=false           ; WarheadType
+Block.ReflectDamage.Multiplier=1.0                   ; floating point value, percents or absolute
+Block.ReflectDamage.AffectsHouses=                   ; list of Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
+Block.ReflectDamage.Override=                        ; integer
+
+[SOMEWARHEAD]                                        ; WarheadType
+Block.Chances=                                       ; list of floating-point values (percentage or absolute) (0.0-1.0)
+Block.DamageMultipliers=                             ; list of floating-point values (percentage or absolute)
+Block.AffectBelowPercents=                           ; list of floating-point values (percentage or absolute) (0.0-1.0)
+Block.AffectsHouses=all                              ; list of Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
+Block.CanActive.NoFirer=true                         ; boolean
+Block.CanActive.Powered=false                        ; boolean
+Block.CanActive.ShieldActive=true                    ; boolean
+Block.CanActive.ShieldInactive=true                  ; boolean
+Block.CanActive.ZeroDamage=false                     ; boolean
+Block.CanActive.NegativeDamage=false                 ; boolean
+Block.CanActive.Move=true                            ; boolean
+Block.CanActive.Stationary=true                      ; boolean
+Block.Flash=false                                    ; boolean
+Block.Flash.FixedSize=                               ; integer
+Block.Flash.Red=true                                 ; boolean
+Block.Flash.Green=true                               ; boolean
+Block.Flash.Blue=true                                ; boolean
+Block.Flash.Black=false                              ; boolean
+Block.Anims=                                         ; list of animations
+Block.Weapon=                                        ; WeaponType
+Block.ReflectDamage=false                            ; boolean
+Block.ReflectDamage.Chance=1.0                       ; floating point value
+Block.ReflectDamage.Warhead=                         ; WarheadType
+Block.ReflectDamage.Warhead.Detonate=false           ; WarheadType
+Block.ReflectDamage.Multiplier=1.0                   ; floating point value, percents or absolute
+Block.ReflectDamage.AffectsHouses=                   ; list of Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
+Block.ReflectDamage.Override=                        ; integer
+Block.BasedOnWarhead=false                           ; boolean
+Block.AllowOverride=true                             ; boolean
+Block.IgnoreChanceModifier=true                      ; boolean
+Block.ChanceMultiplier=1.0                           ; floating point value
+Block.ExtraChance=0.0                                ; floating point value
+ImmuneToBlock=false                                  ; boolean
 ```
 
 ### Build limit group
@@ -1402,7 +1515,7 @@ FLHKEY.BurstN=  ; integer - Forward,Lateral,Height. FLHKey refers to weapon-spec
   - `ForceWeapon.UnderEMP` forces specified weapon to be used if the target is under EMP effect.
   - `ForceWeapon.InRange` forces specified a list of weapons to be used once the target is within their `Range`. The first weapon in the listed order satisfied will be selected. Can be applied to both ground and air target if `ForceAAWeapon.InRange` is not set.
     - `ForceAAWeapon.InRange` does the same thing but only for air target. Taking priority to `ForceWeapon.InRange`, which means that it can only be applied to ground target when they're both set.
-    - `Force(AA)Weapon.InRange.Overrides` overrides the range when decides which weapon to use. Value from position matching the position from `Force(AA)Weapon.InRange` is used if found, or the weapon's own `Range` if not found or set to a value below 0. Specifically, if a position has `Force(AA)Weapon.InRange` set to -1 and `Force(AA)Weapon.InRange.Overrides` set to a positive value, it'll use default weapon selection logic once satisfied.
+    - `Force(AA)Weapon.InRange.Overrides` overrides the range when decides which weapon to use. Value from position matching the position from `Force(AA)Weapon.InRange` is used if found, or the weapon's own `Range` if not found or set to a value below 0.
     - If `Force(AA)Weapon.InRange.ApplyRangeModifiers` is set to true, any applicable weapon range modifiers from the firer are applied to the decision range.
 
 In `rulesmd.ini`:
@@ -1412,12 +1525,16 @@ ForceWeapon.Naval.Decloaked=-1                  ; integer. 0 for primary weapon,
 ForceWeapon.Cloaked=-1                          ; integer. 0 for primary weapon, 1 for secondary weapon, -1 to disable
 ForceWeapon.Disguised=-1                        ; integer. 0 for primary weapon, 1 for secondary weapon, -1 to disable
 ForceWeapon.UnderEMP=-1                         ; integer. 0 for primary weapon, 1 for secondary weapon, -1 to disable
-ForceWeapon.InRange=                            ; list of integer. 0 for primary weapon, 1 for secondary weapon, -1 to disable
-ForceWeapon.InRange.Overrides=                  ; list of floating point value
+ForceWeapon.InRange=                            ; List of integers. 0 for primary weapon, 1 for secondary weapon, -1 to disable
+ForceWeapon.InRange.Overrides=                  ; List of floating-point values
 ForceWeapon.InRange.ApplyRangeModifiers=false   ; boolean
-ForceAAWeapon.InRange=                          ; list of integer. 0 for primary weapon, 1 for secondary weapon, -1 to disable
-ForceAAWeapon.InRange.Overrides=                ; list of floating point value
+ForceAAWeapon.InRange=                          ; List of integers. 0 for primary weapon, 1 for secondary weapon, -1 to disable
+ForceAAWeapon.InRange.Overrides=                ; List of floating-point values
 ForceAAWeapon.InRange.ApplyRangeModifiers=false ; boolean
+```
+
+```{note}
+Specifically, if a position has `Force(AA)Weapon.InRange` set to -1 and `Force(AA)Weapon.InRange.Overrides` set to a positive value, it'll use default weapon selection logic once satisfied.
 ```
 
 ### Initial spawns number
@@ -1786,6 +1903,16 @@ In `rulesmd.ini`:
 RemoveMindControl=false  ; boolean
 ```
 
+### Warhead that can not kill
+
+- Warheads can now damage the enemy without killing them (minimum health will be 1).
+
+In `rulesmd.ini`:
+```ini
+[SOMEWARHEAD]  ; Warhead
+CanKill=true  ; boolean
+```
+
 ### Chance-based extra damage or Warhead detonation / 'critical hits'
 
 - Warheads can now apply additional chance-based damage or Warhead detonation ('critical hits') with the ability to customize chance, damage, affected targets, affected target HP threshold and animations of critical hit.
@@ -1946,9 +2073,9 @@ KillWeapon=                           ; WeaponType
 KillWeapon.OnFirer=                   ; WeaponType
 KillWeapon.AffectsHouses=all          ; List of Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
 KillWeapon.OnFirer.AffectsHouses=all  ; List of Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
-KillWeapon.Affects=all                ; List of Affected Target Enumeration (none|land|water|empty|infantry|units|buildings|all)
-KillWeapon.OnFirer.Affects=all        ; List of Affected Target Enumeration (none|land|water|empty|infantry|units|buildings|all)
-     
+KillWeapon.Affects=all                ; List of Affected Target Enumeration (none|aircraft|buildings|infantry|units|all)
+KillWeapon.OnFirer.Affects=all        ; List of Affected Target Enumeration (none|aircraft|buildings|infantry|units|all)
+
 [SOMETECHNO]                          ; TechnoType
 SuppressKillWeapons=false             ; boolean
 SuppressKillWeapons.Types=            ; List of WeaponTypes
@@ -2046,7 +2173,7 @@ RemoveDisguise=false  ; boolean
 In `rulesmd.ini`:
 ```ini
 [SOMEWARHEAD]  ; WarheadType
-Reveal=0     ; integer - cell radius, negative values mean reveal the entire map
+Reveal=0       ; integer - cell radius, negative values mean reveal the entire map
 ```
 
 ### Sell or undeploy building on impact
@@ -2073,7 +2200,7 @@ BuildingUndeploy.Leave=false         ; boolean
 In `rulesmd.ini`:
 ```ini
 [SOMEWARHEAD]  ; WarheadType
-CreateGap=0     ; integer - cell radius, negative values mean shroud the entire map
+CreateGap=0    ; integer - cell radius, negative values mean shroud the entire map
 ```
 
 ### Spawn powerup crate
