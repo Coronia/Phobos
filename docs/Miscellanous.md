@@ -85,6 +85,31 @@ SaveVariablesOnScenarioEnd=false    ; boolean
 Correspondingly, if such a writing method causes any errors, it is also not within the scope of responsibility of this function.
 ```
 
+### Insignia Type
+
+- It is now possible to define the properties of insignia in an entity, so that all properties in it will be used once it's applied to a techno.
+
+In `rulesmd.ini`:
+```ini
+[InsigniaTypes]
+0=SOMEINSIGNIATYPE
+
+[SOMEINSIGNIATYPE]						 ; InsigniaType
+Insignia=                                ; filename - excluding the .shp extension
+Insignia.Rookie=                         ; filename - excluding the .shp extension
+Insignia.Veteran=                        ; filename - excluding the .shp extension
+Insignia.Elite=                          ; filename - excluding the .shp extension
+InsigniaFrame=-1                         ; int, frame of insignia shp (zero-based) or -1 for default
+InsigniaFrame.Rookie=-1                  ; int, frame of insignia shp (zero-based) or -1 for default
+InsigniaFrame.Veteran=-1                 ; int, frame of insignia shp (zero-based) or -1 for default
+InsigniaFrame.Elite=-1                   ; int, frame of insignia shp (zero-based) or -1 for default
+
+[SOMETECHNO]                             ; TechnoType
+InsigniaType=                            ; InsigniaType
+InsigniaType.WeaponN=                    ; InsigniaType
+InsigniaType.PassengersN=                ; InsigniaType
+```
+
 ## Game Speed
 
 ### Single player game speed
@@ -118,15 +143,20 @@ CampaignDefaultGameSpeed=4  ; integer
 Currently there is no way to set desired FPS directly. Use the generator below to get required values. The generator supports values from 10 to 60.
 ```
 
-<details>
-<summary>Click to show the generator<br>点击显示生成器</summary>
-<input id="customGameSpeedIn" type=number placeholder="Enter desired FPS                   输入所需的 FPS" oninput="onInput()" style="width:100%";>
-<p>
-Results (remember to replace N with your game speed number!):<br>
-&nbsp;&nbsp;结果&nbsp;（别忘了把 N 替换成你的游戏速度编号）：
+```{dropdown} Click to show the generator
+Enter desired FPS
+<div>
+<input id="customGameSpeedIn" type=number oninput="onInput()" style="width:100%";>
+</div>
+
+Results (remember to replace N with your game speed number!):
+
+<div>
 </p>
 <div id="codeBlockHere1"></div>
-</details>
+</div>
+```
+
 <script>
 makeINICodeBlock(document.getElementById("codeBlockHere1"), "customGameSpeedOut", 400);
 let fpsArray = [];
@@ -158,7 +188,7 @@ function onInput() {
 		j += 1;
 		let content = [];
 		if (foundAny) {
-			content.push({key: null, value: null, comment: "// Or 或"});
+			content.push({key: null, value: null, comment: "// -- Or -- "});
 		}
 		content.push({key: "CustomGSN.DefaultDelay", value: d, comment: null});
 		content.push({key: "CustomGSN.ChangeDelay", value: c, comment: null});
