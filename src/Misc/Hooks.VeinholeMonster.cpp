@@ -206,8 +206,8 @@ DEFINE_HOOK(0x73D49E, UnitClass_Harvesting_Weeder, 0x7)
 	GET(CellClass*, pCell, EBP);
 	constexpr unsigned char weedOverlayData = 0x30;
 
-	bool harvesterCanHarvest = pUnit->Type->Harvester && pCell->LandType == LandType::Tiberium;
-	bool weederCanWeed = pUnit->Type->Weeder && pCell->LandType == LandType::Weeds && pCell->OverlayData >= weedOverlayData;
+	const bool harvesterCanHarvest = pUnit->Type->Harvester && pCell->LandType == LandType::Tiberium;
+	const bool weederCanWeed = pUnit->Type->Weeder && pCell->LandType == LandType::Weeds && pCell->OverlayData >= weedOverlayData;
 
 
 	if ((harvesterCanHarvest || weederCanWeed) && pUnit->GetStoragePercentage() < 1.0)

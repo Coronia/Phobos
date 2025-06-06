@@ -21,8 +21,8 @@ Point2D Anchor::OffsetPosition(
 	const Point2D& bottomLeft) const
 {
 	Point2D result { topLeft };
-	Point2D deltaTopRight { topRight - topLeft };
-	Point2D deltaBottomLeft { bottomLeft - topLeft };
+	const Point2D deltaTopRight { topRight - topLeft };
+	const Point2D deltaBottomLeft { bottomLeft - topLeft };
 
 	result += deltaTopRight * this->GetRelativeOffsetHorizontal();
 	result += deltaBottomLeft * this->GetRelativeOffsetVertical();
@@ -43,8 +43,8 @@ Point2D Anchor::OffsetPosition(const RectangleStruct& rect) const
 Point2D Anchor::OffsetPosition(const LTRBStruct& ltrb) const
 {
 	Point2D result { ltrb.Left, ltrb.Top };
-	int deltaX = ltrb.Right - ltrb.Left;
-	int deltaY = ltrb.Bottom - ltrb.Top;
+	const int deltaX = ltrb.Right - ltrb.Left;
+	const int deltaY = ltrb.Bottom - ltrb.Top;
 
 	result.X += static_cast<int>(deltaX * this->GetRelativeOffsetHorizontal());
 	result.Y += static_cast<int>(deltaY * this->GetRelativeOffsetVertical());

@@ -79,7 +79,7 @@ DEFINE_HOOK(0x7396D2, UnitClass_TryToDeploy_Transfer, 0x5)
 	if (pUnit->Type->DeployToFire && pUnit->Target)
 		pStructure->LastTarget = pUnit->Target;
 
-	if (auto pStructureExt = BuildingExt::ExtMap.Find(pStructure))
+	if (const auto pStructureExt = BuildingExt::ExtMap.Find(pStructure))
 		pStructureExt->DeployedTechno = true;
 
 	return 0;
@@ -141,7 +141,7 @@ DEFINE_HOOK(0x73CF46, UnitClass_Draw_It_KeepUnitVisible, 0x6)
 
 	if (pThis->Deploying || pThis->Undeploying)
 	{
-		auto pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
+		const auto pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
 
 		if (pTypeExt->DeployingAnim_KeepUnitVisible)
 			return KeepUnitVisible;
@@ -197,7 +197,7 @@ DEFINE_HOOK(0x739BA8, UnitClass_DeployUndeploy_DeployAnim, 0x5)
 
 	GET(UnitClass*, pThis, ESI);
 
-	bool isDeploying = R->Origin() == 0x739BA8;
+	const bool isDeploying = R->Origin() == 0x739BA8;
 
 	auto const pExt = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType());
 	auto const pAnim = GameCreate<AnimClass>(pThis->Type->DeployingAnim,
@@ -222,8 +222,8 @@ DEFINE_HOOK(0x739C86, UnitClass_DeployUndeploy_DeploySound, 0x6)
 
 	GET(UnitClass*, pThis, ESI);
 
-	bool isDeploying = R->Origin() == 0x739C86;
-	bool isDoneWithDeployUndeploy = isDeploying ? pThis->Deployed : !pThis->Deployed;
+	const bool isDeploying = R->Origin() == 0x739C86;
+	const bool isDoneWithDeployUndeploy = isDeploying ? pThis->Deployed : !pThis->Deployed;
 
 	if (isDoneWithDeployUndeploy)
 		return 0; // Only play sound when done with deploying or undeploying.

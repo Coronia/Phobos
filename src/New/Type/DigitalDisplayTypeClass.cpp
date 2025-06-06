@@ -87,8 +87,8 @@ void DigitalDisplayTypeClass::DisplayText(Point2D& position, int length, int val
 		swprintf_s(text, L"%d/%d", value, maxValue);
 	}
 
-	double ratio = static_cast<double>(value) / maxValue;
-	COLORREF color = Drawing::RGB_To_Int(Text_Color.Get(ratio));
+	const double ratio = static_cast<double>(value) / maxValue;
+	const COLORREF color = Drawing::RGB_To_Int(Text_Color.Get(ratio));
 	RectangleStruct rect = DSurface::Composite->GetRect();
 	rect.Height -= 32; // account for bottom bar
 	const int textHeight = 12;
@@ -156,7 +156,7 @@ void DigitalDisplayTypeClass::DisplayShape(Point2D& position, int length, int va
 	const int redExtraFrame = 34;
 	int numberBaseFrame = greenBaseFrame;
 	int extraBaseFrame = greenExtraFrame;
-	double ratio = static_cast<double>(value) / maxValue;
+	const double ratio = static_cast<double>(value) / maxValue;
 
 	if (ratio > RulesClass::Instance->ConditionYellow)
 		numberBaseFrame = greenBaseFrame;

@@ -8,7 +8,7 @@ const char* Enumerable<ShieldTypeClass>::GetMainSection()
 
 AnimTypeClass* ShieldTypeClass::GetIdleAnimType(bool isDamaged, double healthRatio) const
 {
-	auto damagedAnim = this->IdleAnimDamaged.Get(healthRatio);
+	const auto damagedAnim = this->IdleAnimDamaged.Get(healthRatio);
 
 	if (isDamaged && damagedAnim)
 		return damagedAnim;

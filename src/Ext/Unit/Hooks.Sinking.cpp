@@ -23,9 +23,9 @@ DEFINE_HOOK(0x737DE2, UnitClass_ReceiveDamage_Sinkable, 0x6)
 	GET(UnitTypeClass*, pType, EAX);
 
 	auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
-	bool ShouldSink = pType->Weight > RulesClass::Instance->ShipSinkingWeight && pType->Naval && !pType->Underwater && !pType->Organic;
+	const bool shouldSink = pType->Weight > RulesClass::Instance->ShipSinkingWeight && pType->Naval && !pType->Underwater && !pType->Organic;
 
-	return pTypeExt->Sinkable.Get(ShouldSink) ? GoOtherChecks : NoSink;
+	return pTypeExt->Sinkable.Get(shouldSink) ? GoOtherChecks : NoSink;
 }
 
 DEFINE_HOOK(0x629C67, ParasiteClass_UpdateSquid_SinkableBySquid, 0x9)
@@ -35,8 +35,8 @@ DEFINE_HOOK(0x629C67, ParasiteClass_UpdateSquid_SinkableBySquid, 0x9)
 	GET(ParasiteClass*, pThis, ESI);
 	GET(FootClass*, pVictim, EDI);
 
-	auto pVictimType = pVictim->GetTechnoType();
-	auto pVictimTypeExt = TechnoTypeExt::ExtMap.Find(pVictimType);
+	const auto pVictimType = pVictim->GetTechnoType();
+	const auto pVictimTypeExt = TechnoTypeExt::ExtMap.Find(pVictimType);
 
 	if (pVictimTypeExt->Sinkable_SquidGrab || pVictim->WhatAmI() != AbstractType::Unit)
 	{

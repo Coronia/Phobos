@@ -7,8 +7,8 @@ VoxelAnimExt::ExtContainer VoxelAnimExt::ExtMap;
 
 void VoxelAnimExt::InitializeLaserTrails(VoxelAnimClass* pThis)
 {
-	auto pThisExt = VoxelAnimExt::ExtMap.Find(pThis);
-	auto pTypeExt = VoxelAnimTypeExt::ExtMap.Find(pThis->Type);
+	const auto pThisExt = VoxelAnimExt::ExtMap.Find(pThis);
+	const auto pTypeExt = VoxelAnimTypeExt::ExtMap.Find(pThis->Type);
 
 	if (pThisExt->LaserTrails.size())
 		return;

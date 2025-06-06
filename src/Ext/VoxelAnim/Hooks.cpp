@@ -12,12 +12,12 @@ DEFINE_HOOK(0x74A70E, VoxelAnimClass_AI_Additional, 0xC)
 	GET(VoxelAnimClass* const, pThis, EBX);
 
 	//auto pTypeExt = VoxelAnimTypeExt::ExtMap.Find(pThis->Type);
-	auto pThisExt = VoxelAnimExt::ExtMap.Find(pThis);
+	const auto pThisExt = VoxelAnimExt::ExtMap.Find(pThis);
 
 	if (!pThisExt->LaserTrails.empty())
 	{
-		CoordStruct location = pThis->GetCoords();
-		CoordStruct drawnCoords = location;
+		const CoordStruct location = pThis->GetCoords();
+		const CoordStruct drawnCoords = location;
 
 		for (auto& trail : pThisExt->LaserTrails)
 		{
@@ -40,7 +40,7 @@ DEFINE_HOOK(0x74A027, VoxelAnimClass_AI_Expired, 0x6)
 	GET(VoxelAnimClass* const, pThis, EBX);
 	GET(int, flag, EAX);
 
-	bool heightFlag = flag & 0xFF;
+	const bool heightFlag = flag & 0xFF;
 
 	if (!pThis || !pThis->Type)
 		return SkipGameCode;

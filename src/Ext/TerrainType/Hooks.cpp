@@ -36,7 +36,7 @@ DEFINE_HOOK(0x71C84D, TerrainClass_AI_Animated, 0x6)
 			if (pThis->Type->SpawnsTiberium)
 			{
 				auto pCell = pThis->GetCell();
-				int cellCount = pTypeExt->GetCellsPerAnim();
+				const int cellCount = pTypeExt->GetCellsPerAnim();
 
 				// Set context for CellClass hooks.
 				TerrainTypeTemp::pCurrentType = pThis->Type;
@@ -73,8 +73,8 @@ DEFINE_HOOK(0x71C812, TerrainClass_AI_Crumbling, 0x6)
 		return SkipCheck;
 	}
 
-	int animationLength = pTypeExt->AnimationLength.Get(pThis->Type->GetImage()->Frames / (2 * (pTypeExt->HasDamagedFrames + 1)));
-	int currentStage = pThis->Animation.Value + (pThis->Type->IsAnimated ? animationLength * (pTypeExt->HasDamagedFrames + 1) : 0 + pTypeExt->HasDamagedFrames);
+	const int animationLength = pTypeExt->AnimationLength.Get(pThis->Type->GetImage()->Frames / (2 * (pTypeExt->HasDamagedFrames + 1)));
+	const int currentStage = pThis->Animation.Value + (pThis->Type->IsAnimated ? animationLength * (pTypeExt->HasDamagedFrames + 1) : 0 + pTypeExt->HasDamagedFrames);
 
 	if (currentStage + 1 == pThis->Type->GetImage()->Frames / 2)
 	{
@@ -94,11 +94,11 @@ DEFINE_HOOK(0x71C1FE, TerrainClass_Draw_PickFrame, 0x6)
 	GET(TerrainClass*, pThis, ESI);
 
 	auto const pTypeExt = TerrainTypeExt::ExtMap.Find(pThis->Type);
-	bool isDamaged = pTypeExt->HasDamagedFrames && pThis->GetHealthPercentage() <= RulesExt::Global()->ConditionYellow_Terrain.Get(RulesClass::Instance->ConditionYellow);
+	const bool isDamaged = pTypeExt->HasDamagedFrames && pThis->GetHealthPercentage() <= RulesExt::Global()->ConditionYellow_Terrain.Get(RulesClass::Instance->ConditionYellow);
 
 	if (pThis->Type->IsAnimated)
 	{
-		int animLength = pTypeExt->AnimationLength.Get(pThis->Type->GetImage()->Frames / (2 * (pTypeExt->HasDamagedFrames + 1)));
+		const int animLength = pTypeExt->AnimationLength.Get(pThis->Type->GetImage()->Frames / (2 * (pTypeExt->HasDamagedFrames + 1)));
 
 		if (pTypeExt->HasCrumblingFrames && pThis->IsCrumbling)
 			frame = (animLength * (pTypeExt->HasDamagedFrames + 1)) + 1 + pThis->Animation.Value;
@@ -121,17 +121,17 @@ DEFINE_HOOK(0x71C2BC, TerrainClass_Draw_Palette, 0x6)
 {
 	GET(TerrainClass*, pThis, ESI);
 
-	auto const pCell = pThis->GetCell();
-	int wallOwnerIndex = pCell->WallOwnerIndex;
-	int colorSchemeIndex = HouseClass::CurrentPlayer->ColorSchemeIndex;
-
-	if (wallOwnerIndex >= 0)
-		colorSchemeIndex = HouseClass::Array[wallOwnerIndex]->ColorSchemeIndex;
-
 	auto const pTypeExt = TerrainTypeExt::ExtMap.Find(pThis->Type);
 
 	if (pTypeExt->Palette)
 	{
+		auto const pCell = pThis->GetCell();
+		const int wallOwnerIndex = pCell->WallOwnerIndex;
+		int colorSchemeIndex = HouseClass::CurrentPlayer->ColorSchemeIndex;
+
+		if (wallOwnerIndex >= 0)
+			colorSchemeIndex = HouseClass::Array[wallOwnerIndex]->ColorSchemeIndex;
+
 		R->EDX(pTypeExt->Palette->Items[colorSchemeIndex]->LightConvert);
 		R->EBP(pCell->Intensity_Normal);
 	}
@@ -186,13 +186,13 @@ DEFINE_HOOK(0x48381D, CellClass_SpreadTiberium_CellSpread, 0x6)
 		TiberiumClass* pTib = TiberiumClass::Array.GetItem(tibIndex);
 
 		std::vector<CellStruct> adjacentCells = GeneralUtils::AdjacentCellsInRange(TerrainTypeTemp::pCurrentExt->SpawnsTiberium_Range);
-		size_t size = adjacentCells.size();
-		int rand = ScenarioClass::Instance->Random.RandomRanged(0, size - 1);
+		const size_t size = adjacentCells.size();
+		const int rand = ScenarioClass::Instance->Random.RandomRanged(0, size - 1);
 
 		for (unsigned int i = 0; i < size; i++)
 		{
 			unsigned int cellIndex = (i + rand) % size;
-			CellStruct tgtPos = pThis->MapCoords + adjacentCells[cellIndex];
+			const CellStruct tgtPos = pThis->MapCoords + adjacentCells[cellIndex];
 			CellClass* tgtCell = MapClass::Instance.TryGetCellAt(tgtPos);
 
 			if (tgtCell && tgtCell->CanTiberiumGerminate(pTib))
@@ -244,7 +244,7 @@ DEFINE_HOOK(0x71B98B, TerrainClass_TakeDamage_RefreshDamageFrame, 0x7)
 	GET(TerrainClass*, pThis, ESI);
 
 	auto const pTypeExt = TerrainTypeExt::ExtMap.Find(pThis->Type);
-	double condYellow = RulesExt::Global()->ConditionYellow_Terrain.Get(RulesClass::Instance->ConditionYellow);
+	const double condYellow = RulesExt::Global()->ConditionYellow_Terrain.Get(RulesClass::Instance->ConditionYellow);
 
 	if (!pThis->Type->IsAnimated && pTypeExt->HasDamagedFrames && TerrainTypeTemp::PriorHealthRatio > condYellow && pThis->GetHealthPercentage() <= condYellow)
 	{
@@ -289,7 +289,7 @@ DEFINE_HOOK(0x47C065, CellClass_CellColor_TerrainRadarColor, 0x6)
 	GET_STACK(ColorStruct*, arg0, STACK_OFFSET(0x14, 0x4));
 	GET_STACK(ColorStruct*, arg4, STACK_OFFSET(0x14, 0x8));
 
-	auto pTerrain = pThis->GetTerrain(false);
+	auto const pTerrain = pThis->GetTerrain(false);
 
 	if (pTerrain)
 	{
@@ -298,8 +298,10 @@ DEFINE_HOOK(0x47C065, CellClass_CellColor_TerrainRadarColor, 0x6)
 			R->ESI(pThis);
 			return SkipTerrainColor;
 		}
-		else if (auto const pTerrainExt = TerrainTypeExt::ExtMap.Find(pTerrain->Type))
+		else
 		{
+			auto const pTerrainExt = TerrainTypeExt::ExtMap.Find(pTerrain->Type);
+
 			if (pTerrainExt->MinimapColor.isset())
 			{
 				auto& color = pTerrainExt->MinimapColor.Get();

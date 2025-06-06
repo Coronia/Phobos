@@ -70,7 +70,7 @@ inline int PhobosToolTip::GetBuildTime(TechnoTypeClass* pType) const
 	// BuildingTypeClass, AircraftTypeClass, InfantryTypeClass and UnitTypeClass
 	// It has to be these four classes, otherwise pType will just be nullptr
 	reinterpret_cast<TechnoClass*>(pTrick)->Owner = HouseClass::CurrentPlayer;
-	int nTimeToBuild = reinterpret_cast<TechnoClass*>(pTrick)->TimeToBuild();
+	const int nTimeToBuild = reinterpret_cast<TechnoClass*>(pTrick)->TimeToBuild();
 	// 54 frames at least
 	return std::max(54, nTimeToBuild);
 }
@@ -91,7 +91,7 @@ inline int PhobosToolTip::GetPower(TechnoTypeClass* pType) const
 		}
 	case AbstractType::BuildingType:
 		{
-			auto pBldType = (BuildingTypeClass*)pType;
+			const auto pBldType = (BuildingTypeClass*)pType;
 			return pBldType->PowerBonus - pBldType->PowerDrain;
 		}
 	default:
@@ -134,11 +134,11 @@ void PhobosToolTip::HelpText_Techno(TechnoTypeClass* pType)
 
 	auto const pData = TechnoTypeExt::ExtMap.Find(pType);
 
-	int nBuildTime = TickTimeToSeconds(this->GetBuildTime(pType));
-	int nSec = nBuildTime % 60;
-	int nMin = nBuildTime / 60;
+	const int nBuildTime = TickTimeToSeconds(this->GetBuildTime(pType));
+	const int nSec = nBuildTime % 60;
+	const int nMin = nBuildTime / 60;
 
-	int cost = pType->GetActualCost(HouseClass::CurrentPlayer);
+	const int cost = pType->GetActualCost(HouseClass::CurrentPlayer);
 
 	std::wostringstream oss;
 	oss << pType->UIName << L"\n"
@@ -164,14 +164,14 @@ void PhobosToolTip::HelpText_Techno(TechnoTypeClass* pType)
 
 void PhobosToolTip::HelpText_Super(int swidx)
 {
-	auto pSuper = HouseClass::CurrentPlayer->Supers.Items[swidx];
+	auto const pSuper = HouseClass::CurrentPlayer->Supers.Items[swidx];
 	auto const pData = SWTypeExt::ExtMap.Find(pSuper->Type);
 
 	std::wostringstream oss;
 	oss << pSuper->Type->UIName;
 	bool showSth = false;
 
-	if (int nCost = std::abs(pData->Money_Amount))
+	if (const int nCost = std::abs(pData->Money_Amount))
 	{
 		oss << L"\n";
 
@@ -182,14 +182,14 @@ void PhobosToolTip::HelpText_Super(int swidx)
 		showSth = true;
 	}
 
-	int rechargeTime = TickTimeToSeconds(pSuper->GetRechargeTime());
+	const int rechargeTime = TickTimeToSeconds(pSuper->GetRechargeTime());
 	if (rechargeTime > 0)
 	{
 		if (!showSth)
 			oss << L"\n";
 
-		int nSec = rechargeTime % 60;
-		int nMin = rechargeTime / 60;
+		const int nSec = rechargeTime % 60;
+		const int nMin = rechargeTime / 60;
 
 		oss << (showSth ? L" " : L"") << Phobos::UI::TimeLabel
 			<< std::setw(2) << std::setfill(L'0') << nMin << L":"
@@ -198,8 +198,8 @@ void PhobosToolTip::HelpText_Super(int swidx)
 	}
 
 	auto const& sw_ext = HouseExt::ExtMap.Find(HouseClass::CurrentPlayer)->SuperExts[swidx];
-	int sw_shots = pData->SW_Shots;
-	int remain_shots = pData->SW_Shots - sw_ext.ShotCount;
+	const int sw_shots = pData->SW_Shots;
+	const int remain_shots = pData->SW_Shots - sw_ext.ShotCount;
 	if (sw_shots > 0)
 	{
 		if (!showSth)
@@ -210,7 +210,7 @@ void PhobosToolTip::HelpText_Super(int swidx)
 		oss << (showSth ? L" " : L"") << buffer;
 	}
 
-	if (auto pDesc = this->GetUIDescription(pData))
+	if (const auto pDesc = this->GetUIDescription(pData))
 		oss << L"\n" << pDesc;
 
 	this->TextBuffer = oss.str();

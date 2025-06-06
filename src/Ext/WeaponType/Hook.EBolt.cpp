@@ -43,7 +43,7 @@ DEFINE_HOOK(0x4C20BC, EBolt_DrawArcs, 0xB)
 
 	GET_STACK(int, plotIndex, STACK_OFFSET(0x408, -0x3E0));
 
-	int arcCount = WeaponTypeExt::BoltWeaponType ? WeaponTypeExt::BoltWeaponType->Bolt_Arcs : 8;
+	const int arcCount = WeaponTypeExt::BoltWeaponType ? WeaponTypeExt::BoltWeaponType->Bolt_Arcs : 8;
 
 	return plotIndex < arcCount ? DoLoop : Break;
 }
@@ -124,7 +124,7 @@ DEFINE_HOOK(0x4C285D, EBolt_DrawAll_BurstIndex, 0x5)
 	GET(TechnoClass*, pTechno, ECX);
 	GET_STACK(EBolt*, pThis, STACK_OFFSET(0x34, -0x24));
 
-	int burstIndex = pTechno->CurrentBurstIndex;
+	const int burstIndex = pTechno->CurrentBurstIndex;
 	pTechno->CurrentBurstIndex = WeaponTypeExt::BoltWeaponMap[pThis].BurstIndex;
 	auto const fireCoords = pTechno->GetFLH(pThis->WeaponSlot, CoordStruct::Empty);
 	pTechno->CurrentBurstIndex = burstIndex;

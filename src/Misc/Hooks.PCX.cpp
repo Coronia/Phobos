@@ -19,7 +19,7 @@ DEFINE_HOOK(0x5535D0, LoadProgressMgr_Draw_PCXLoadingScreen, 0x6)
 	strcpy_s(pFilename, name);
 	_strlwr_s(pFilename);
 
-	int ScreenWidth = *(int*)0x8A00A4;
+	const int ScreenWidth = *(int*)0x8A00A4;
 	BSurface* pcx = nullptr;
 
 	sprintf_s(Phobos::readBuffer, GameStrings::LSSOBS_SHP /* "ls%sobs.shp" */,

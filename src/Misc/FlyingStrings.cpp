@@ -35,8 +35,8 @@ void FlyingStrings::AddMoneyString(int amount, HouseClass* owner, AffectedHouse 
 	if (amount && (displayToHouses == AffectedHouse::All ||
 		owner && EnumFunctions::CanTargetHouse(displayToHouses, owner, HouseClass::CurrentPlayer)))
 	{
-		bool isPositive = amount > 0;
-		ColorStruct color = isPositive ? ColorStruct { 0, 255, 0 } : ColorStruct { 255, 0, 0 };
+		const bool isPositive = amount > 0;
+		const ColorStruct color = isPositive ? ColorStruct { 0, 255, 0 } : ColorStruct { 255, 0, 0 };
 		wchar_t moneyStr[0x20];
 		swprintf_s(moneyStr, L"%ls%ls%d", isPositive ? L"+" : L"-", Phobos::UI::CostLabel, std::abs(amount));
 
@@ -55,7 +55,7 @@ void FlyingStrings::UpdateAll()
 
 	for (int i = Data.size() - 1; i >= 0; --i)
 	{
-		auto& dataItem = Data[i];
+		const auto& dataItem = Data[i];
 
 		auto [point, visible] = TacticalClass::Instance->CoordsToClient(dataItem.Location);
 

@@ -59,13 +59,12 @@ DEFINE_HOOK(0x483DDF, CellClass_CheckPassability_PassableTerrain, 0x6)
 	GET(CellClass*, pThis, EDI);
 	GET(TerrainClass*, pTerrain, ESI);
 
-	if (auto const pTypeExt = TerrainTypeExt::ExtMap.Find(pTerrain->Type))
+	auto const pTypeExt = TerrainTypeExt::ExtMap.Find(pTerrain->Type);
+
+	if (pTypeExt->IsPassable)
 	{
-		if (pTypeExt->IsPassable)
-		{
-			pThis->Passability = PassabilityType::Passable;
-			return ReturnFromFunction;
-		}
+		pThis->Passability = PassabilityType::Passable;
+		return ReturnFromFunction;
 	}
 
 	return 0;

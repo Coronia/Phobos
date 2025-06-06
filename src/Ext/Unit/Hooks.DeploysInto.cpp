@@ -7,18 +7,18 @@
 
 static void TransferMindControlOnDeploy(TechnoClass* pTechnoFrom, TechnoClass* pTechnoTo)
 {
-	auto pAnimType = pTechnoFrom->MindControlRingAnim ?
+	auto const pAnimType = pTechnoFrom->MindControlRingAnim ?
 		pTechnoFrom->MindControlRingAnim->Type : TechnoExt::ExtMap.Find(pTechnoFrom)->MindControlRingAnimType;
 
-	if (auto Controller = pTechnoFrom->MindControlledBy)
+	if (auto const Controller = pTechnoFrom->MindControlledBy)
 	{
-		if (auto Manager = Controller->CaptureManager)
+		if (auto const Manager = Controller->CaptureManager)
 		{
 			CaptureManagerExt::FreeUnit(Manager, pTechnoFrom, true);
 
 			if (CaptureManagerExt::CaptureUnit(Manager, pTechnoTo, false, pAnimType, true))
 			{
-				if (auto pBld = abstract_cast<BuildingClass*, true>(pTechnoTo))
+				if (auto const pBld = abstract_cast<BuildingClass*, true>(pTechnoTo))
 				{
 					// Capturing the building after unlimbo before buildup has finished or even started appears to throw certain things off,
 					// Hopefully this is enough to fix most of it like anims playing prematurely etc.
@@ -40,7 +40,7 @@ static void TransferMindControlOnDeploy(TechnoClass* pTechnoFrom, TechnoClass* p
 			}
 		}
 	}
-	else if (auto MCHouse = pTechnoFrom->MindControlledByHouse)
+	else if (auto const MCHouse = pTechnoFrom->MindControlledByHouse)
 	{
 		pTechnoTo->MindControlledByHouse = MCHouse;
 		pTechnoFrom->MindControlledByHouse = nullptr;

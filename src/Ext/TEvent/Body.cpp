@@ -273,7 +273,7 @@ bool TEventExt::CellHasTechnoTypeTEvent(TEventClass* pThis, ObjectClass* pObject
 	if (!pTechno)
 		return false;
 
-	auto pDesiredType = TechnoTypeClass::Find(pThis->String);
+	auto const pDesiredType = TechnoTypeClass::Find(pThis->String);
 
 	if (!pDesiredType)
 	{

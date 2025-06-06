@@ -125,7 +125,7 @@ DEFINE_HOOK(0x702299, TechnoClass_ReceiveDamage_DebrisMaximumsFix, 0xA)
 {
 	GET(TechnoClass* const, pThis, ESI);
 
-	auto pType = pThis->GetTechnoType();
+	const auto pType = pThis->GetTechnoType();
 
 	// If DebrisMaximums has one value, then legacy behavior is used
 	if (pType->DebrisMaximums.Count == 1 &&
@@ -145,7 +145,7 @@ DEFINE_HOOK(0x702299, TechnoClass_ReceiveDamage_DebrisMaximumsFix, 0xA)
 		{
 			if (pType->DebrisMaximums.GetItem(currentIndex) > 0)
 			{
-				int adjustedMaximum = Math::min(pType->DebrisMaximums.GetItem(currentIndex), pType->MaxDebris);
+				const int adjustedMaximum = Math::min(pType->DebrisMaximums.GetItem(currentIndex), pType->MaxDebris);
 				int amountToSpawn = abs(ScenarioClass::Instance->Random.Random()) % (adjustedMaximum + 1); //0x702337
 				amountToSpawn = Math::min(amountToSpawn, totalSpawnAmount);
 				totalSpawnAmount -= amountToSpawn;
@@ -239,7 +239,7 @@ DEFINE_HOOK(0x4438B4, BuildingClass_SetRallyPoint_Naval, 0x6)
 	REF_STACK(SpeedType, spdtp, STACK_OFFSET(0xA4, -0x84));
 	if (!playEVA)// assuming the hook above is the only place where it's set to false when UndeploysInto
 	{
-		if (auto pInto = pBuildingType->UndeploysInto)// r u sure this is not too OP?
+		if (const auto pInto = pBuildingType->UndeploysInto)// r u sure this is not too OP?
 		{
 			R->ESI(pInto->MovementZone);
 			spdtp = pInto->SpeedType;
@@ -338,7 +338,7 @@ DEFINE_HOOK(0x480552, CellClass_AttachesToNeighbourOverlay_Gate, 0x7)
 	GET(CellClass*, pThis, EBP);
 	GET(int, idxOverlay, EBX);
 	GET_STACK(int, state, STACK_OFFSET(0x10, 0x8));
-	bool isWall = idxOverlay != -1 && OverlayTypeClass::Array.GetItem(idxOverlay)->Wall;
+	const bool isWall = idxOverlay != -1 && OverlayTypeClass::Array.GetItem(idxOverlay)->Wall;
 	enum { Attachable = 0x480549 };
 
 	if (isWall)
@@ -349,7 +349,7 @@ DEFINE_HOOK(0x480552, CellClass_AttachesToNeighbourOverlay_Gate, 0x7)
 			{
 				if (auto pBuilding = abstract_cast<BuildingClass*, true>(pObject))
 				{
-					auto pBType = pBuilding->Type;
+					const auto pBType = pBuilding->Type;
 					if ((RulesClass::Instance->EWGates.FindItemIndex(pBType) != -1) && (state == 2 || state == 6))
 						return Attachable;
 					else if ((RulesClass::Instance->NSGates.FindItemIndex(pBType) != -1) && (state == 0 || state == 4))
@@ -368,7 +368,7 @@ DEFINE_HOOK(0x415F5C, AircraftClass_FireAt_SpeedModifiers, 0xA)
 
 	if (const auto pLocomotor = locomotion_cast<FlyLocomotionClass*>(pThis->Locomotor))
 	{
-		double currentSpeed = pThis->GetTechnoType()->Speed * pLocomotor->CurrentSpeed *
+		const double currentSpeed = pThis->GetTechnoType()->Speed * pLocomotor->CurrentSpeed *
 			TechnoExt::GetCurrentSpeedMultiplier(pThis);
 		R->EAX(static_cast<int>(currentSpeed));
 	}
@@ -380,7 +380,7 @@ DEFINE_HOOK(0x4CDA78, FlyLocomotionClass_MovementAI_SpeedModifiers, 0x6)
 {
 	GET(FlyLocomotionClass*, pThis, ESI);
 
-	double currentSpeed = pThis->LinkedTo->GetTechnoType()->Speed * pThis->CurrentSpeed *
+	const double currentSpeed = pThis->LinkedTo->GetTechnoType()->Speed * pThis->CurrentSpeed *
 		TechnoExt::GetCurrentSpeedMultiplier(pThis->LinkedTo);
 
 	R->EAX(static_cast<int>(currentSpeed));
@@ -392,7 +392,7 @@ DEFINE_HOOK(0x4CE4BF, FlyLocomotionClass_4CE4B0_SpeedModifiers, 0x6)
 {
 	GET(FlyLocomotionClass*, pThis, ECX);
 
-	double currentSpeed = pThis->LinkedTo->GetTechnoType()->Speed * pThis->CurrentSpeed *
+	const double currentSpeed = pThis->LinkedTo->GetTechnoType()->Speed * pThis->CurrentSpeed *
 		TechnoExt::GetCurrentSpeedMultiplier(pThis->LinkedTo);
 
 	R->EAX(static_cast<int>(currentSpeed));
@@ -404,7 +404,7 @@ DEFINE_HOOK(0x54D138, JumpjetLocomotionClass_Movement_AI_SpeedModifiers, 0x6)
 {
 	GET(JumpjetLocomotionClass*, pThis, ESI);
 
-	double multiplier = TechnoExt::GetCurrentSpeedMultiplier(pThis->LinkedTo);
+	const double multiplier = TechnoExt::GetCurrentSpeedMultiplier(pThis->LinkedTo);
 	pThis->Speed = (int)(pThis->LinkedTo->GetTechnoType()->JumpjetSpeed * multiplier);
 
 	return 0;
@@ -430,7 +430,7 @@ DEFINE_HOOK(0x44CABA, BuildingClass_Mission_Missile_BulletParams, 0x7)
 	GET(BuildingClass* const, pThis, ESI);
 	GET(CellClass* const, pTarget, EAX);
 
-	auto pWeapon = SuperWeaponTypeClass::Array.GetItem(pThis->FiringSWType)->WeaponType;
+	const auto pWeapon = SuperWeaponTypeClass::Array.GetItem(pThis->FiringSWType)->WeaponType;
 	BulletClass* pBullet = nullptr;
 
 	if (pWeapon)
@@ -516,7 +516,7 @@ DEFINE_HOOK(0x438771, BombClass_Detonate_SetContext, 0x6)
 	FetchBomb::pThisBomb = pThis;
 
 	// Also adjust detonation coordinate.
-	CoordStruct coords = pThis->Target->GetCenterCoords();
+	const CoordStruct coords = pThis->Target->GetCenterCoords();
 
 	R->EDX(&coords);
 	return 0;
@@ -533,25 +533,23 @@ static DamageAreaResult __fastcall _BombClass_Detonate_DamageArea
 )
 {
 	auto const pThisBomb = FetchBomb::pThisBomb;
-	auto nCoord = *pCoord;
-	auto nDamageAreaResult = WarheadTypeExt::ExtMap.Find(pWarhead)->DamageAreaWithTarget
+	auto const nCoord = *pCoord;
+	auto const nDamageAreaResult = WarheadTypeExt::ExtMap.Find(pWarhead)->DamageAreaWithTarget
 	(nCoord, nDamage, pSource, pWarhead, pWarhead->Tiberium, pThisBomb->OwnerHouse, abstract_cast<TechnoClass*>(pThisBomb->Target));
-	auto nLandType = MapClass::Instance.GetCellAt(nCoord)->LandType;
+	auto const nLandType = MapClass::Instance.GetCellAt(nCoord)->LandType;
 
-	if (auto pAnimType = MapClass::SelectDamageAnimation(nDamage, pWarhead, nLandType, nCoord))
+	if (const auto pAnimType = MapClass::SelectDamageAnimation(nDamage, pWarhead, nLandType, nCoord))
 	{
-		auto pAnim = GameCreate<AnimClass>(pAnimType, nCoord, 0, 1, 0x2600, -15, false);
+		const auto pAnim = GameCreate<AnimClass>(pAnimType, nCoord, 0, 1, 0x2600, -15, false);
 
 		AnimExt::SetAnimOwnerHouseKind(pAnim, pThisBomb->OwnerHouse,
 			pThisBomb->Target ? pThisBomb->Target->GetOwningHouse() : nullptr, false);
 
 		if (!pAnim->Owner)
-		{
 			pAnim->Owner = pThisBomb->OwnerHouse;
-		}
 
-		if (const auto pExt = AnimExt::ExtMap.Find(pAnim))
-			pExt->SetInvoker(pThisBomb->Owner);
+		const auto pExt = AnimExt::ExtMap.Find(pAnim);
+		pExt->SetInvoker(pThisBomb->Owner);
 
 	}
 
@@ -562,7 +560,7 @@ DEFINE_HOOK(0x6F5201, TechnoClass_DrawExtras_IvanBombImage, 0x6)
 {
 	GET(TechnoClass*, pThis, EBP);
 
-	auto coords = pThis->GetCenterCoords();
+	const auto coords = pThis->GetCenterCoords();
 
 	R->EAX(&coords);
 	return 0;
@@ -620,7 +618,7 @@ DEFINE_HOOK(0x51A996, InfantryClass_PerCellProcess_KillOnImpassable, 0x5)
 
 	if (landType == LandType::Water)
 	{
-		float multiplier = GroundType::Array[static_cast<int>(landType)].Cost[static_cast<int>(pThis->Type->SpeedType)];
+		const float multiplier = GroundType::Array[static_cast<int>(landType)].Cost[static_cast<int>(pThis->Type->SpeedType)];
 
 		if (multiplier == 0.0)
 			return ContinueChecks;
@@ -704,7 +702,7 @@ DEFINE_HOOK(0x53AD85, IonStormClass_AdjustLighting_ColorSchemes, 0x5)
 	{
 		for (int i = 1; i < pSchemes->Count; i += 2)
 		{
-			auto pScheme = pSchemes->GetItem(i);
+			const auto pScheme = pSchemes->GetItem(i);
 			pScheme->LightConvert->UpdateColors(red, green, blue, tint);
 		}
 
@@ -713,7 +711,7 @@ DEFINE_HOOK(0x53AD85, IonStormClass_AdjustLighting_ColorSchemes, 0x5)
 
 	if (paletteCount > 0)
 	{
-		int schemeCount = ColorScheme::GetNumberOfSchemes();
+		const int schemeCount = ColorScheme::GetNumberOfSchemes();
 		Debug::Log("Recalculated %d extra palettes across %d color schemes (total: %d).\n", paletteCount, schemeCount, schemeCount * paletteCount);
 	}
 
@@ -796,11 +794,11 @@ bool __fastcall BuildingClass_SetOwningHouse_Wrapper(BuildingClass* pThis, void*
 	// Fix : Suppress capture EVA event if ConsideredVehicle=yes
 	if(announce) announce = !pThis->IsStrange();
 
-	bool res = reinterpret_cast<bool(__thiscall*)(BuildingClass*, HouseClass*, bool)>(0x448260)(pThis, pHouse, announce);
+	const bool res = reinterpret_cast<bool(__thiscall*)(BuildingClass*, HouseClass*, bool)>(0x448260)(pThis, pHouse, announce);
 
 	if (res && (pThis->Type->Powered || pThis->Type->PoweredSpecial))
 	{
-		bool on = pThis->IsPowerOnline();
+		const bool on = pThis->IsPowerOnline();
 		if (on != pThis->WasOnline)
 		{
 			reinterpret_cast<void(__thiscall*)(BuildingClass*)>(0x4549B0)(pThis);
@@ -821,7 +819,7 @@ DEFINE_HOOK(0x6B75AC, SpawnManagerClass_AI_SetDestinationForMissiles, 0x5)
 	GET(SpawnManagerClass*, pSpawnManager, ESI);
 	GET(TechnoClass*, pSpawnTechno, EDI);
 
-	CoordStruct coord = pSpawnManager->Target->GetCenterCoords();
+	const CoordStruct coord = pSpawnManager->Target->GetCenterCoords();
 	CellClass* pCellDestination = MapClass::Instance.TryGetCellAt(coord);
 
 	pSpawnTechno->SetDestination(pCellDestination, true);
@@ -870,12 +868,12 @@ DEFINE_HOOK(0x412B40, AircraftTrackerClass_FillCurrentVector, 0x5)
 
 	auto const bounds = MapClass::Instance.MapCoordBounds;
 	auto const mapCoords = pCell->MapCoords;
-	int sectorWidth = bounds.Right / 20;
-	int sectorHeight = bounds.Bottom / 20;
-	int sectorIndexXStart = Math::clamp((mapCoords.X - range) / sectorWidth, 0, 19);
-	int sectorIndexYStart = Math::clamp((mapCoords.Y - range) / sectorHeight, 0, 19);
-	int sectorIndexXEnd = Math::clamp((mapCoords.X + range) / sectorWidth, 0, 19);
-	int sectorIndexYEnd = Math::clamp((mapCoords.Y + range) / sectorHeight, 0, 19);
+	const int sectorWidth = bounds.Right / 20;
+	const int sectorHeight = bounds.Bottom / 20;
+	const int sectorIndexXStart = Math::clamp((mapCoords.X - range) / sectorWidth, 0, 19);
+	const int sectorIndexYStart = Math::clamp((mapCoords.Y - range) / sectorHeight, 0, 19);
+	const int sectorIndexXEnd = Math::clamp((mapCoords.X + range) / sectorWidth, 0, 19);
+	const int sectorIndexYEnd = Math::clamp((mapCoords.Y + range) / sectorHeight, 0, 19);
 
 	for (int y = sectorIndexYStart; y <= sectorIndexYEnd; y++)
 	{
@@ -945,8 +943,8 @@ DEFINE_HOOK(0x72958E, TunnelLocomotionClass_ProcessDigging_SlowdownDistance, 0x8
 
 	GET(TunnelLocomotionClass* const, pLoco, ESI);
 
-	auto& currLoc = pLoco->LinkedTo->Location;
-	int distance = (int) CoordStruct{currLoc.X - pLoco->Coords.X, currLoc.Y - pLoco->Coords.Y,0}.Magnitude() ;
+	const auto& currLoc = pLoco->LinkedTo->Location;
+	const int distance = (int) CoordStruct{currLoc.X - pLoco->Coords.X, currLoc.Y - pLoco->Coords.Y,0}.Magnitude() ;
 
 	// The movement speed was actually also hardcoded here to 19, so the distance check made sense
 	// It can now be customized globally or per TechnoType however - Starkku
@@ -956,7 +954,7 @@ DEFINE_HOOK(0x72958E, TunnelLocomotionClass_ProcessDigging_SlowdownDistance, 0x8
 
 	// Calculate speed multipliers.
 	pLoco->LinkedTo->SpeedPercentage = 1.0; // Subterranean locomotor doesn't normally use this so it would be 0.0 here and cause issues.
-	int maxSpeed = pType->Speed;
+	const int maxSpeed = pType->Speed;
 	pType->Speed = speed;
 	speed = pLoco->LinkedTo->GetCurrentSpeed();
 	pType->Speed = maxSpeed;
@@ -964,7 +962,7 @@ DEFINE_HOOK(0x72958E, TunnelLocomotionClass_ProcessDigging_SlowdownDistance, 0x8
 	if (distance > speed)
 	{
 		REF_STACK(CoordStruct, newLoc, STACK_OFFSET(0x40, -0xC));
-		double angle = -Math::atan2(currLoc.Y - pLoco->Coords.Y, pLoco->Coords.X - currLoc.X);
+		const double angle = -Math::atan2(currLoc.Y - pLoco->Coords.Y, pLoco->Coords.X - currLoc.X);
 		newLoc = currLoc + CoordStruct { int((double)speed * Math::cos(angle)), int((double)speed * Math::sin(angle)), 0 };
 		return 0x7298D3;
 	}
@@ -1091,7 +1089,7 @@ DEFINE_HOOK(0x743664, UnitClass_ReadFromINI_Follower3, 0x6)
 		if (!pUnit)
 			continue;
 
-		int followerIndex = followers[i];
+		const int followerIndex = followers[i];
 
 		if (followerIndex < 0 || followerIndex >= static_cast<int>(units.size()))
 		{
@@ -1376,7 +1374,7 @@ DEFINE_HOOK(0x719F17, EndPiggyback_PowerOn, 0x5) // Teleport
 {
 	auto* iloco = R->Origin() == 0x719F17 ? R->ECX<ILocomotion*>() : R->EAX<ILocomotion*>();
 	__assume(iloco!=nullptr);
-	auto pLinkedTo = static_cast<LocomotionClass*>(iloco)->LinkedTo;
+	const auto pLinkedTo = static_cast<LocomotionClass*>(iloco)->LinkedTo;
 	if (!pLinkedTo->Deactivated && !pLinkedTo->IsUnderEMP())
 		iloco->Power_On();
 	else

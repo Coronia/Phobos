@@ -57,7 +57,7 @@ AnimTypeClass* AttachEffectTypeClass::GetCumulativeAnimation(int cumulativeCount
 	if (cumulativeCount < 0 || this->CumulativeAnimations.size() < 1)
 		return nullptr;
 
-	int index = static_cast<size_t>(cumulativeCount) >= this->CumulativeAnimations.size() ? this->CumulativeAnimations.size() - 1 : cumulativeCount - 1;
+	const int index = static_cast<size_t>(cumulativeCount) >= this->CumulativeAnimations.size() ? this->CumulativeAnimations.size() - 1 : cumulativeCount - 1;
 
 	return this->CumulativeAnimations.at(index);
 }
