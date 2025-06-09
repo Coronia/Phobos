@@ -82,14 +82,14 @@ DEFINE_HOOK(0x4666F7, BulletClass_AI, 0x6)
 			(int)(location.Z + velocity.Z)
 		};
 
-		for (auto& trail : pBulletExt->LaserTrails)
+		for (auto const& trail : pBulletExt->LaserTrails)
 		{
 			// We insert initial position so the first frame of trail doesn't get skipped - Kerbiter
 			// TODO move hack to BulletClass creation
-			if (!trail.LastLocation.isset())
-				trail.LastLocation = location;
+			if (!trail->LastLocation.isset())
+				trail->LastLocation = location;
 
-			trail.Update(drawnCoords);
+			trail->Update(drawnCoords);
 		}
 
 	}
@@ -237,22 +237,32 @@ DEFINE_HOOK(0x46A4FB, BulletClass_Shrapnel_Targeting, 0x6)
 	{
 		auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pShrapnelWeapon);
 		auto const pType = pObject->GetType();
+
+		if (!pType->LegalTarget)
+			return SkipObject;
+
+		if (!pWeaponExt->SkipWeaponPicking && !EnumFunctions::IsCellEligible(pObject->GetCell(), pWeaponExt->CanTarget, true, true))
+			return SkipObject;
+
 		auto const pWH = pShrapnelWeapon->Warhead;
 		auto armorType = pType->Armor;
 
-		if (!pType->LegalTarget || !EnumFunctions::IsCellEligible(pObject->GetCell(), pWeaponExt->CanTarget, true, true))
-			return SkipObject;
-
 		if (auto const pTechno = abstract_cast<TechnoClass*, true>(pObject))
 		{
-			if (!EnumFunctions::CanTargetHouse(pWeaponExt->CanTargetHouses, pOwner, pTechno->Owner))
-				return SkipObject;
+			if (!pWeaponExt->SkipWeaponPicking)
+			{
+				if (!EnumFunctions::CanTargetHouse(pWeaponExt->CanTargetHouses, pOwner, pTechno->Owner))
+					return SkipObject;
 
-			if (!EnumFunctions::IsTechnoEligible(pTechno, pWeaponExt->CanTarget))
-				return SkipObject;
+				if (!EnumFunctions::IsTechnoEligible(pTechno, pWeaponExt->CanTarget))
+					return SkipObject;
 
-			if (!pWeaponExt->HasRequiredAttachedEffects(pTechno, pSource))
-				return SkipObject;
+				if (!pWeaponExt->IsHealthRatioEligible(pTechno))
+					return SkipObject;
+
+				if (!pWeaponExt->HasRequiredAttachedEffects(pTechno, pSource))
+					return SkipObject;
+			}
 
 			auto const pShield = TechnoExt::ExtMap.Find(pTechno)->Shield.get();
 

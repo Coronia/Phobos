@@ -25,7 +25,7 @@ public:
 	public:
 		TechnoTypeExt::ExtData* TypeExtData;
 		std::unique_ptr<ShieldClass> Shield;
-		std::vector<LaserTrailClass> LaserTrails;
+		std::vector<std::unique_ptr<LaserTrailClass>> LaserTrails;
 		std::vector<std::unique_ptr<AttachEffectClass>> AttachedEffects;
 		AttachEffectTechnoProperties AE;
 		TechnoTypeClass* PreviousType; // Type change registered in TechnoClass::AI on current frame and used in FootClass::AI on same frame and reset after.
@@ -71,6 +71,8 @@ public:
 
 		AirstrikeClass* AirstrikeTargetingMe;
 
+		CDTimerClass FiringAnimationTimer;
+
 		ExtData(TechnoClass* OwnerObject) : Extension<TechnoClass>(OwnerObject)
 			, TypeExtData { nullptr }
 			, Shield {}
@@ -115,6 +117,7 @@ public:
 			, LastSensorsMapCoords { CellStruct::Empty }
 			, TiberiumEater_Timer {}
 			, AirstrikeTargetingMe { nullptr }
+			, FiringAnimationTimer {}
 		{ }
 
 		void OnEarlyUpdate();
