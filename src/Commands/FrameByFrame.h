@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Commands.h"
-
 class FrameByFrameCommandClass : public CommandClass
 {
 public:

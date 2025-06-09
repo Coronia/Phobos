@@ -1,7 +1,19 @@
 #pragma once
 
-#include <AnimTypeClass.h>
+// Forward declarations
+class AnimTypeClass;
+class WeaponTypeClass;
+class ParticleSystemTypeClass;
+class VocClass;
+class UnitClass;
+class TechnoClass;
+class CCINIClass;
+class PhobosStreamReader;
+class PhobosStreamWriter;
+class CreateUnitTypeClass;
 
+// Required includes
+#include <AnimTypeClass.h>
 #include <New/Type/Affiliated//CreateUnitTypeClass.h>
 #include <Utilities/Container.h>
 #include <Utilities/Enum.h>

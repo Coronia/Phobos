@@ -1,14 +1,20 @@
 #pragma once
 
+// Forward declarations
+class TEventClass;
+class HouseClass;
+class ObjectClass;
+class CDTimerClass;
+class TechnoClass;
+class PhobosStreamReader;
+class PhobosStreamWriter;
+
+// Required includes
 #include <Utilities/Container.h>
 #include <Utilities/Template.h>
 #include <Helpers/Template.h>
-
 #include <optional>
-
 #include <TEventClass.h>
-
-class HouseClass;
 
 enum PhobosTriggerEvent
 {

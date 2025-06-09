@@ -1,6 +1,13 @@
 #pragma once
-#include <CellClass.h>
 
+// Forward declarations
+class CellClass;
+class RadSiteClass;
+class PhobosStreamReader;
+class PhobosStreamWriter;
+
+// Required includes
+#include <CellClass.h>
 #include <Utilities/Container.h>
 #include <Utilities/Constructs.h>
 #include <Utilities/Template.h>

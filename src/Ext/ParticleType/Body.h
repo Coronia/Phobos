@@ -1,7 +1,13 @@
 #pragma once
 
-#include <ParticleTypeClass.h>
+// Forward declarations
+class ParticleTypeClass;
+class CCINIClass;
+class PhobosStreamReader;
+class PhobosStreamWriter;
 
+// Required includes
+#include <ParticleTypeClass.h>
 #include <Helpers/Macro.h>
 #include <Utilities/Container.h>
 #include <Utilities/TemplateDef.h>

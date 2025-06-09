@@ -1,7 +1,16 @@
 #pragma once
 
-#include <ScenarioClass.h>
+// Forward declarations
+class ScenarioClass;
+class CCINIClass;
+class PhobosStreamReader;
+class PhobosStreamWriter;
+class IStream;
+struct CellStruct;
+class TechnoExt;
 
+// Required includes
+#include <ScenarioClass.h>
 #include <Helpers/Macro.h>
 #include <Utilities/Container.h>
 #include <Utilities/TemplateDef.h>

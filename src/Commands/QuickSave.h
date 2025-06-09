@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Commands.h"
-
 // Quicksave current game
 class QuickSaveCommandClass : public CommandClass
 {

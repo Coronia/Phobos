@@ -1,10 +1,17 @@
 #pragma once
-#include <OverlayTypeClass.h>
 
+// Forward declarations
+class OverlayTypeClass;
+class ColorScheme;
+class CCINIClass;
+class PhobosStreamReader;
+class PhobosStreamWriter;
+
+// Required includes
+#include <OverlayTypeClass.h>
 #include <Helpers/Macro.h>
 #include <Utilities/Container.h>
 #include <Utilities/TemplateDef.h>
-#include <Utilities/Macro.h>
 
 class OverlayTypeExt
 {

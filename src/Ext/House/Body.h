@@ -1,6 +1,21 @@
 #pragma once
-#include <HouseClass.h>
 
+// Forward declarations
+class HouseClass;
+class BuildingClass;
+class TechnoClass;
+class TechnoTypeClass;
+class CCINIClass;
+class PhobosStreamReader;
+class PhobosStreamWriter;
+class CellClass;
+class SuperClass;
+class BuildingTypeClass;
+class CounterClass;
+class CDTimerClass;
+
+// Required includes
+#include <HouseClass.h>
 #include <Helpers/Macro.h>
 #include <Utilities/Container.h>
 #include <Utilities/TemplateDef.h>

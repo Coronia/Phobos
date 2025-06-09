@@ -1,10 +1,9 @@
 #pragma once
 
 #include <Utilities/Constructs.h>
-#include <Utilities/Enum.h>
 #include <Utilities/Template.h>
 
-class TiberiumEaterTypeClass
+class TiberiumEaterTypeClass final : public Enumerable<TiberiumEaterTypeClass>
 {
 public:
 	Valueable<int> TransDelay { -1 };

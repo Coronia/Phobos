@@ -1,5 +1,9 @@
 #pragma once
-/*
+
+// Forward declarations
+enum class EventTypeExt : uint8_t;
+
+// Required includes
 #include <cstddef>
 #include <stdint.h>
 
@@ -43,4 +47,3 @@ public:
 static_assert(sizeof(EventExt) == 111);
 static_assert(offsetof(EventExt, DataBuffer) == 7);
 #pragma pack(pop)
-*/

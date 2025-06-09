@@ -3,7 +3,6 @@
 #include <Theater.h>
 #include <ScenarioClass.h>
 #include <BitFont.h>
-
 #include <Ext/Rules/Body.h>
 #include <Ext/Techno/Body.h>
 #include <Misc/FlyingStrings.h>

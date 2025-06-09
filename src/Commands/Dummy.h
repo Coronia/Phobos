@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Commands.h"
-
 // The example command class
 class DummyCommandClass : public CommandClass
 {

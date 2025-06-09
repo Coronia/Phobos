@@ -1,13 +1,19 @@
 #pragma once
 
+// Forward declarations
+class TActionClass;
+class ObjectClass;
+class TriggerClass;
+class CellStruct;
+class PhobosStreamReader;
+class PhobosStreamWriter;
+class HouseClass;
+
+// Required includes
+#include <TActionClass.h>
 #include <Utilities/Container.h>
 #include <Utilities/Template.h>
-
 #include <Helpers/Template.h>
-
-#include <TActionClass.h>
-
-class HouseClass;
 
 enum class PhobosTriggerAction : unsigned int
 {

@@ -7,7 +7,7 @@
 class TechnoClass;
 class WarheadTypeClass;
 
-class ShieldClass
+class ShieldClass : public Enumerable<ShieldClass>
 {
 public:
 	static std::vector<ShieldClass*> Array;

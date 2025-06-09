@@ -8,9 +8,6 @@
 
 #include <Utilities/GeneralUtils.h>
 #include <AnimClass.h>
-#include <HouseClass.h>
-#include <RadarEventClass.h>
-#include <TacticalClass.h>
 
 std::vector<ShieldClass*> ShieldClass::Array;
 

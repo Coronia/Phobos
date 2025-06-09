@@ -1,5 +1,4 @@
 #pragma once
-#include "Commands.h"
 
 #include <Ext/Sidebar/Body.h>
 #include <Ext/Sidebar/SWSidebar/SWSidebarClass.h>

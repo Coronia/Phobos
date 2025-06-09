@@ -2,7 +2,7 @@
 
 #include <New/Type/AttachEffectTypeClass.h>
 
-class AttachEffectClass
+class AttachEffectClass : public Enumerable<AttachEffectClass>
 {
 public:
 	static std::vector<AttachEffectClass*> Array;

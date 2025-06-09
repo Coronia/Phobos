@@ -1,7 +1,5 @@
 #include "LaserTrailClass.h"
 
-#include <Utilities/TemplateDef.h>
-
 // Draws LaserTrail if the conditions are suitable.
 // Returns true if drawn, false otherwise.
 bool LaserTrailClass::Update(CoordStruct location)

@@ -1,6 +1,39 @@
 #pragma once
 #include <TechnoTypeClass.h>
 
+// Forward declarations for types used as pointers or members
+class Matrix3D;
+class ParticleSystemTypeClass;
+class ShieldTypeClass;
+class LaserTrailTypeClass;
+class AttachEffectTypeClass;
+class InterceptorTypeClass;
+class PassengerDeletionTypeClass;
+class DigitalDisplayTypeClass;
+class SelectBoxTypeClass;
+class DroppodTypeClass;
+class TiberiumEaterTypeClass;
+class CreateUnitTypeClass;
+class AnimTypeClass;
+class InfantryTypeClass;
+class WeaponTypeClass;
+class WarheadTypeClass;
+class SHPStruct;
+class TechnoClass;
+class HouseClass;
+class AbstractClass;
+class CCINIClass;
+class PhobosStreamReader;
+class PhobosStreamWriter;
+class PhobosMap;
+
+// Struct/enum forward declarations
+struct Leptons;
+struct ColorStruct;
+struct CoordStruct;
+struct PartialVector3D;
+enum class AffectedHouse;
+
 #include <Helpers/Macro.h>
 #include <Utilities/Container.h>
 #include <Utilities/TemplateDef.h>
@@ -16,8 +49,6 @@
 #include <New/Type/Affiliated/TiberiumEaterTypeClass.h>
 #include <New/Type/Affiliated/CreateUnitTypeClass.h>
 
-class Matrix3D;
-class ParticleSystemTypeClass;
 class TechnoTypeExt
 {
 public:

@@ -1,18 +1,23 @@
 #pragma once
-#include <BuildingClass.h>
-#include <HouseClass.h>
-#include <TiberiumClass.h>
-#include <FactoryClass.h>
 
+// Forward declarations
+class BuildingClass;
+class HouseClass;
+class TiberiumClass;
+class FactoryClass;
+class BuildingTypeExt;
+class TechnoExt;
+class SuperClass;
+class TechnoClass;
+class PhobosStreamReader;
+class PhobosStreamWriter;
+
+// Required includes
+#include <BuildingClass.h>
 #include <Helpers/Macro.h>
 #include <Utilities/Container.h>
 #include <Utilities/TemplateDef.h>
-
 #include <Misc/FlyingStrings.h>
-#include <Ext/Techno/Body.h>
-#include <Ext/TechnoType/Body.h>
-#include <Ext/Building/Body.h>
-#include <Ext/BuildingType/Body.h>
 
 class BuildingExt
 {

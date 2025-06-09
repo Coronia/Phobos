@@ -22,7 +22,7 @@ DEFINE_HOOK(0x533066, CommandClassCallback_Register, 0x6)
 	MakeCommand<QuickSaveCommandClass>();
 	MakeCommand<ToggleDigitalDisplayCommandClass>();
 	MakeCommand<ToggleDesignatorRangeCommandClass>();
-	MakeCommand<ToggleSWSidebar>();
+	MakeCommand<ToggleSWSidebarCommandClass>();
 
 	if (Phobos::Config::SuperWeaponSidebarCommands)
 	{

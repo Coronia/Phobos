@@ -1,4 +1,11 @@
 #pragma once
+
+// Forward declarations
+class AircraftClass;
+class AbstractClass;
+class BuildingClass;
+
+// Required includes
 #include <AircraftClass.h>
 
 // TODO: Implement proper extended AircraftClass.

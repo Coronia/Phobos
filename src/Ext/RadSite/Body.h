@@ -1,14 +1,23 @@
 #pragma once
 
-#include <RadSiteClass.h>
+// Forward declarations
+class RadSiteClass;
+class WeaponTypeClass;
+class RadTypeClass;
+class HouseClass;
+class TechnoClass;
+class PhobosStreamReader;
+class PhobosStreamWriter;
+class AbstractClass;
+class CellStruct;
 
+// Required includes
+#include <RadSiteClass.h>
 #include <Helpers/Macro.h>
 #include <Utilities/Container.h>
 #include <Utilities/TemplateDef.h>
 
 #include <Ext/WeaponType/Body.h>
-
-class RadTypeClass;
 
 class RadSiteExt
 {

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Commands.h"
-
 // Select next idle harvester
 class NextIdleHarvesterCommandClass : public CommandClass
 {

@@ -1,9 +1,6 @@
 #pragma once
 
-#include <Utilities/Template.h>
-#include <Utilities/Enum.h>
-
-class CreateUnitTypeClass
+class CreateUnitTypeClass : public Enumerable<CreateUnitTypeClass>
 {
 public:
 	Valueable<TechnoTypeClass*> Type { nullptr };

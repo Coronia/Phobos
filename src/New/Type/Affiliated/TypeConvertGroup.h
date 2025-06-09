@@ -2,7 +2,7 @@
 
 #include <Utilities/EnumFunctions.h>
 
-class TypeConvertGroup
+class TypeConvertGroup : public Enumerable<TypeConvertGroup>
 {
 public:
 	ValueableVector<TechnoTypeClass*> FromTypes;

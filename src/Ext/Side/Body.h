@@ -1,6 +1,17 @@
 #pragma once
-#include <SideClass.h>
 
+// Forward declarations
+class SideClass;
+class CCINIClass;
+class PhobosStreamReader;
+class PhobosStreamWriter;
+struct Point2D;
+struct ColorStruct;
+enum class TextAlign;
+class PhobosPCXFile;
+
+// Required includes
+#include <SideClass.h>
 #include <Helpers/Macro.h>
 #include <Utilities/Container.h>
 #include <Utilities/TemplateDef.h>

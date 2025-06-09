@@ -6,7 +6,7 @@
 #include <New/Type/LaserTrailTypeClass.h>
 
 
-class LaserTrailClass
+class LaserTrailClass : public Enumerable<LaserTrailClass>
 {
 public:
 	LaserTrailTypeClass* Type;

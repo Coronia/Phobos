@@ -31,11 +31,9 @@
 #pragma endregion
 
 #include "Constructs.h"
-
 #include <ConvertClass.h>
 #include <FileSystem.h>
 #include <Utilities/GeneralUtils.h>
-
 #include "Savegame.h"
 #include "Debug.h"
 

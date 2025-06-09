@@ -1,13 +1,21 @@
 #pragma once
-#include <VoxelAnimTypeClass.h>
 
+// Forward declarations
+class VoxelAnimTypeClass;
+class CCINIClass;
+class PhobosStreamReader;
+class PhobosStreamWriter;
+class LaserTrailTypeClass;
+class AnimTypeClass;
+
+// Required includes
+#include <VoxelAnimTypeClass.h>
 #include <Utilities/Container.h>
 #include <Utilities/Constructs.h>
 #include <Utilities/Template.h>
 #include <Utilities/TemplateDef.h>
 #include <Utilities/Debug.h>
 #include <Helpers/Macro.h>
-
 #include <New/Type/LaserTrailTypeClass.h>
 
 class VoxelAnimTypeExt
