@@ -3,8 +3,6 @@
 #include <CCINIClass.h>
 #include <ScenarioClass.h>
 #include <SessionClass.h>
-#include <MessageListClass.h>
-#include <HouseClass.h>
 #include <GameOptionsClass.h>
 
 #include <Utilities/Parser.h>
@@ -12,7 +10,7 @@
 #include <Utilities/Patch.h>
 #include <Utilities/Macro.h>
 
-#include "Misc/BlittersFix.h"
+#include <Misc/BlittersFix.h>
 
 bool Phobos::UI::DisableEmptySpawnPositions = false;
 bool Phobos::UI::ExtendedToolTips = false;

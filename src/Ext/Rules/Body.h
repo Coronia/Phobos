@@ -1,15 +1,21 @@
 #pragma once
 
-#include <CCINIClass.h>
-#include <RulesClass.h>
-#include <Utilities/Container.h>
-#include <Utilities/Constructs.h>
-#include <Utilities/Template.h>
-#include <Utilities/Enum.h>
-#include <Utilities/TemplateDef.h>
-#include <Utilities/Debug.h>
-#include <Utilities/Anchor.h>
-
+// Forward declarations
+class RulesClass;
+class PhobosStreamReader;
+class PhobosStreamWriter;
+class IStream;
+class ScriptTypeClass;
+template<typename T> struct Vector3D;
+struct Point2D;
+struct Leptons;
+enum class BuildingSelectBracketPosition;
+enum class TranslucencyLevel;
+enum class IronCurtainEffect;
+enum class AffectedHouse;
+template<typename T> struct PartialVector2D;
+struct ColorStruct;
+template<size_t N> class PhobosFixedString;
 class AnimTypeClass;
 class MouseCursor;
 class SuperWeaponTypeClass;
@@ -18,6 +24,18 @@ class VocClass;
 class WarheadTypeClass;
 class DigitalDisplayTypeClass;
 class SelectBoxTypeClass;
+class SHPStruct;
+
+// Required includes
+#include <RulesClass.h>
+#include <CCINIClass.h>
+#include <Utilities/Container.h>
+#include <Utilities/Constructs.h>
+#include <Utilities/Template.h>
+#include <Utilities/Enum.h>
+#include <Utilities/TemplateDef.h>
+#include <Utilities/Debug.h>
+#include <Utilities/Anchor.h>
 
 class RulesExt
 {

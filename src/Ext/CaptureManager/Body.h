@@ -1,11 +1,21 @@
 #pragma once
 
+// Forward declarations
+class CaptureManagerClass;
+class AnimTypeClass;
+class RulesClass;
+class FootClass;
+class HouseClass;
+class AnimClass;
+class TechnoClass;
+class AbstractClass;
+class TechnoTypeExt;
+
+// Required includes
 #include <CaptureManagerClass.h>
-#include <AnimTypeClass.h>
 #include <RulesClass.h>
 #include <FootClass.h>
 #include <HouseClass.h>
-#include <AnimClass.h>
 
 #include <Ext/TechnoType/Body.h>
 

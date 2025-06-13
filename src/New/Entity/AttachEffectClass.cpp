@@ -2,7 +2,6 @@
 #include "Memory.h"
 
 #include <AnimClass.h>
-#include <BuildingClass.h>
 
 #include <Ext/Anim/Body.h>
 #include <Ext/Techno/Body.h>

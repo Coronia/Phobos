@@ -2,7 +2,7 @@
 
 #include <Utilities/Template.h>
 
-class DroppodTypeClass
+class DroppodTypeClass : public Enumerable<DroppodTypeClass>
 {
 public:
 	Nullable<int> Speed {};

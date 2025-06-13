@@ -4,27 +4,27 @@
 #include <Utilities/GeneralUtils.h>
 #include <Ext/Sidebar/SWSidebar/SWSidebarClass.h>
 
-const char* ToggleSWSidebar::GetName() const
+const char* ToggleSWSidebarCommandClass::GetName() const
 {
 	return "Toggle Super Weapon Sidebar";
 }
 
-const wchar_t* ToggleSWSidebar::GetUIName() const
+const wchar_t* ToggleSWSidebarCommandClass::GetUIName() const
 {
 	return GeneralUtils::LoadStringUnlessMissing("TXT_TOGGLE_SW_SIDEBAR", L"Toggle Super Weapon Sidebar");
 }
 
-const wchar_t* ToggleSWSidebar::GetUICategory() const
+const wchar_t* ToggleSWSidebarCommandClass::GetUICategory() const
 {
 	return CATEGORY_INTERFACE;
 }
 
-const wchar_t* ToggleSWSidebar::GetUIDescription() const
+const wchar_t* ToggleSWSidebarCommandClass::GetUIDescription() const
 {
 	return GeneralUtils::LoadStringUnlessMissing("TXT_TOGGLE_SW_SIDEBAR_DESC", L"Toggle the Super Weapon Sidebar.");
 }
 
-void ToggleSWSidebar::Execute(WWKey eInput) const
+void ToggleSWSidebarCommandClass::Execute(WWKey eInput) const
 {
 	ToggleSWButtonClass::SwitchSidebar();
 

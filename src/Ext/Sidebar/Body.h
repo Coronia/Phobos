@@ -1,7 +1,15 @@
 #pragma once
 
-#include <SidebarClass.h>
+// Forward declarations
+class SidebarClass;
+class PhobosStreamReader;
+class PhobosStreamWriter;
+class IStream;
+class SHPStruct;
+class BuildType;
 
+// Required includes
+#include <SidebarClass.h>
 #include <Helpers/Macro.h>
 #include <Utilities/Container.h>
 #include <Utilities/TemplateDef.h>

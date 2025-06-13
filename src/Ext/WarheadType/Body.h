@@ -1,4 +1,31 @@
 #pragma once
+
+// Forward declarations
+class WarheadTypeClass;
+class SuperWeaponTypeClass;
+class AnimTypeClass;
+class TechnoClass;
+class HouseClass;
+class BulletClass;
+class WeaponTypeClass;
+class ShieldTypeClass;
+class AttachEffectTypeClass;
+class CCINIClass;
+class PhobosStreamReader;
+class PhobosStreamWriter;
+class TechnoTypeClass;
+class AbstractClass;
+
+// Struct/enum forward declarations
+struct Point2D;
+struct CoordStruct;
+struct Powerup;
+struct TypeConvertGroup;
+struct AEAttachInfoTypeClass;
+enum class AffectedHouse;
+enum class AffectedTarget;
+
+// Required includes
 #include <WarheadTypeClass.h>
 #include <SuperWeaponTypeClass.h>
 #include <Helpers/Macro.h>

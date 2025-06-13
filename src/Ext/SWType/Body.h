@@ -1,14 +1,32 @@
 #pragma once
-#include <WarheadTypeClass.h>
-#include <WeaponTypeClass.h>
-#include <SuperWeaponTypeClass.h>
 
+// Forward declarations
+class WarheadTypeClass;
+class WeaponTypeClass;
+class SuperWeaponTypeClass;
+class VoxClass;
+class ColorScheme;
+class CSFText;
+class CustomPalette;
+class PhobosPCXFile;
+class TypeConvertGroup;
+class SuperClass;
+class CCINIClass;
+class PhobosStreamReader;
+class PhobosStreamWriter;
+class CellStruct;
+class HouseClass;
+class TechnoClass;
+class BuildingClass;
+class BuildingTypeClass;
+class TechnoTypeClass;
+class RulesClass;
+
+// Required includes
+#include <SuperWeaponTypeClass.h>
 #include <Helpers/Macro.h>
 #include <Utilities/Container.h>
 #include <Utilities/TemplateDef.h>
-
-#include <Ext/Building/Body.h>
-#include <New/Type/Affiliated/TypeConvertGroup.h>
 
 class SWTypeExt
 {

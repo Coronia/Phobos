@@ -1,8 +1,5 @@
 #pragma once
 
-#include <Utilities/Enumerable.h>
-#include <Utilities/Template.h>
-
 class LaserTrailTypeClass final : public Enumerable<LaserTrailTypeClass>
 {
 public:

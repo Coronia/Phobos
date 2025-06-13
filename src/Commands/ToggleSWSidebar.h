@@ -1,9 +1,7 @@
 #pragma once
 
-#include "Commands.h"
-
 // Display damage strings
-class ToggleSWSidebar : public CommandClass
+class ToggleSWSidebarCommandClass : public CommandClass
 {
 public:
 	virtual const char* GetName() const override;

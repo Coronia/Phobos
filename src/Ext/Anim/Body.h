@@ -1,11 +1,24 @@
 #pragma once
-#include <AnimClass.h>
-#include <ParticleSystemClass.h>
 
-#include <Ext/AnimType/Body.h>
+// Forward declarations
+class AnimClass;
+class ParticleSystemClass;
+class TechnoClass;
+class HouseClass;
+class BuildingClass;
+class AnimTypeClass;
+class WarheadTypeClass;
+class CellClass;
+class PhobosStreamReader;
+class PhobosStreamWriter;
+
+// Required includes
+#include <AnimClass.h>
 #include <Helpers/Macro.h>
 #include <Utilities/Container.h>
 #include <Utilities/TemplateDef.h>
+
+#include <Ext/AnimType/Body.h>
 
 class AnimExt
 {

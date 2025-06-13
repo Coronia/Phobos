@@ -1,8 +1,31 @@
 #pragma once
-#include <BulletClass.h>
+
+// Forward declarations
+class BulletClass;
+class WeaponTypeClass;
+class DiskLaserClass;
+class EBolt;
+class TechnoClass;
+class HouseClass;
+class AbstractClass;
+class CCINIClass;
+class RadTypeClass;
+class AttachEffectTypeClass;
+class WarheadTypeClass;
+class PhobosStreamReader;
+class PhobosStreamWriter;
+class PhobosMap;
+
+// Struct/enum forward declarations
+struct Leptons;
+struct ColorStruct;
+struct CoordStruct;
+enum class AreaFireTarget;
+enum class AffectedTarget;
+enum class AffectedHouse;
+
+// Required includes
 #include <WeaponTypeClass.h>
-#include <DiskLaserClass.h>
-#include <EBolt.h>
 #include <Helpers/Macro.h>
 #include <Utilities/Container.h>
 #include <Utilities/TemplateDef.h>

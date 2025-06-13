@@ -1,10 +1,26 @@
 #pragma once
 
+// Forward declarations
+class ScriptClass;
+class ScriptTypeClass;
+class TeamClass;
+class AITriggerTypeClass;
+class HouseClass;
+class AircraftClass;
+class MapClass;
+class BulletClass;
+class WarheadTypeClass;
+class SpawnManagerClass;
+class TechnoClass;
+class AbstractClass;
+class PhobosStreamReader;
+class PhobosStreamWriter;
+
+// Required includes
 #include <ScriptClass.h>
 #include <ScriptTypeClass.h>
 #include <TeamClass.h>
 #include <AITriggerTypeClass.h>
-
 #include <HouseClass.h>
 #include <AircraftClass.h>
 #include <MapClass.h>
@@ -12,7 +28,6 @@
 #include <Helpers/Enumerators.h>
 #include <WarheadTypeClass.h>
 #include <SpawnManagerClass.h>
-
 #include <Ext/Team/Body.h>
 #include <Utilities/Container.h>
 #include <Phobos.h>

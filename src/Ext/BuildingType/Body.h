@@ -1,4 +1,20 @@
 #pragma once
+
+// Forward declarations
+class BuildingTypeClass;
+class SuperClass;
+class SuperWeaponTypeClass;
+class BuildingClass;
+class HouseClass;
+class TechnoTypeClass;
+class WeaponTypeClass;
+class VocClass;
+class CCINIClass;
+class PhobosStreamReader;
+class PhobosStreamWriter;
+class IStream;
+
+// Required includes
 #include <BuildingTypeClass.h>
 #include <SuperClass.h>
 #include <SuperWeaponTypeClass.h>

@@ -1,16 +1,50 @@
 #pragma once
+
+// Forward declarations
+class BulletClass;
+class TechnoClass;
+class TechnoTypeClass;
+class InfantryClass;
+class AnimClass;
+class ShieldClass;
+class LaserTrailClass;
+class AttachEffectClass;
+class TechnoTypeExt;
+class AttachEffectTypeClass;
+class UnitTypeClass;
+class FootClass;
+class UnitClass;
+class HouseClass;
+class CellClass;
+class WeaponTypeClass;
+class AirstrikeClass;
+class EBolt;
+class ShieldTypeClass;
+class AnimTypeClass;
+class AbstractClass;
+class CDTimerClass;
+class PhobosStreamReader;
+class PhobosStreamWriter;
+class OverlayTypeClass;
+
+// Struct/enum forward declarations
+struct CellStruct;
+struct Point2D;
+struct RectangleStruct;
+struct CoordStruct;
+struct AttachEffectTechnoProperties;
+enum class AutoDeathBehavior;
+enum class TargetZoneScanType;
+enum class Anchor;
+enum class BuildingSelectBracketPosition;
+enum class DisplayInfoType;
+
+// Required includes
 #include <InfantryClass.h>
 #include <AnimClass.h>
-
 #include <Helpers/Macro.h>
 #include <Utilities/Container.h>
 #include <Utilities/TemplateDef.h>
-#include <Utilities/Macro.h>
-#include <New/Entity/ShieldClass.h>
-#include <New/Entity/LaserTrailClass.h>
-#include <New/Entity/AttachEffectClass.h>
-
-class BulletClass;
 
 class TechnoExt
 {

@@ -1,6 +1,16 @@
 #pragma once
-#include <TeamClass.h>
 
+// Forward declarations
+class TeamClass;
+class PhobosStreamReader;
+class PhobosStreamWriter;
+class FootClass;
+class ScriptClass;
+class AbstractClass;
+class CDTimerClass;
+
+// Required includes
+#include <TeamClass.h>
 #include <Helpers/Enumerators.h>
 #include <Helpers/Macro.h>
 #include <Utilities/Container.h>

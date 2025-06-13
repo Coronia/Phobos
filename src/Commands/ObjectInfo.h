@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Commands.h"
-
 // #53 New debug feature for AI scripts
 class ObjectInfoCommandClass : public CommandClass
 {

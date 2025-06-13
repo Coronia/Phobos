@@ -1,10 +1,9 @@
 #pragma once
 
 #include <Utilities/Constructs.h>
-#include <Utilities/Enum.h>
 #include <Utilities/Template.h>
 
-class PassengerDeletionTypeClass
+class PassengerDeletionTypeClass final : public Enumerable<PassengerDeletionTypeClass>
 {
 public:
 

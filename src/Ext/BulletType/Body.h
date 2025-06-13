@@ -1,6 +1,16 @@
 #pragma once
-#include <BulletTypeClass.h>
 
+// Forward declarations
+class BulletTypeClass;
+class WeaponTypeClass;
+class AnimTypeClass;
+class CCINIClass;
+class PhobosStreamReader;
+class PhobosStreamWriter;
+class LaserTrailTypeClass;
+
+// Required includes
+#include <BulletTypeClass.h>
 #include <Helpers/Macro.h>
 #include <Utilities/Container.h>
 #include <Utilities/TemplateDef.h>

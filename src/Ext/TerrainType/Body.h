@@ -1,6 +1,19 @@
 #pragma once
-#include <TerrainTypeClass.h>
 
+// Forward declarations
+class TerrainTypeClass;
+class CCINIClass;
+class PhobosStreamReader;
+class PhobosStreamWriter;
+class AnimTypeClass;
+class VocClass;
+struct ColorStruct;
+class ColorScheme;
+class TerrainClass;
+struct CoordStruct;
+
+// Required includes
+#include <TerrainTypeClass.h>
 #include <Helpers/Macro.h>
 #include <Utilities/Container.h>
 #include <Utilities/TemplateDef.h>

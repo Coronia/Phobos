@@ -1,8 +1,5 @@
 #pragma once
 
-#include <Utilities/Enumerable.h>
-#include <Utilities/TemplateDef.h>
-
 class InsigniaTypeClass final : public Enumerable<InsigniaTypeClass>
 {
 public:

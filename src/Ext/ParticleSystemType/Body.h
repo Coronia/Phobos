@@ -1,10 +1,16 @@
 #pragma once
-#include <ParticleSystemTypeClass.h>
 
+// Forward declarations
+class ParticleSystemTypeClass;
+class CCINIClass;
+class PhobosStreamReader;
+class PhobosStreamWriter;
+
+// Required includes
+#include <ParticleSystemTypeClass.h>
 #include <Helpers/Macro.h>
 #include <Utilities/Container.h>
 #include <Utilities/TemplateDef.h>
-#include <Utilities/Macro.h>
 #include <Utilities/GeneralUtils.h>
 
 class ParticleSystemTypeExt

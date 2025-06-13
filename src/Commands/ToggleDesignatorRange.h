@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Commands.h"
-
 // Display damage strings
 class ToggleDesignatorRangeCommandClass : public CommandClass
 {

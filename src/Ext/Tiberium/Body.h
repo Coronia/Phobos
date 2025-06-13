@@ -1,6 +1,14 @@
 #pragma once
-#include <TiberiumClass.h>
 
+// Forward declarations
+class TiberiumClass;
+class CCINIClass;
+class PhobosStreamReader;
+class PhobosStreamWriter;
+struct ColorStruct;
+
+// Required includes
+#include <TiberiumClass.h>
 #include <Helpers/Macro.h>
 #include <Utilities/Container.h>
 #include <Utilities/TemplateDef.h>
