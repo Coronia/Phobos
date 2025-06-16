@@ -114,6 +114,12 @@ public:
 	template<bool Allocate = false>
 	inline void Read(INI_EX& parser, const char* pSection, const char* pKey);
 
+	inline void Read(INI_EX& parser, const char* pSection, const char* pKey, Val defaultValue)
+	{
+		this->Value = std::move(defaultValue);
+		this->Read(parser, pSection, pKey);
+	}
+
 	inline bool Load(PhobosStreamReader& Stm, bool RegisterForChange);
 
 	inline bool Save(PhobosStreamWriter& Stm) const;

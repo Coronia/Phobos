@@ -330,9 +330,7 @@ void AnimExt::SpawnFireAnims(AnimClass* pThis)
 			}
 		};
 
-	auto const disallowedLandTypes = pTypeExt->FireAnimDisallowedLandTypes.Get(pType->Scorch ? LandTypeFlags::DefaultDisallowed : LandTypeFlags::None);
-
-	if (IsLandTypeInFlags(disallowedLandTypes, pThis->GetCell()->LandType))
+	if (IsLandTypeInFlags(pTypeExt->FireAnimDisallowedLandTypes, pThis->GetCell()->LandType))
 		return;
 
 	std::span<AnimTypeClass*> anims = pTypeExt->SmallFireAnims;

@@ -44,7 +44,7 @@ public:
 		Valueable<bool> RestrictVisibilityIfCloaked;
 		Valueable<bool> DetachOnCloak;
 		Valueable<bool> ConstrainFireAnimsToCellSpots;
-		Nullable<LandTypeFlags> FireAnimDisallowedLandTypes;
+		Valueable<LandTypeFlags> FireAnimDisallowedLandTypes;
 		Nullable<bool> AttachFireAnimsToParent;
 		Nullable<int> SmallFireCount;
 		ValueableVector<AnimTypeClass*> SmallFireAnims;
