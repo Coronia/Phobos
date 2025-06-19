@@ -145,10 +145,43 @@ void TechnoTypeExt::ExtData::ParseBurstFLHs(INI_EX& exArtINI, const char* pArtSe
 			else if (!FLH.isset() && !eliteFLH.isset())
 				break;
 
-			nFLH[i].push_back(FLH.Get());
-			nEFlh[i].push_back(eliteFLH.Get());
+			nFLH[i].emplace_back(FLH.Get());
+			nEFlh[i].emplace_back(eliteFLH.Get());
 		}
 	}
+}
+
+void TechnoTypeExt::ExtData::CalculateSpawnerRange()
+{
+	const auto pTechnoType = this->OwnerObject();
+	const int weaponRangeExtra = this->Spawner_ExtraLimitRange * Unsorted::LeptonsPerCell;
+	this->SpawnerRange = 0;
+	this->EliteSpawnerRange = 0;
+
+	auto setWeaponRange = [](int& weaponRange, WeaponTypeClass* pWeaponType)
+		{
+			if (pWeaponType && pWeaponType->Spawner && pWeaponType->Range > weaponRange)
+				weaponRange = pWeaponType->Range;
+		};
+
+	if (pTechnoType->IsGattling)
+	{
+		for (int i = 0; i < pTechnoType->WeaponCount; i++)
+		{
+			setWeaponRange(this->SpawnerRange, pTechnoType->Weapon[i].WeaponType);
+			setWeaponRange(this->EliteSpawnerRange, pTechnoType->EliteWeapon[i].WeaponType);
+		}
+	}
+	else
+	{
+		setWeaponRange(this->SpawnerRange, pTechnoType->Weapon[0].WeaponType);
+		setWeaponRange(this->SpawnerRange, pTechnoType->Weapon[1].WeaponType);
+		setWeaponRange(this->EliteSpawnerRange, pTechnoType->EliteWeapon[0].WeaponType);
+		setWeaponRange(this->EliteSpawnerRange, pTechnoType->EliteWeapon[1].WeaponType);
+	}
+
+	this->SpawnerRange += weaponRangeExtra;
+	this->EliteSpawnerRange += weaponRangeExtra;
 }
 
 //TODO: YRpp this with proper casting
@@ -334,10 +367,6 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 {
 	auto pThis = this->OwnerObject();
 	const char* pSection = pThis->ID;
-
-	if (!pINI->GetSection(pSection))
-		return;
-
 	INI_EX exINI(pINI);
 
 	this->HealthBar_Hide.Read(exINI, pSection, "HealthBar.Hide");
@@ -602,6 +631,8 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->Wake_Sinking.Read(exINI, pSection, "Wake.Sinking");
 	this->BunkerableAnyway.Read(exINI, pSection, "BunkerableAnyway");
 
+	this->DigitalDisplay_Health_FakeAtDisguise.Read(exINI, pSection, "DigitalDisplay.Health.FakeAtDisguise");
+
 	this->AttackMove_Aggressive.Read(exINI, pSection, "AttackMove.Aggressive");
 	this->AttackMove_UpdateTarget.Read(exINI, pSection, "AttackMove.UpdateTarget");
 
@@ -659,6 +690,8 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 	this->FallingDownDamage_Water.Read(exINI, pSection, "FallingDownDamage.Water");
 
 	this->FiringForceScatter.Read(exINI, pSection, "FiringForceScatter");
+
+	this->EngineerRepairAmount.Read(exINI, pSection, "EngineerRepairAmount");
 
 	this->ImmuneToTaunt.Read(exINI, pSection, "ImmuneToTaunt");
 
@@ -759,6 +792,9 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 		}
 	}
 
+	// Airstrike tint color
+	this->TintColorAirstrike = GeneralUtils::GetColorFromColorAdd(this->LaserTargetColor.Get(RulesClass::Instance->LaserTargetColor));
+
 	// Art tags
 	INI_EX exArtINI(CCINIClass::INI_Art);
 	auto pArtSection = pThis->ImageFile;
@@ -829,7 +865,7 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 		if (this->AlternateFLHs.size() < i)
 			this->AlternateFLHs[i] = alternateFLH;
 		else
-			this->AlternateFLHs.push_back(alternateFLH);
+			this->AlternateFLHs.emplace_back(alternateFLH);
 	}
 
 	// Parasitic types
@@ -934,7 +970,9 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->ShadowIndices)
 		.Process(this->ShadowIndex_Frame)
 		.Process(this->Spawner_LimitRange)
-		.Process(this->Spawner_ExtraLimitRange)
+		//.Process(this->Spawner_ExtraLimitRange)
+		.Process(this->SpawnerRange)
+		.Process(this->EliteSpawnerRange)
 		.Process(this->Spawner_DelayFrames)
 		.Process(this->Spawner_AttackImmediately)
 		.Process(this->Spawner_UseTurretFacing)
@@ -947,6 +985,7 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->InitialStrength)
 		.Process(this->ReloadInTransport)
 		.Process(this->ForbidParallelAIQueues)
+		.Process(this->TintColorAirstrike)
 		.Process(this->LaserTargetColor)
 		.Process(this->AirstrikeLineColor)
 		.Process(this->ShieldType)
@@ -1181,6 +1220,8 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->Wake_Grapple)
 		.Process(this->Wake_Sinking)
 
+		.Process(this->DigitalDisplay_Health_FakeAtDisguise)
+
 		.Process(this->AttackMove_Aggressive)
 		.Process(this->AttackMove_UpdateTarget)
 
@@ -1243,6 +1284,8 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->FireUp)
 		.Process(this->FireUp_ResetInRetarget)
 		//.Process(this->SecondaryFire)
+
+		.Process(this->EngineerRepairAmount)
 
 		.Process(this->ImmuneToTaunt)
 		;
@@ -1311,7 +1354,7 @@ DEFINE_HOOK(0x717094, TechnoTypeClass_Save_Suffix, 0x5)
 	return 0;
 }
 
-DEFINE_HOOK_AGAIN(0x716132, TechnoTypeClass_LoadFromINI, 0x5)
+//DEFINE_HOOK_AGAIN(0x716132, TechnoTypeClass_LoadFromINI, 0x5)// Section dont exist!
 DEFINE_HOOK(0x716123, TechnoTypeClass_LoadFromINI, 0x5)
 {
 	GET(TechnoTypeClass*, pItem, EBP);

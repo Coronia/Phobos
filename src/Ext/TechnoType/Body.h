@@ -48,6 +48,8 @@ public:
 		std::map<int, int> ShadowIndices;
 		Valueable<bool> Spawner_LimitRange;
 		Valueable<int> Spawner_ExtraLimitRange;
+		int SpawnerRange;
+		int EliteSpawnerRange;
 		Nullable<int> Spawner_DelayFrames;
 		Valueable<bool> Spawner_AttackImmediately;
 		Valueable<bool> Spawner_UseTurretFacing;
@@ -60,6 +62,8 @@ public:
 		Nullable<int> InitialStrength;
 		Valueable<bool> ReloadInTransport;
 		Valueable<bool> ForbidParallelAIQueues;
+
+		int TintColorAirstrike;
 		Nullable<int> LaserTargetColor;
 		Nullable<ColorStruct> AirstrikeLineColor;
 
@@ -351,6 +355,8 @@ public:
 		Valueable<bool> SuppressKillWeapons;
 		ValueableVector<WeaponTypeClass*> SuppressKillWeapons_Types;
 
+		Valueable<bool> DigitalDisplay_Health_FakeAtDisguise;
+
 		NullableVector<int> Overload_Count;
 		NullableVector<int> Overload_Damage;
 		NullableVector<int> Overload_Frames;
@@ -374,6 +380,8 @@ public:
 		Valueable<bool> FireUp_ResetInRetarget;
 		//Nullable<int> SecondaryFire;
 
+		Valueable<int> EngineerRepairAmount;
+
 		ExtData(TechnoTypeClass* OwnerObject) : Extension<TechnoTypeClass>(OwnerObject)
 			, HealthBar_Hide { false }
 			, UIDescription {}
@@ -394,6 +402,8 @@ public:
 			, ShadowIndex_Frame { 0 }
 			, Spawner_LimitRange { false }
 			, Spawner_ExtraLimitRange { 0 }
+			, SpawnerRange { 0 }
+			, EliteSpawnerRange { 0 }
 			, Spawner_DelayFrames {}
 			, Spawner_AttackImmediately { false }
 			, Spawner_UseTurretFacing { false }
@@ -406,6 +416,7 @@ public:
 			, InitialStrength {}
 			, ReloadInTransport { false }
 			, ForbidParallelAIQueues { false }
+			, TintColorAirstrike { 0 }
 			, LaserTargetColor {}
 			, AirstrikeLineColor {}
 			, ShieldType {}
@@ -634,6 +645,8 @@ public:
 			, Wake_Grapple { }
 			, Wake_Sinking { }
 
+			, DigitalDisplay_Health_FakeAtDisguise { true }
+
 			, AttackMove_Aggressive {}
 			, AttackMove_UpdateTarget {}
 
@@ -697,6 +710,8 @@ public:
 			, FireUp_ResetInRetarget { true }
 			//, SecondaryFire {}
 
+			, EngineerRepairAmount { 0 }
+
 			, ImmuneToTaunt { false }
 		{ }
 
@@ -712,6 +727,7 @@ public:
 		void LoadFromINIByWhatAmI(INI_EX& exArtINI, const char* pArtSection);
 
 		void ApplyTurretOffset(Matrix3D* mtx, double factor = 1.0);
+		void CalculateSpawnerRange();
 		bool IsSecondary(int nWeaponIndex);
 
 		int SelectForceWeapon(TechnoClass* pThis, AbstractClass* pTarget);

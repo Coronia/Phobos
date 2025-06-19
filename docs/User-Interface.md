@@ -35,19 +35,50 @@ IngameScore.LoseTheme= ; Soundtrack theme ID
 *Default configuration of digital display using example shapes from [Phobos supplementaries](https://github.com/Phobos-developers/PhobosSupplementaries).*
 
 - You can now configure various types of numerical counters to be displayed over Techno to represent its attributes, such as health points or shield points and can be turned on or off via a [new hotkey](#toggle-digital-display).
+  - `InfoIndex` defines the specific `InfoType`.
+    - In `InfoType=Spawns`,
+      - 0 - alive spawns,
+      - 1 - docked spawns,
+      - 2 - launching spawns.
+      <br><br>
+    - In `InfoType=Tiberium`,
+      - 0 - all,
+      - 1 - the first tiberium,
+      - 2 - the second tiberium,
+      <br>...
+    - In `InfoType=SpawnTimer`,
+      - 0 - the fastest spawnee,
+      - 1 - the first spawnee,
+      - 2 - the second spawnee,
+      <br>...
+    - In `InfoType=SuperWeapon`,
+      - 0 - the first SW of all,
+      - 1 - `[BuildingType] -> SuperWeapon`,
+      - 2 - `[BuildingType] -> SuperWeapon2`,
+      - 3 - the first SW in `[BuildingType] -> SuperWeapons`,
+      <br>...
+    - In `InfoType=FactoryProcess`,
+      - 0 - the first factory in production,
+      - 1 - primary factory,
+      - 2 - secondary factory.
+      <br><br>
   - `Anchor.Horizontal` and `Anchor.Vertical` set the anchor point from which the display is drawn (depending on `Align`) relative to unit's center/selection box. For buildings, `Anchor.Building` is used instead.
     - `Offset` and `Offset.ShieldDelta` (the latter applied when a shield is active) can be used to further modify the position.
   - By default, values are displayed in `current/maximum` format (i.e. `20/40`).
     - `HideMaxValue=yes` will make the counter show only the current value (i.e. `20`), default to whether the techno is infantry or not.
     - `Percentage=yes` changes the format to `percent%` (i.e. `50%`).
+    - `ValueAsTimer` controls whether the value will be displayed in the form of a timer (i.e. `0:30`, `5:00` or `1:00:00`).
   - `VisibleToHouses` and `VisibleToHouses.Observer` can limit visibility to specific players.
+    - `VisibleInSpecialState` controls whether this display type will show when the owner is in ironcurtain or is attacked by a temporal weapon.
   - The digits can be either a custom shape (.shp) or text drawn using the game font. This depends on whether `Shape` is set.
     - `Text.Color`, `Text.Color.ConditionYellow` and `Text.Color.ConditionRed` allow customization of the font color. `Text.Background=yes` will additionally draw a black rectangle background.
-    - When using shapes, a custom palette can be specified with `Palette`. `Shape.Spacing` controls pixel buffer between characters.
-    - Frames 0-9 will be used as digits when the owner's health bar is green, 10-19 when yellow, 20-29 when red. For `/` and `%` characters, frame numbers are 30-31, 32-33, 34-35, respectively.
+    - When using shapes, a custom palette can be specified with `Palette`. `Shape.Spacing` controls pixel buffer between characters. If `Shape.PercentageFrame` set to true, it will only draw one frame that corresponds to total frames by percentage.
+    - Frames 0-9 will be used as digits when the owner's health bar is green, 10-19 when yellow, 20-29 when red. For `/` and `%` (or `:` if set `ValueAsTimer` to true) characters, frame numbers are 30-31, 32-33, 34-35, respectively.
   - Default `Offset.ShieldDelta` for `InfoType=Shield` is `0,-10`, `0,0` for others.
   - Default `Shape.Spacing` for buildings is `4,-2`, `4,0` for others.
-  - `ValueScaleDivisor` can be used to adjust scale of displayed values. Both the current & maximum value will be divided by the integer number given, if higher than 1.
+  - `ValueScaleDivisor` can be used to adjust scale of displayed values. Both the current & maximum value will be divided by the integer number given, if higher than 1. Default to 1 (or 15 when set `ValueAsTimer` to true).
+
+  - `DigitalDisplay.Health.FakeAtDisguise`, if set to true on an InfantryType with Disguise, will use the disguised TechnoType's `Strength` value as the maximum value of health display. The current value will be displayed as the percentage of its current health multiplies the new maximum value.
 
 In `rulesmd.ini`:
 ```ini
@@ -55,49 +86,69 @@ In `rulesmd.ini`:
 0=SOMEDIGITALDISPLAYTYPE
 
 [AudioVisual]
-Buildings.DefaultDigitalDisplayTypes=   ; List of DigitalDisplayTypes
-Infantry.DefaultDigitalDisplayTypes=    ; List of DigitalDisplayTypes
-Vehicles.DefaultDigitalDisplayTypes=    ; List of DigitalDisplayTypes
-Aircraft.DefaultDigitalDisplayTypes=    ; List of DigitalDisplayTypes
+Buildings.DefaultDigitalDisplayTypes=          ; List of DigitalDisplayTypes
+Infantry.DefaultDigitalDisplayTypes=           ; List of DigitalDisplayTypes
+Vehicles.DefaultDigitalDisplayTypes=           ; List of DigitalDisplayTypes
+Aircraft.DefaultDigitalDisplayTypes=           ; List of DigitalDisplayTypes
 
-[SOMEDIGITALDISPLAYTYPE]                ; DigitalDisplayType
+[SOMEDIGITALDISPLAYTYPE]                       ; DigitalDisplayType
 ; Generic
-InfoType=Health                         ; Displayed value enumeration (health|shield|ammo|mindcontrol|spawns|passengers|tiberium|experience|occupants|gattlingstage)
-Offset=0,0                              ; integers - horizontal, vertical
-Offset.ShieldDelta=                     ; integers - horizontal, vertical
-Align=right                             ; Text alignment enumeration (left|right|center/centre)
-Anchor.Horizontal=right                 ; Horizontal position enumeration (left|center/centre|right)
-Anchor.Vertical=top                     ; Vertical position enumeration (top|center/centre|bottom)
-Anchor.Building=top                     ; Hexagon vertex enumeration (top|lefttop|leftbottom|bottom|rightbottom|righttop)
-Percentage=false                        ; boolean
-HideMaxValue=false                      ; boolean
-VisibleToHouses=owner                   ; Affected house enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
-VisibleToHouses.Observer=true           ; boolean
-ValueScaleDivisor=1                     ; integer
+InfoType=Health                                ; Displayed value enumeration (Health|Shield|Ammo|Mindcontrol|Spawns|Passengers|Tiberium|Experience|Occupants|GattlingStage|ROF|Reload|SpawnTimer|GattlingTimer|ProduceCash|PassengerKill|AutoDeath|SuperWeapon|IronCurtain|TemporalLife|FactoryProcess)
+InfoIndex=                                     ; integer
+Offset=0,0                                     ; integers - horizontal, vertical
+Offset.ShieldDelta=                            ; integers - horizontal, vertical
+Align=right                                    ; Text alignment enumeration (left|right|center/centre)
+Anchor.Horizontal=right                        ; Horizontal position enumeration (left|center/centre|right)
+Anchor.Vertical=top                            ; Vertical position enumeration (top|center/centre|bottom)
+Anchor.Building=top                            ; Hexagon vertex enumeration (top|lefttop|leftbottom|bottom|rightbottom|righttop)
+Percentage=false                               ; boolean
+HideMaxValue=false                             ; boolean
+VisibleToHouses=owner                          ; Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
+VisibleToHouses.Observer=true                  ; boolean
+VisibleInSpecialState=true                     ; boolean
+ValueScaleDivisor=                             ; integer
+ValueAsTimer=false                             ; boolean
 ; Text
-Text.Color=0,255,0                      ; integers - Red, Green, Blue
-Text.Color.ConditionYellow=255,255,0    ; integers - Red, Green, Blue
-Text.Color.ConditionRed=255,0,0         ; integers - Red, Green, Blue
-Text.Background=false                   ; boolean
+Text.Color=0,255,0                             ; integers - Red, Green, Blue
+Text.Color.ConditionYellow=255,255,0           ; integers - Red, Green, Blue
+Text.Color.ConditionRed=255,0,0                ; integers - Red, Green, Blue
+Text.Background=false                          ; boolean
 ; Shape
-Shape=                                  ; filename with .shp extension, if not present, game-drawn text will be used instead
-Palette=palette.pal                     ; filename with .pal extension
-Shape.Spacing=                          ; integers - horizontal, vertical spacing between digits
+Shape=                                         ; filename with .shp extension, if not present, game-drawn text will be used instead
+Palette=palette.pal                            ; filename with .pal extension
+Shape.Spacing=                                 ; integers - horizontal, vertical spacing between digits
+Shape.PercentageFrame=false                    ; boolean
 
-[SOMETECHNO]                            ; TechnoType
-DigitalDisplay.Disable=false            ; boolean
-DigitalDisplayTypes=                    ; List of DigitalDisplayTypes
+[SOMETECHNOTYPE]                               ; TechnoType
+DigitalDisplay.Disable=false                   ; boolean
+DigitalDisplayTypes=                           ; List of DigitalDisplayTypes
+DigitalDisplay.Health.FakeAtDisguise=true      ; boolean
 ```
 
 In `RA2MD.INI`:
 ```ini
 [Phobos]
-DigitalDisplay.Enable=false             ; boolean
+DigitalDisplay.Enable=false                    ; boolean
 ```
 
 ```{note}
 An example shape file for digits can be found on [Phobos supplementaries repo](https://github.com/Phobos-developers/PhobosSupplementaries).
 ```
+
+````{note}
+`Shape.PercentageFrame` effectively provides the ultimate solution for all static data display effects: it allows mapping the current value to a specific static frame index in a shape file sequence by calculating its proportional ratio to the total value, where the concrete image on this frame is entirely user-defined.
+
+```{hint}
+You can create a circular health bar for technos, where the different frames of this ring Shape file correspond to the state of the circular health bar at varying degrees of damage.
+
+![image](_static/images/ring-health-bar.gif)
+*Example of a ring-shaped health bar*
+
+The arrangement of static images on the plane is entirely up to you to draw freely, without being constrained by pre-established frameworks (e.g., the original rule for health bars was to start at a fixed coordinate, fetch a pip from a fixed frame of a fixed file at fixed intervals, and then arrange them horizontally), choosing from inherently limited options.
+```
+
+Of course, this is just the implementation method. To balance freedom with efficiency—that is, how to efficiently draw the patterns you need—you still need to independently explore a workflow that suits you.
+````
 
 ### Flashing Technos on selecting
 
