@@ -14,7 +14,6 @@ This page describes all ingame logics that are fixed or improved in Phobos witho
 - Fixed the bug when units are already dead but still in map (for sinking, crashing, dying animation, etc.), they could die again.
 - Fixed the bug when cloaked Desolator was unable to fire his deploy weapon.
 - Fixed the bug that temporaryed unit cannot be erased correctly and no longer raise an error.
-- Fixed `DebrisMaximums` (spawned debris type amounts cannot go beyond specified maximums anymore). Only applied when `DebrisMaximums` values amount is more than 1 for compatibility reasons.
 - Fixed building and defense tab hotkeys not enabling the placement mode after *Cannot build here.* triggered and the placement mode cancelled.
 - Fixed buildings with `UndeployInto` playing `EVA_NewRallypointEstablished` on undeploying.
 - Fixed buildings with `Naval=yes` ignoring `WaterBound=no` to be forced to place onto water.
@@ -215,7 +214,6 @@ This page describes all ingame logics that are fixed or improved in Phobos witho
 - Fixed an issue that teleport units board transport vehicles on the bridge will create an impassable invisible barrier, which may cause the game to freeze or even crash.
 - Fixed an issue that moving MCV with Teleport locomotion will cause reconnection error.
 - Fixed wrong shadow when a vehicle has hover locomotor and is being lifted by `IsLocomotor=yes` warhead.
-- Fixed the bug that a unit can overlap with `Teleport` units after it's been damaged by a fallen unit lifted by `IsLocomotor=yes` warheads.
 - Fixed an issue that game crashes (EIP:7FB178) when infantry are about to enter an occupiable building that has been removed and is not real dead.
 - Fixed an issue that game crashes when spawnee has been removed and is not real dead.
 - Separated the AirstrikeClass pointer between the attacker/aircraft and the target to avoid erroneous overwriting issues.
@@ -234,6 +232,10 @@ This page describes all ingame logics that are fixed or improved in Phobos witho
 - Fixed the bug that `DamageSelf` and `AllowDamageOnSelf` are ineffective on airforce.
 - Fixed the bug that damaged particle dont disappear after building has repaired by engineer.
 - Fixed the issue of incorrect position of `TrailerAnim` in `VoxelAnim`.
+- Fixed the bug that `OpenToppedWarpDistance` is calculated incorrectly for building target.
+- Fixed an issue that `MovementZone=Fly` harvesters can not be able to enter refinery buildings manually.
+- Fixed an issue that jumpjet harvester cannot automatically go mining when leaving the weapons factory.
+- Fixed an issue that jumpjet harvester will overlap when manually entering refinery buildings and cause game crashes.
 
 ## Fixes / interactions with other extensions
 
@@ -329,7 +331,7 @@ LandingDir=     ; Direction type (integers from 0-255). Accepts negative values 
 
 - `Weapon` can be set to a WeaponType, to create a projectile and immediately detonate it instead of simply dealing `Damage` by `Warhead`. This allows weapon effects to be applied.
 - `Damage.Delay` determines delay between two applications of `Damage`. Requires `Damage` to be set to 1.0 or above. Value of 0 disables the delay. Keep in mind that this is measured in animation frames, not game frames. Depending on `Rate`, animation may or may not advance animation frames on every game frame.
-- `Damage.DealtByInvoker`, if set to true, makes any `Damage` dealt to be considered as coming from the animation's invoker (f.ex, firer of the weapon if it is Warhead `AnimList/SplashList` animation, the destroyed vehicle if it is `DestroyAnim` animation or the object the animation is attached to). If invoker has died or does not exist, the house the invoker belonged to is still used to deal damage and apply Phobos-introduced Warhead effects. Does not affect which house the `Damage` dealt by `Warhead` is dealt by.
+- `Damage.DealtByInvoker`, if set to true, makes any `Damage` dealt to be considered as coming from the animation's invoker (f.ex, firer of the weapon if it is Warhead `AnimList/SplashList` animation, the destroyed vehicle if it is `DestroyAnim` animation or the object the animation is attached to). If invoker has died or does not exist, the house the invoker belonged to is still used to deal damage and apply Phobos-introduced Warhead effects etc. If not set, the animation's owner house, or failing that, owning house of object it is attached to or the building it belongs to is used to deal the damage.
   - `Damage.ApplyFirepowerMult` determines whether or not firepower modifiers from the animation's invoker are applied on the damage dealt from this animation, if exists.
 - `Damage.ApplyOncePerLoop`, if set to true, makes `Damage` be dealt only once per animation loop (on single loop animations, only once, period) instead of on every frame or intervals defined by `Damage.Delay`. The frame on which it is dealt is determined by `Damage.Delay`, defaulting to after the first animation frame.
 
@@ -580,10 +582,10 @@ Grinding.Weapon.RequiredCredits=0  ; integer
 
 In `rulesmd.ini`:
 ```ini
-[SOMEWARHEAD]
+[SOMEWARHEAD]             ; WarheadType
 ElectricAssaultLevel=1    ; integer
 
-[SOMEBUILDING]
+[SOMEBUILDING]            ; BuildingType
 Overpower.KeepOnline=2    ; integer, negative values mean that cannot keep online
 Overpower.ChargeWeapon=1  ; integer, negative values mean that weapons can never be switched
 ```
@@ -1118,6 +1120,27 @@ DamagedSpeed=0.75        ; floating point value, multiplier
 DamagedSpeed=            ; floating point value, multiplier
 ```
 
+### Debris voxel animations limitation
+
+- Now, the original `DebrisMaximums` can be used in conjunction with new `DebrisMinimums` to limit the quantity of `DebrisTypes` when `DebrisTypes.Limit` is enabled.
+  - The default value of `DebrisTypes.Limit` is whether the number of `DebrisMaximums` is greater than (not equal to) 1 (for compatibility reasons).
+
+In `rulesmd.ini`:
+```ini
+[SOMETECHNO]        ; TechnoType
+DebrisTypes.Limit=  ; boolean
+DebrisMaximums=     ; List of integers
+DebrisMinimums=     ; List of integers
+```
+
+```{hint}
+How to generate `DebrisTypes` in the game:
+1. Generate the total number of debris through `MaxDebris` and `MinDebris` first.
+2. Traverse `DebrisTypes` and limit the quantity range through `DebrisMaximums` and `DebrisMinimums`.
+3. When the number of generated debris will exceeds the total number, limit the quantity and end the traversal.
+4. When the number of debris generated after a single traversal is not enough to exceed the total number, it will end if `DebrisTypes.Limit` is enabled, otherwise the traversal will restart like vanilla game do.
+```
+
 ### Exploding object customizations
 
 - By default `Explodes=true` TechnoTypes have all of their passengers killed when they are destroyed. This behaviour can now be disabled by setting `Explodes.KillPassengers=false`.
@@ -1169,7 +1192,7 @@ IronCurtain.KillOrganicsWarhead=   ; WarheadType
 ForceShield.EffectOnOrganics=kill  ; Iron Curtain effect Enumeration (kill | invulnerable | ignore)
 ForceShield.KillOrganicsWarhead=   ; WarheadType
 
-[SOMETECHNO]                       ; InfantryType or Organic=true TechnoType
+[SOMETECHNO]                       ; TechnoType with Organic=true
 IronCurtain.Effect=                ; IronCurtain effect Enumeration (kill | invulnerable | ignore)
 IronCurtain.KillWarhead=           ; WarheadType
 ForceShield.Effect=                ; IronCurtain effect Enumeration (kill | invulnerable | ignore)
@@ -1612,7 +1635,7 @@ In `rulesmd.ini`:
 [General]
 HarvesterScanAfterUnload=false     ; boolean
 
-[SOMEVEHICLE]
+[SOMEVEHICLE]                      ; VehicleType
 HarvesterScanAfterUnload=          ; boolean, default to [General] -> HarvesterScanAfterUnload
 ```
 
@@ -1713,7 +1736,7 @@ In `rulesmd.ini`:
 [General]
 HarvesterDumpAmount=0.0               ; float point value
 
-[SOMEVEHICLE]
+[SOMEVEHICLE]                         ; VehicleType
 HarvesterDumpAmount=                  ; float point value
 ```
 
@@ -1856,6 +1879,19 @@ In `rulesmd.ini`:
 [SOMEWARHEAD]              ; WarheadType
 DebrisAnims=               ; List of AnimationTypes
 Debris.Conventional=false  ; boolean
+```
+
+### Custom debris voxel animations limitation
+
+- Now, the original `DebrisMaximums` can be used in conjunction with new `DebrisMinimums` to limit the quantity of `DebrisTypes` when `DebrisTypes.Limit` is enabled.
+  - The default value of `DebrisTypes.Limit` is whether the number of `DebrisMaximums` is greater than (not equal to) 1 (for compatibility reasons).
+
+In `rulesmd.ini`:
+```ini
+[SOMEWARHEAD]       ; WarheadType
+DebrisTypes.Limit=  ; boolean
+DebrisMaximums=     ; List of integers
+DebrisMinimums=     ; List of integers
 ```
 
 ### Customizable rocker amplitude
