@@ -4,6 +4,7 @@
 #include <AnimClass.h>
 #include <BuildingClass.h>
 
+#include <Ext/TEvent/Body.h>
 #include <Ext/Anim/Body.h>
 #include <Ext/Techno/Body.h>
 #include <Ext/WeaponType/Body.h>
@@ -39,6 +40,7 @@ AttachEffectClass::AttachEffectClass(AttachEffectTypeClass* pType, TechnoClass* 
 	, IsOnline { true }
 	, IsCloaked { false }
 	, LastActiveStat { true }
+	, LaserTrail { nullptr }
 	, NeedsDurationRefresh { false }
 	, HasCumulativeAnim { false }
 	, ShouldBeDiscarded { false }
@@ -49,15 +51,28 @@ AttachEffectClass::AttachEffectClass(AttachEffectTypeClass* pType, TechnoClass* 
 	this->HasInitialized = false;
 
 	if (this->InitialDelay <= 0)
+	{
 		this->HasInitialized = true;
+		pType->HandleEvent(pTechno);
+	}
 
 	this->Duration = this->DurationOverride != 0 ? this->DurationOverride : pType->Duration;
 
 	if (pType->Duration_ApplyFirepowerMult && this->Duration > 0 && pInvoker)
 		this->Duration = Math::max(static_cast<int>(this->Duration * pInvoker->FirepowerMultiplier * TechnoExt::ExtMap.Find(pInvoker)->AE.FirepowerMultiplier), 0);
 
+	const auto pTechnoExt = TechnoExt::ExtMap.Find(pTechno);
+
 	if (pType->Duration_ApplyArmorMultOnTarget && this->Duration > 0) // count its own ArmorMultiplier as well
-		this->Duration = Math::max(static_cast<int>(this->Duration / pTechno->ArmorMultiplier / TechnoExt::ExtMap.Find(pTechno)->AE.ArmorMultiplier / pType->ArmorMultiplier), 0);
+		this->Duration = Math::max(static_cast<int>(this->Duration / pTechno->ArmorMultiplier / pTechnoExt->AE.ArmorMultiplier / pType->ArmorMultiplier), 0);
+
+	const int laserTrailIdx = pType->LaserTrail_Type;
+
+	if (laserTrailIdx != -1)
+	{
+		this->LaserTrail = pTechnoExt->LaserTrails.emplace_back(std::make_unique<LaserTrailClass>(LaserTrailTypeClass::Array[laserTrailIdx].get(), pTechno->Owner)).get();
+		this->LaserTrail->Intrinsic = false;
+	}
 
 	if (pInvoker)
 		TechnoExt::ExtMap.Find(pInvoker)->AttachedEffectInvokerCount++;
@@ -67,6 +82,17 @@ AttachEffectClass::AttachEffectClass(AttachEffectTypeClass* pType, TechnoClass* 
 
 AttachEffectClass::~AttachEffectClass()
 {
+	if (const auto& pTrail = this->LaserTrail)
+	{
+		const auto pTechnoExt = TechnoExt::ExtMap.Find(this->Techno);
+		const auto it = std::find_if(pTechnoExt->LaserTrails.cbegin(), pTechnoExt->LaserTrails.cend(), [pTrail](std::unique_ptr<LaserTrailClass> const& item) { return item.get() == pTrail; });
+
+		if (it != pTechnoExt->LaserTrails.cend())
+			pTechnoExt->LaserTrails.erase(it);
+
+		this->LaserTrail = nullptr;
+	}
+
 	auto it = std::find(AttachEffectClass::Array.begin(), AttachEffectClass::Array.end(), this);
 
 	if (it != AttachEffectClass::Array.end())
@@ -125,7 +151,9 @@ void AttachEffectClass::PointerGotInvalid(void* ptr, bool removed)
 
 void AttachEffectClass::AI()
 {
-	if (!this->Techno || this->Techno->InLimbo || this->Techno->IsImmobilized || this->Techno->Transporter)
+	auto const pTechno = this->Techno;
+
+	if (!pTechno || pTechno->InLimbo || pTechno->IsImmobilized || pTechno->Transporter)
 		return;
 
 	if (this->InitialDelay > 0)
@@ -134,23 +162,27 @@ void AttachEffectClass::AI()
 		return;
 	}
 
+	auto const pType = this->Type;
+
 	if (!this->HasInitialized && this->InitialDelay == 0)
 	{
 		this->HasInitialized = true;
 
-		if (this->Type->ROFMultiplier > 0.0 && this->Type->ROFMultiplier_ApplyOnCurrentTimer)
+		if (pType->ROFMultiplier > 0.0 && pType->ROFMultiplier_ApplyOnCurrentTimer)
 		{
-			double ROFModifier = this->Type->ROFMultiplier;
-			auto const pTechno = this->Techno;
-			auto const pExt = TechnoExt::ExtMap.Find(this->Techno);
+			const double ROFModifier = pType->ROFMultiplier;
+			auto const pExt = TechnoExt::ExtMap.Find(pTechno);
 			pTechno->RearmTimer.Start(static_cast<int>(pTechno->RearmTimer.GetTimeLeft() * ROFModifier));
 
 			if (!pExt->ChargeTurretTimer.HasStarted() && pExt->LastRearmWasFullDelay)
 				pTechno->ChargeTurretDelay = static_cast<int>(pTechno->ChargeTurretDelay * ROFModifier);
 		}
 
-		if (this->Type->HasTint())
-			this->Techno->MarkForRedraw();
+		if (pType->HasTint())
+			pTechno->MarkForRedraw();
+
+		this->NeedsRecalculateStat = true;
+		pType->HandleEvent(pTechno);
 	}
 
 	if (this->CurrentDelay > 0)
@@ -171,7 +203,9 @@ void AttachEffectClass::AI()
 		if (!this->ShouldBeDiscardedNow())
 		{
 			this->RefreshDuration();
+			this->NeedsRecalculateStat = true;
 			this->NeedsDurationRefresh = false;
+			pType->HandleEvent(pTechno);
 		}
 
 		return;
@@ -182,17 +216,26 @@ void AttachEffectClass::AI()
 
 	if (this->Duration == 0)
 	{
-		if (!this->IsSelfOwned() || this->Delay < 0)
+		const int delay = this->Delay;
+
+		if (!this->IsSelfOwned() || delay < 0)
 			return;
 
-		this->CurrentDelay = this->Delay;
+		this->CurrentDelay = delay;
 
-		if (this->Delay > 0)
+		if (delay > 0)
+		{
 			this->KillAnim();
+			this->NeedsRecalculateStat = true;
+		}
 		else if (!this->ShouldBeDiscardedNow())
+		{
 			this->RefreshDuration();
+		}
 		else
+		{
 			this->NeedsDurationRefresh = true;
+		}
 
 		return;
 	}
@@ -705,6 +748,7 @@ AttachEffectClass* AttachEffectClass::CreateAndAttach(AttachEffectTypeClass* pTy
 				best->RefreshDuration(attachParams.DurationOverride);
 			}
 
+			pType->HandleEvent(pTarget);
 			return nullptr;
 		}
 		else if (attachParams.CumulativeRefreshAll && attachParams.CumulativeRefreshAll_OnAttach)
@@ -719,6 +763,7 @@ AttachEffectClass* AttachEffectClass::CreateAndAttach(AttachEffectTypeClass* pTy
 	if (!pType->Cumulative && currentTypeCount > 0 && match)
 	{
 		match->RefreshDuration(attachParams.DurationOverride);
+		pType->HandleEvent(pTarget);
 	}
 	else
 	{
@@ -862,7 +907,7 @@ int AttachEffectClass::RemoveAllOfType(AttachEffectTypeClass* pType, TechnoClass
 					{
 						if (auto const pInvoker = attachEffect->Invoker)
 							expireWeapons.push_back(std::make_pair(pType->ExpireWeapon, pInvoker));
-					}			
+					}
 					else
 					{
 						expireWeapons.push_back(std::make_pair(pType->ExpireWeapon, pTarget));
@@ -995,6 +1040,7 @@ bool AttachEffectClass::Serialize(T& Stm)
 		.Process(this->HasCumulativeAnim)
 		.Process(this->ShouldBeDiscarded)
 		.Process(this->LastActiveStat)
+		.Process(this->LaserTrail)
 		.Process(this->NeedsRecalculateStat)
 		.Success();
 }

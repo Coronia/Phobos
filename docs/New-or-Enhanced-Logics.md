@@ -142,6 +142,7 @@ ReflectDamage.Override=                            ; integer
 ReflectDamage.UseInvokerAsOwner=false              ; boolean
 DisableWeapons=false                               ; boolean
 Unkillable=false                                   ; boolean
+LaserTrail.Type=                                   ; lasertrail type
 Groups=                                            ; comma-separated list of strings (group IDs)
 
 [SOMETECHNO]                                       ; TechnoType
@@ -234,6 +235,7 @@ Due to performance concerns, unless any radiation type has `RadApplicationDelay.
 
 - Technos, Projectiles, and VoxelAnims can now have colorful trails of different transparency, thickness and color, which are drawn via laser drawing code.
 - Technos, Projectiles, and VoxelAnims can have multiple laser trails. For technos each trail can have custom laser trail type and FLH offset relative to turret and body.
+- LaserTrail can also be drawn as EBolt or RadBeam.
 
 In `artmd.ini`:
 ```ini
@@ -241,15 +243,28 @@ In `artmd.ini`:
 0=SOMETRAIL
 
 [SOMETRAIL]                      ; LaserTrailType name
-IsHouseColor=false               ; boolean
-Color=255,0,0                    ; integer - R,G,B
-FadeDuration=64                  ; integer
-Thickness=4                      ; integer
+DrawType=laser                   ; laser trail type (laser | ebolt | radbeam)
+FadeDuration=                    ; integer, default to 64 for laser, 17 for ebolt, 15 for radbeam
 SegmentLength=128                ; integer, minimal length of each trail segment
 IgnoreVertical=false             ; boolean, whether the trail won't be drawn on vertical movement
-IsIntense=false                  ; boolean, whether the laser is "supported" (AKA prism forwarding)
 CloakVisible=false               ; boolean, whether the laser is visible when the attached unit is cloaked
 CloakVisible.DetectedOnly=false  ; boolean, whether CloakVisible=true laser is visible only to those who can detect the attached unit
+; laser
+Color=255,0,0                    ; integer - R,G,B
+IsHouseColor=false               ; boolean
+Thickness=4                      ; integer
+IsIntense=false                  ; boolean, whether the laser is "supported" (AKA prism forwarding)
+; ebolt
+IsAlternateColor=false           ; boolean
+Bolt.Color1=                     ; integer - R,G,B
+Bolt.Disable1=false              ; boolean
+Bolt.Color2=                     ; integer - R,G,B
+Bolt.Disable2=false              ; boolean
+Bolt.Color3=                     ; integer - R,G,B
+Bolt.Disable3=false              ; boolean
+; radbeam
+Beam.Color=                      ; integer - R,G,B
+Beam.Amplitude=40.0              ; floating point value
 
 [SOMEPROJECTILE]                 ; Projectile Image
 LaserTrail.Types=SOMETRAIL       ; List of LaserTrailTypes
@@ -263,8 +278,8 @@ LaserTrailN.IsOnTurret=false     ; boolean, whether the trail origin is turret
 
 In `rulesmd.ini`:
 ```ini
-[SOMEVOXELANIM]             ; VoxelAnim
-LaserTrail.Types=SOMETRAIL  ; List of LaserTrailTypes
+[SOMEVOXELANIM]                  ; VoxelAnim
+LaserTrail.Types=SOMETRAIL       ; List of LaserTrailTypes
 ```
 
 ```{warning}
@@ -587,10 +602,6 @@ EngineerRepairAmount=0             ; integer
 ![image](_static/images/powersup.owner-01.png)
 *Upgrading own and allied Power Plants in [CnC: Final War](https://www.moddb.com/mods/cncfinalwar)*
 
-```{note}
-Due to technical limitations, with Ares, upgrades placed through `PowersUp.Buildings` instead of `PowersUpBuilding` (note that internally `PowersUpBuilding` is set to first entry of `PowersUp.Buildings` if former is not set but latter is) **DO NOT** satisfy prerequisites. Suggested workaround is to use the upgrades to provide Superweapons that spawn in buildings via [LimboDelivery](#limbodelivery) logic to function as prerequisites, which are destroyed by another SW that becomes available if parent building is gone and so on.
-```
-
 - Building upgrades now can be placed on own buildings, on allied buildings and/or on enemy buildings. These three owners can be specified by `PowersUp.Owner`. When upgrade is placed on building, it automatically changes it's owner to match the building's owner.
 - One upgrade can now be applied to multiple different types of buildings specified by `PowersUp.Buildings`.
   - Ares-introduced build limit for building upgrades works with this feature.
@@ -600,6 +611,10 @@ In `rulesmd.ini`:
 [SOMEBUILDING]      ; BuildingType, as an upgrade
 PowersUp.Owner=Self ; List of Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
 PowersUp.Buildings= ; List of BuildingTypes
+```
+
+```{note}
+Due to technical limitations, with Ares, upgrades placed through `PowersUp.Buildings` instead of `PowersUpBuilding` (note that internally `PowersUpBuilding` is set to first entry of `PowersUp.Buildings` if former is not set but latter is) **DO NOT** satisfy prerequisites. Suggested workaround is to use the upgrades to provide Superweapons that spawn in buildings via [LimboDelivery](#limbodelivery) logic to function as prerequisites, which are destroyed by another SW that becomes available if parent building is gone and so on.
 ```
 
 ### Power plant enhancer
@@ -651,8 +666,7 @@ DeployedSecondaryFireFLH=  ; integer - Forward,Lateral,Height
 In `rulesmd.ini`:
 
 ```ini
-[SOMEINFANTRY]        ; InfantryType
-Slaved=yes
+[SOMEINFANTRY]        ; InfantryType, with Slaved=yes
 SlavesFreeSound=      ; Sound entry, default to [AudioVisual] -> SlavesFreeSound
 ```
 
@@ -688,8 +702,7 @@ NotHuman.RandomDeathSequence=yes  ; boolean
 
 In `rulesmd.ini`:
 ```ini
-[SOMEINFANTRY]                       ; InfantryType
-Slaved=yes
+[SOMEINFANTRY]                       ; InfantryType, with Slaved=yes
 Slaved.OwnerWhenMasterKilled=killer  ; enumeration (suicide | master | killer | neutral)
 ```
 
@@ -704,6 +717,22 @@ OnlyUseLandSequences=false  ; boolean
 ```
 
 ## Projectiles
+
+### Parabombs
+
+- Restored feature from Red Alert 1 (also partially implemented in Ares but undocumented, if used together Phobos' version takes priority) that allows projectiles to be parachuted down to ground if fired by an aerial unit.
+  - Setting `Parachuted` to true enables this behaviour. Note that using any other projectile logics like `ROT` > 0 or `Vertical=true` together with this feature is unnecessary and can cause unwanted effects.
+  - Falling speed can be customized by setting `Parachuted.FallRate` and is capped to `Parachuted.MaxFallRate`.
+  - `BombParachute` can be used to customize the parachute animation used. The animation is drawn in unit palette using team color of the firing house if available.
+
+In `rulesmd.ini`:
+```ini
+[SOMEPROJECTILE]         ; Projectile
+Parachuted=false         ; boolean
+Parachuted.FallRate=1    ; integer
+Parachuted.MaxFallRate=  ; integer, default to [General] -> ParachuteMaxFallRate
+BombParachute=           ; AnimationType, default to [General] -> BombParachute
+```
 
 ### Projectile interception logic
 
@@ -1099,6 +1128,35 @@ LimboKill.IDs=                  ; List of numeric IDs.
 Remember that Limbo Delivered buildings don't exist physically! This means they should never have enabled machanics that require interaction with the game world (i.e. factories, cloning vats, service depots, helipads). They also **should have either `KeepAlive=no` set or be killable with LimboKill** - otherwise the game might never end.
 ```
 
+### Linked superweapons
+
+- Superweapons can now set a list of linked superweapons with `SW.Link`, which will be granted or set timers when the original superweapon is launched.
+- `SW.Link.Grant` allow the linked superweapons to be added 1-time to the firer like the nuke crate if it's not presented.
+- `SW.Link.Ready` specifies if superweapons timers should be set to readiness.
+- `SW.Link.Reset` specifies if superweapons timers should be reset. Takes precedence over `SW.Link.Ready`.
+  - For a granted superweapon, the other will be:
+    1. Check `SW.Link.Reset` to see if it needs to be reset.
+    2. If false, check `SW.Link.Ready` to see if it needs to be set to readiness.
+    3. If false, whether it'll be ready or not is decided by the granted superweapon's `SW.InitialReady`.
+- `Message.LinkedSWAcquired` will be displayed to the firer when at least 1 linked superweapon is acquired or has timer set.
+- `EVA.LinkedSWAcquired` will be played to the firer when at least 1 linked superweapon is acquired or has timer set.
+- These superweapons can be made random with these optional tags. The game will randomly choose only a single superweapon from the list for each roll chance provided.
+  - `SW.Link.RollChances` lists chances of each "dice roll" happening. Valid values range from 0% (never happens) to 100% (always happens). Defaults to a single sure roll.
+  - `SW.Link.RandomWeightsN` lists the weights for each "dice roll" that increase the probability of picking a specific superweapon. Valid values are 0 (don't pick) and above (the higher value, the bigger the likelyhood). `RandomWeights` are a valid alias for `RandomWeights0`. If a roll attempt doesn't have weights specified, the last weights will be used.
+
+In `rulesmd.ini`:
+```ini
+[SOMESW]                     ; SuperWeaponType
+SW.Link=                     ; List of SuperWeaponTypes
+SW.Link.Grant=false          ; boolean
+SW.Link.Ready=               ; boolean, default to SW.InitialReady for granted superweapons, false otherwise
+SW.Link.Reset=false          ; boolean
+SW.Link.RollChances=         ; List of percentages.
+SW.Link.RandomWeightsN=      ; List of integers.
+Message.LinkedSWAcquired=    ; CSF entry key
+EVA.LinkedSWAcquired=        ; EVA entry
+```
+
 ### Next
 
 ![image](_static/images/swnext.gif)
@@ -1108,6 +1166,9 @@ Remember that Limbo Delivered buildings don't exist physically! This means they 
   - `SW.Next.RealLaunch` controls whether the owner who fired the initial superweapon must own all listed superweapons and sufficient funds to support `Money.Amout`. Otherwise they will be launched forcibly.
   - `SW.Next.IgnoreInhibitors` ignores `SW.Inhibitors`/`SW.AnyInhibitor` of each superweapon, otherwise only non-inhibited superweapons are launched.
   - `SW.Next.IgnoreDesignators` ignores `SW.Designators` / `SW.AnyDesignator` respectively.
+- These superweapons can be made random with these optional tags. The game will randomly choose only a single superweapon from the list for each roll chance provided.
+  - `SW.Next.RollChances` lists chances of each "dice roll" happening. Valid values range from 0% (never happens) to 100% (always happens). Defaults to a single sure roll.
+  - `SW.Next.RandomWeightsN` lists the weights for each "dice roll" that increase the probability of picking a specific superweapon. Valid values are 0 (don't pick) and above (the higher value, the bigger the likelyhood). `RandomWeights` are a valid alias for `RandomWeights0`. If a roll attempt doesn't have weights specified, the last weights will be used.
 
 In `rulesmd.ini`:
 ```ini
@@ -1155,6 +1216,56 @@ AttackMove.UpdateTarget=false  ; boolean
 [SOMETECHNO]                   ; TechnoType
 AttackMove.Aggressive=         ; boolean, default to [General] -> AttackMove.Aggressive
 AttackMove.UpdateTarget=       ; boolean, default to [General] -> AttackMove.UpdateTarget
+```
+
+### Attack move - behavior when target acquired
+
+- Now you can make attack-moving units stop moving when they spot an enemy using `AttackMove.StopWhenTargetAcquired`. This is more like the attack move behavior in Starcraft and Warcraft.
+  - This feature is used to prevent units from charging forward and taking more damage during an attack move command.
+- You can also make them keep chasing on the spotted target using `AttackMove.PursuitTarget`.
+  - This feature should be useful for close range units like ZEP.
+
+
+In `rulesmd.ini`:
+```ini
+[General]
+AttackMove.StopWhenTargetAcquired=         ; boolean
+
+[SOMETECHNO]                               ; TechnoType
+AttackMove.StopWhenTargetAcquired=         ; boolean, default to [General] -> AttackMove.StopWhenTargetAcquired if set, inverse of OpportunityFire otherwise.
+AttackMove.PursuitTarget=                  ; boolean
+```
+
+```{note}
+1. Many units would have stopped when they found an enemy during an attack move command already. This behavior is independent from `AttackMove.StopWhenTargetAcquired`.
+2. Some units (f.ex. jumpjets) will not fire correctly under the vanilla attack move command. The exact reason is not clear, but this feature can fix this problem.
+3. Jumpjets with `AttackMove.StopWhenTargetAcquired=true` will stop immediatly and not scatter to a cell. This is designed for practical reason.
+```
+
+### Attack move - follow
+
+- Now you can have some units following surrounding units when executing an attack move command. The follow behavior is equivalent to the behavior of follow command (`[Ctrl]+[Alt]`).
+  - Use `AttackMove.Follow.IncludeAir` to determine whether the follower will follow an air unit.
+  - Mind control units with `AttackMove.Follow.IfMindControlIsFull=true` set will follow if they reach the capacity.
+- This feature should be useful for supportive units such as medics and repairers.
+
+In `rulesmd.ini`:
+```ini
+[SOMETECHNO]                                     ; TechnoType
+AttackMove.Follow=false                          ; boolean
+AttackMove.Follow.IncludeAir=false               ; boolean
+AttackMove.Follow.IfMindControlIsFull=false      ; boolean
+```
+
+### Attack move - without weapon
+
+- In vanilla, attack move command is not allowed to be given to units without weapons. Now you can disable this hardcoded behavior using `AttackMove.IgnoreWeaponCheck=true`.
+  - Unarmed units cannot actually execute attack move commands. This feature is to prevent the attack move pointer from being disabled when you select unarmed units and other units at the same time.
+
+In `rulesmd.ini`:
+```ini
+[General]
+AttackMove.IgnoreWeaponCheck=false    ; boolean
 ```
 
 ### Aircraft spawner customizations
@@ -1344,14 +1455,18 @@ Note that all spawnees in a queue should have `MissileSpawn` set to the same val
 ### Customize EVA voice and `SellSound` when selling units
 
 - When a building or a unit is sold, a sell sound as well as an EVA is played to the owner. These configurations have been deglobalized.
-  - `EVA.Sold` is used to customize the EVA voice when selling, default to `EVA_StructureSold` for buildings and `EVA_UnitSold` for vehicles.
-  - `SellSound` is used to customize the report sound when selling, default to `[AudioVisual] -> SellSound`. Note that vanilla game played vehicles' `SellSound` globally. This has been changed in consistency with buildings' `SellSound`.
+  - `EVA.Sold` is used to customize the EVA voice when selling.
+  - `SellSound` is used to customize the report sound when selling.
 
 In `rulesmd.ini`:
 ```ini
 [SOMETECHNO]    ; BuildingType or VehicleType
-EVA.Sold=       ; EVA entry
-SellSound=      ; Sound entry
+EVA.Sold=       ; EVA entry, default to EVA_StructureSold for buildings and EVA_UnitSold for vehicles
+SellSound=      ; Sound entry, default to [AudioVisual] -> SellSound
+```
+
+```{note}
+Vanilla game played vehicles' `SellSound` globally. This has been changed in consistency with buildings' `SellSound`.
 ```
 
 ### Disabling fallback to (Elite)Secondary weapon
@@ -1424,7 +1539,7 @@ FLHKEY.BurstN=  ; integer - Forward,Lateral,Height. FLHKey refers to weapon-spec
 *Enemy behavior against EMP targets with `ForceWeapon.UnderEMP` in [C&C: Reloaded](https://www.moddb.com/mods/cncreloaded)*
 
 - Can be used to override normal weapon selection logic to force specific weapons to use against certain targets. If multiple are set and target satisfies the conditions, the first one in listed order satisfied takes effect.
-  - `ForceWeapon.Naval.Decloaked` forces specified weapon to be used against uncloaked naval targets. Useful if your naval unit has one weapon only for underwater and another weapon for surface targets.
+  - `ForceWeapon.Naval.Decloaked` forces specified weapon to be used against uncloaked `Naval=yes` targets. Useful if your naval unit has one weapon only for underwater and another weapon for surface targets.
   - `ForceWeapon.Cloaked` forces specified weapon to be used against any cloaked targets.
   - `ForceWeapon.Disguised` forces specified weapon to be used against any disguised targets.
   - `ForceWeapon.UnderEMP` forces specified weapon to be used if the target is under EMP effect.
@@ -1432,21 +1547,35 @@ FLHKEY.BurstN=  ; integer - Forward,Lateral,Height. FLHKey refers to weapon-spec
     - `ForceAAWeapon.InRange` does the same thing but only for air target. Taking priority to `ForceWeapon.InRange`, which means that it can only be applied to ground target when they're both set.
     - `Force(AA)Weapon.InRange.Overrides` overrides the range when decides which weapon to use. Value from position matching the position from `Force(AA)Weapon.InRange` is used if found, or the weapon's own `Range` if not found or set to a value below 0.
     - If `Force(AA)Weapon.InRange.ApplyRangeModifiers` is set to true, any applicable weapon range modifiers from the firer are applied to the decision range.
+  - A series of tags can force specified weapons based on the target's type.
+    - `ForceWeapon.Naval.Units` forces specified weapon to be used against `Naval=yes` units. Taking priority to `ForceWeapon.Units`.
+    - If `ForceWeapon.Defenses` is enabled, it'll be used if the target is a building with `BuildCat=Combat`. Otherwise it'll follow `ForceWeapon.Buildings`, if enabled.
+    - `ForceWeapon.Infantry/Units/Aircraft` can be applied to both ground and air target if `ForceAAWeapon.Infantry/Units/Aircraft` is not set.
+    - `ForceAAWeapon.Infantry/Units/Aircraft` do the same things but only for air target. Taking priority to `ForceWeapon.Infantry/Units/Naval.Units/Aircraft`, which means that they can only be applied to ground target when they're both set.
 
 In `rulesmd.ini`:
 ```ini
 [SOMETECHNO]                                    ; TechnoType
-ForceWeapon.Naval.Decloaked=-1                  ; integer. 0 for primary weapon, 1 for secondary weapon, -1 to disable
-ForceWeapon.Cloaked=-1                          ; integer. 0 for primary weapon, 1 for secondary weapon, -1 to disable
-ForceWeapon.Disguised=-1                        ; integer. 0 for primary weapon, 1 for secondary weapon, -1 to disable
-ForceWeapon.UnderEMP=-1                         ; integer. 0 for primary weapon, 1 for secondary weapon, -1 to disable
-ForceWeapon.InRange=                            ; List of integers. 0 for primary weapon, 1 for secondary weapon, -1 to disable
+ForceWeapon.Naval.Decloaked=-1                  ; integer, -1 to disable
+ForceWeapon.Cloaked=-1                          ; integer, -1 to disable
+ForceWeapon.Disguised=-1                        ; integer, -1 to disable
+ForceWeapon.UnderEMP=-1                         ; integer, -1 to disable
+ForceWeapon.InRange=                            ; List of integers
 ForceWeapon.InRange.Overrides=                  ; List of floating-point values
 ForceWeapon.InRange.ApplyRangeModifiers=false   ; boolean
 ForceWeapon.InRange.TechnoOnly=true             ; boolean
-ForceAAWeapon.InRange=                          ; List of integers. 0 for primary weapon, 1 for secondary weapon, -1 to disable
+ForceAAWeapon.InRange=                          ; List of integers
 ForceAAWeapon.InRange.Overrides=                ; List of floating-point values
 ForceAAWeapon.InRange.ApplyRangeModifiers=false ; boolean
+ForceWeapon.Buildings=-1                        ; integer, -1 to disable
+ForceWeapon.Defenses=-1                         ; integer, -1 to disable
+ForceWeapon.Infantry=-1                         ; integer, -1 to disable
+ForceWeapon.Naval.Units=-1                      ; integer, -1 to disable
+ForceWeapon.Units=-1                            ; integer, -1 to disable
+ForceWeapon.Aircraft=-1                         ; integer, -1 to disable
+ForceAAWeapon.Infantry=-1                       ; integer, -1 to disable
+ForceAAWeapon.Units=-1                          ; integer, -1 to disable
+ForceAAWeapon.Aircraft=-1                       ; integer, -1 to disable
 ```
 
 ```{note}
@@ -1497,14 +1626,8 @@ Both `InitialStrength` and `InitialStrength.Cloning` never surpass the type's `S
   - `kill`: The object will be destroyed normally.
   - `vanish`: The object will be directly removed from the game peacefully instead of actually getting killed.
   - `sell`: If the object is a **building** with buildup, it will be sold instead of destroyed.
-
-If this option is not set, the self-destruction logic will not be enabled. `AutoDeath.VanishAnimation` can be set to animation to play at object's location if `vanish` behaviour is chosen.
-
-```{note}
-Please notice that if the object is a unit which carries passengers, they will not be released even with the `kill` option **if you are not using Ares 3.0+**.
-```
-
-This logic also supports buildings delivered by [LimboDelivery](#limbodelivery). However in this case, all `AutoDeath.Behavior` values produce identical result where the building is simply deleted.
+- If this option is not set, the self-destruction logic will not be enabled. `AutoDeath.VanishAnimation` can be set to animation to play at object's location if `vanish` behaviour is chosen.
+- This logic also supports buildings delivered by [LimboDelivery](#limbodelivery). However in this case, all `AutoDeath.Behavior` values produce identical result where the building is simply deleted.
 
 In `rulesmd.ini`:
 ```ini
@@ -1521,6 +1644,10 @@ AutoDeath.TechnosExist=                        ; List of TechnoTypes
 AutoDeath.TechnosExist.Any=true                ; boolean
 AutoDeath.TechnosExist.AllowLimboed=false      ; boolean
 AutoDeath.TechnosExist.Houses=owner            ; Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
+```
+
+```{note}
+Please notice that if the object is a unit which carries passengers, they will not be released even with the `kill` option **if you are not using Ares 3.0+**.
 ```
 
 ### Mind Control enhancement
@@ -1540,6 +1667,26 @@ In `rulesmd.ini`:
 MindControlRangeLimit=-1.0            ; floating point value
 MindControlLink.VisibleToHouse=all    ; Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
 MultiMindControl.ReleaseVictim=false  ; boolean
+```
+
+### Multi Weapon
+
+![image](_static/images/multiweapons.gif)
+*Multi Weapon used to release different weapons against different targets in **Zero Boundary** by @[Stormsulfur](https://space.bilibili.com/11638715/lists/5358986)*
+
+- You can now use `WeaponX` to enable more than 2 weapons for a TechnoType without hardcoded `Gunner=yes`, `IsGattling=yes` or `IsChargeTurret=yes` restriction.
+  - Set `MultiWeapon=yes` to enable this feature, be careful not to forget `WeaponCount`.
+  - `MultiWeapon.IsSecondary` specifies which weapons will be considered as `Secondary` when selecting weapons or triggering infantry's `SecondaryFire` settings. If not set, `Weapon1` will be considered as `Secondary`.
+  - `MultiWeapon.SelectCount` determines the number of weapons that can be selected by default weapon selection logic. Notice that higher number is bad for performance.
+    - If the number is smaller than the total amount of weapons, the ones with smaller indices will be picked.
+    - Other weapons can still be used for logic that specify a weapon index, such as [ForceWeapon](#forcing-specific-weapon-against-certain-targets).
+
+In `rulesmd.ini`:
+```ini
+[SOMETECHNO]                    ; TechnoType
+MultiWeapon=false               ; boolean
+MultiWeapon.IsSecondary=        ; List of integers
+MultiWeapon.SelectCount=2       ; integer
 ```
 
 ### No Manual Move
@@ -1670,7 +1817,7 @@ CombatAlert.Suppress=                  ; boolean
 
 ### Recount burst index
 
-- You can now make technos recount their current burst index when they have changed the firing weapon or have maintained for a period of time without any targets (take the larger value of last firing weapon's `ROF` and 30 frames). Defaults to `[General] -> RecountBurst`, which defaults to false.
+- You can now make technos recount their current burst index when they have changed the firing weapon or have maintained for a period of time without any targets (take the larger value of last firing weapon's `ROF` and 30 frames).
 
 In `rulesmd.ini`:
 ```ini
@@ -1678,7 +1825,7 @@ In `rulesmd.ini`:
 RecountBurst=false  ; boolean
 
 [SOMETECHNO]        ; TechnoType
-RecountBurst=       ; boolean
+RecountBurst=       ; boolean, default to [General] -> RecountBurst
 ```
 
 ### Revenge weapon
@@ -1938,7 +2085,7 @@ CanKill=true   ; boolean
   - `Crit.Warhead.FullDetonation` controls whether or not the Warhead is detonated fully on the targets (as part of a dummy weapon) or simply deals area damage and applies Phobos' Warhead effects.
   - `Crit.Affects` can be used to customize types of targets that this Warhead can deal critical hits against. Critical hits cannot affect empty cells or cells containing only TerrainTypes, overlays etc.
   - `Crit.AffectsHouses` can be used to customize houses that this Warhead can deal critical hits against.
-  - `Crit.AffectBelowPercent` can be used to set minimum percentage of their maximum `Strength` that targets must have left to be affected by a critical hit.
+  - `Crit.AffectBelowPercent` and `Crit.AffectsAbovePercent` can be used to set the health percentage that targets must be below or above respectively to be affected by critical hits.
   - `Crit.AnimList` can be used to set a list of animations used instead of Warhead's `AnimList` if Warhead deals a critical hit to even one target. If `Crit.AnimList.PickRandom` is set (defaults to `AnimList.PickRandom`) then the animation is chosen randomly from the list. If `Crit.AnimList.CreateAll` is set (defaults to `AnimList.CreateAll`), all animations from the list are created.
     - `Crit.AnimOnAffectedTargets`, if set, makes the animation(s) from `Crit.AnimList` play on each affected target *in addition* to animation from Warhead's `AnimList` playing as normal instead of replacing `AnimList` animation. Note that because these animations are independent from `AnimList`, `Crit.AnimList.PickRandom` and `Crit.AnimList.CreateAll` will not default to their `AnimList` counterparts here and need to be explicitly set if needed.
   - `Crit.ActiveChanceAnims` can be used to set animation to be always displayed at the Warhead's detonation coordinates if the current Warhead has a chance to critically hit. If more than one animation is listed, a random one is selected.
@@ -1947,25 +2094,26 @@ CanKill=true   ; boolean
 
 In `rulesmd.ini`:
 ```ini
-[SOMEWARHEAD]                               ; WarheadType
-Crit.Chance=0.0                             ; floating point value, percents or absolute (0.0-1.0)
-Crit.ApplyChancePerTarget=false             ; boolean
-Crit.ExtraDamage=0                          ; integer
-Crit.ExtraDamage.ApplyFirepowerMult=false   ; boolean
-Crit.Warhead=                               ; WarheadType
-Crit.Warhead.FullDetonation=true            ; boolean
-Crit.Affects=all                            ; List of Affected Target Enumeration (none|land|water|infantry|units|buildings|all)
-Crit.AffectsHouses=all                      ; List of Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
-Crit.AffectBelowPercent=1.0                 ; floating point value, percents or absolute (0.0-1.0)
-Crit.AnimList=                              ; List of AnimationTypes
-Crit.AnimList.PickRandom=                   ; boolean
-Crit.AnimList.CreateAll=                    ; boolean
-Crit.ActiveChanceAnims=                     ; List of AnimationTypes
-Crit.AnimOnAffectedTargets=false            ; boolean
-Crit.SuppressWhenIntercepted=false          ; boolean
-
-[SOMETECHNO]                                ; TechnoType
-ImmuneToCrit=false                          ; boolean
+[SOMEWARHEAD]                              ; WarheadType
+Crit.Chance=0.0                            ; floating point value, percents or absolute (0.0-1.0)
+Crit.ApplyChancePerTarget=false            ; boolean
+Crit.ExtraDamage=0                         ; integer
+Crit.ExtraDamage.ApplyFirepowerMult=false  ; boolean
+Crit.Warhead=                              ; WarheadType
+Crit.Warhead.FullDetonation=true           ; boolean
+Crit.Affects=all                           ; List of Affected Target Enumeration (none|land|water|infantry|units|buildings|all)
+Crit.AffectsHouses=all                     ; List of Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
+Crit.AffectBelowPercent=1.0                ; floating point value, percents or absolute (0.0-1.0)
+Crit.AffectsAbovePercent=0.0               ; floating point value, percents or absolute (0.0-1.0)
+Crit.AnimList=                             ; List of AnimationTypes
+Crit.AnimList.PickRandom=                  ; boolean
+Crit.AnimList.CreateAll=                   ; boolean
+Crit.ActiveChanceAnims=                    ; List of AnimationTypes
+Crit.AnimOnAffectedTargets=false           ; boolean
+Crit.SuppressWhenIntercepted=false         ; boolean
+                                           
+[SOMETECHNO]                               ; TechnoType
+ImmuneToCrit=false                         ; boolean
 ```
 
 ```{warning}
@@ -2010,7 +2158,7 @@ This feature requires Ares 3.0 or higher to function! When Ares 3.0+ is not dete
 ```
 
 ### Custom Mind Control Animation
-- Allows Warheads to play custom `MindControl.Anim` which defaults to `[CombatDamage] -> ControlledAnimationType`.
+- Allows Warheads to play custom `MindControl.Anim`.
 
 In `rulesmd.ini`:
 ```ini
@@ -2026,25 +2174,33 @@ MindControl.Anim=                     ; Animation, defaults to [CombatDamage] ->
 In `rulesmd.ini`:
 ```ini
 [SOMEWARHEAD]                ; WarheadType
-SplashList=<none>            ; List of AnimationTypes
+SplashList=                  ; List of AnimationTypes
 SplashList.PickRandom=false  ; boolean
 ```
 
-### Damage multiplier for different houses
+### Damage multipliers
 
-- Warheads are now able to define the extra damage multiplier for owner house, ally houses and enemy houses. If the warhead's own `Damage(Owner|Allies|Enemies)Multiplier` are not set, these will default to respective `[CombatDamage] -> Damage(Owner|Allies|Enemies)Multiplier` which all default to 1.0 .Note that `DamageAlliesMultiplier` won't affect your own units like `AffectsAllies` did, and this function will not affect damage with ignore defenses like `Suicide`.etc .
+- Warheads are now able to define the extra damage multiplier for owner house, ally houses and enemy houses.
+- An extra damage multiplier based on the firer or target's health percentage will be added to the total multiplier. To be elaborate: the damage multiplier will firstly increased by the firer's health percentage multiplies `DamageSourceHealthMultiplier`, then increased by the target's health percentage multiplies `DamageTargetHealthMultiplier`.
+- These multipliers will not affect damage with ignore defenses like `Suicide`.etc .
 
 In `rulesmd.ini`:
 ```ini
 [CombatDamage]
-DamageOwnerMultiplier=1.0     ; floating point value
-DamageAlliesMultiplier=1.0    ; floating point value
-DamageEnemiesMultiplier=1.0   ; floating point value
+DamageOwnerMultiplier=1.0           ; floating point value
+DamageAlliesMultiplier=1.0          ; floating point value
+DamageEnemiesMultiplier=1.0         ; floating point value
 
-[SOMEWARHEAD]                 ; WarheadType
-DamageOwnerMultiplier=        ; floating point value
-DamageAlliesMultiplier=       ; floating point value
-DamageEnemiesMultiplier=      ; floating point value
+[SOMEWARHEAD]                       ; WarheadType
+DamageOwnerMultiplier=              ; floating point value, default to [CombatDamage] -> DamageOwnerMultiplier
+DamageAlliesMultiplier=             ; floating point value, default to [CombatDamage] -> DamageAlliesMultiplier
+DamageEnemiesMultiplier=            ; floating point value, default to [CombatDamage] -> DamageEnemiesMultiplier
+DamageSourceHealthMultiplier=0.0    ; floating point value
+DamageTargetHealthMultiplier=0.0    ; floating point value
+```
+
+```{note}
+`DamageAlliesMultiplier` won't affect your own units like `AffectsAllies` did.
 ```
 
 ### Detonate Warhead on all objects on map
@@ -2142,9 +2298,6 @@ PenetratesForceShield=       ; boolean
 
 ```{note}
 - For animation warheads/weapons to take effect, `Damage.DealtByInvoker` must be set.
-
-- Due to the nature of some superweapon types, not all superweapons are suitable for launch. **Please use with caution!**
-
 - The superweapons are launched on the *cell* where the warhead is detonated, instead of being click-fired.
 ```
 
@@ -2158,6 +2311,10 @@ LaunchSW.IgnoreDesignators=true   ; boolean
 LaunchSW.DisplayMoney=false       ; boolean
 LaunchSW.DisplayMoney.Houses=all  ; Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
 LaunchSW.DisplayMoney.Offset=0,0  ; X,Y, pixels relative to default
+```
+
+```{warning}
+Due to the nature of some superweapon types, not all superweapons are suitable for launch. **Please use with caution!**
 ```
 
 ### Parasite removal
@@ -2347,8 +2504,7 @@ KeepRange.AllowPlayer=false  ; boolean
 
 In `rulesmd.ini`:
 ```ini
-[SOMEWEAPON]              ; WeaponType
-OmniFire=yes
+[SOMEWEAPON]              ; WeaponType, with OmniFire=yes
 OmniFire.TurnToTarget=no  ; boolean
 ```
 
@@ -2403,13 +2559,17 @@ This function is only used as an additional scattering visual display, which is 
 *`Weapon target filter - different weapon used against enemies & allies as well as units & buildings in [Project Phantom](https://www.moddb.com/mods/project-phantom)*
 
 - You can now specify which targets or houses a weapon can fire at. This also affects weapon selection, other than certain special cases where the selection is fixed.
-  - Note that `CanTarget` explicitly requires either `all` or `empty` to be listed for the weapon to be able to fire at cells containing no TechnoTypes.
+  - `CanTarget.MaxHealth` and `CanTarget.MinHealth` set health percentage thresholds for allowed targets (TechnoTypes only), maximum/minimum respectively.
 
 In `rulesmd.ini`:
 ```ini
-[SOMEWEAPON]              ; WeaponType
-CanTarget=all             ; List of Affected Target Enumeration (none|land|water|empty|infantry|units|buildings|all)
-CanTargetHouses=all       ; List of Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
-CanTarget.MaxHealth=1.0   ; floating point value, percents or absolute
-CanTarget.MinHealth=0.0   ; floating point value, percents or absolute
+[SOMEWEAPON]             ; WeaponType
+CanTarget=all            ; List of Affected Target Enumeration (none|land|water|empty|infantry|units|buildings|all)
+CanTargetHouses=all      ; List of Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
+CanTarget.MaxHealth=1.0  ; floating point value, percents or absolute
+CanTarget.MinHealth=0.0  ; floating point value, percents or absolute
+```
+
+```{note}
+`CanTarget` explicitly requires either `all` or `empty` to be listed for the weapon to be able to fire at cells containing no TechnoTypes.
 ```

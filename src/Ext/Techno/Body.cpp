@@ -595,6 +595,12 @@ UnitTypeClass* TechnoExt::ExtData::GetUnitTypeExtra() const
 	return nullptr;
 }
 
+bool TechnoExt::IsHealthInThreshold(TechnoClass* pObject, double min, double max)
+{
+	const double hp = pObject->GetHealthPercentage();
+	return hp <= max && hp >= min;
+}
+
 // =============================
 // load / save
 
@@ -652,6 +658,7 @@ void TechnoExt::ExtData::Serialize(T& Stm)
 		.Process(this->TintIntensityOwner)
 		.Process(this->TintIntensityAllies)
 		.Process(this->TintIntensityEnemies)
+		.Process(this->AttackMoveFollowerTempCount)
 		;
 }
 
