@@ -614,48 +614,41 @@ void WarheadTypeExt::ExtData::ApplyAttachEffects(TechnoClass* pTarget, HouseClas
 
 void WarheadTypeExt::ExtData::ApplyTaunt(HouseClass* pHouse, TechnoClass* pTarget, TechnoClass* pOwner)
 {
-	if (!pTarget)
-		return;
-
 	if (!this->Taunt_AffectsBerserk && pTarget->Berzerk)
 		return;
 
 	auto const pTargetExt = TechnoExt::ExtMap.Find(pTarget);
 
-	if (pTargetExt->TypeExtData->ImmuneToTaunt || (pTargetExt->Shield && pTargetExt->Shield->IsActive() && pTargetExt->Shield->GetType()->ImmuneToTaunt))
+	if (pTargetExt->TypeExtData->ImmuneToTaunt)
+		return;
+
+	auto const pShield = pTargetExt->Shield.get();
+
+	if (pShield && pShield->IsActive() && pShield->GetType()->ImmuneToTaunt)
 		return;
 
 	if (!TechnoExt::IsActive(pTarget))
 		return;
 
-	if (!this->Taunt_AffectsControlledAllies)
-	{
-		if (auto const pController = pTarget->MindControlledBy)
-		{
-			for (auto const pNode : pController->CaptureManager->ControlNodes)
-			{
-				if (pNode->Unit == pTarget)
-				{
-					if (pHouse && pHouse->IsAlliedWith(pNode->OriginalOwner))
-						return;
-
-					break;
-				}
-			}
-		}
-	}
+	if (!this->Taunt_AffectsControlledAllies && pTarget->IsMindControlled() && pHouse && pHouse->IsAlliedWith(pTarget->GetOriginalOwner()))
+		return;
 
 	if (pHouse && !EnumFunctions::CanTargetHouse(this->Crit_AffectsHouses, pHouse, pTarget->Owner))
 		return;
 
-	if (this->Taunt_BreakMission || !pOwner)
+	// clean current missions first to avoid failure
+	const auto pAircraft = abstract_cast<AircraftClass*, true>(pTarget);
+	const bool commonAircraft = pAircraft && !pAircraft->Airstrike && !pAircraft->Spawned;
+	TechnoExt::PreProcessStopCommand(pTarget, pAircraft, commonAircraft);
+
+	if (this->Taunt_BreakMission || !pOwner || pTarget->SelectWeapon(pOwner) < 0)
 	{
-		pTarget->QueueMission(pTarget->GetTechnoType()->DefaultToGuardArea ? Mission::Area_Guard : Mission::Guard, true);
+		TechnoExt::ProcessStopCommand(pTarget, pAircraft, commonAircraft);
 	}
 	else
 	{
-		pTarget->SetTarget(pOwner);
 		pTarget->QueueMission(Mission::Attack, true);
+		pTarget->SetTarget(pOwner);
 	}
 }
 

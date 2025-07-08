@@ -1091,7 +1091,7 @@ DEFINE_HOOK(0x546C95, IsometricTileTypeClass_ReadINI_LunarFixes, 0x6)
 	return 0;
 }
 
-// Oct 26, 2024 - Starkku: Fixes an edge case that affects AI-owned technos where they lose ally targets instantly even if they have AttackFriendlies=yes 
+// Oct 26, 2024 - Starkku: Fixes an edge case that affects AI-owned technos where they lose ally targets instantly even if they have AttackFriendlies=yes
 DEFINE_HOOK(0x6FA467, TechnoClass_AI_AttackFriendlies, 0x5)
 {
 	enum { SkipResetTarget = 0x6FA472 };
@@ -1229,79 +1229,10 @@ DEFINE_HOOK(0x4C75DA, EventClass_RespondToEvent_Stop, 0x6)
 	GET(TechnoClass* const, pTechno, ESI);
 
 	// Check aircraft
-	const auto pAircraft = abstract_cast<AircraftClass*>(pTechno);
+	const auto pAircraft = abstract_cast<AircraftClass*, true>(pTechno);
 	const bool commonAircraft = pAircraft && !pAircraft->Airstrike && !pAircraft->Spawned;
-	const auto mission = pTechno->CurrentMission;
-
-	// To avoid aircraft overlap by keep link if is returning or is in airport now.
-	if (!commonAircraft || (mission != Mission::Sleep && mission != Mission::Guard && mission != Mission::Enter)
-		|| !pAircraft->DockNowHeadingTo || (pAircraft->DockNowHeadingTo != pAircraft->GetNthLink()))
-	{
-		pTechno->SendToEachLink(RadioCommand::NotifyUnlink);
-	}
-
-	// To avoid technos being unable to stop in attack move mega mission
-	if (pTechno->MegaMissionIsAttackMove())
-		pTechno->ClearMegaMissionData();
-
-	// Clearing the current target should still be necessary for all technos
-	pTechno->SetTarget(nullptr);
-
-	// Stop any enter action
-	pTechno->QueueUpToEnter = nullptr;
-
-	if (commonAircraft)
-	{
-		if (pAircraft->Type->AirportBound)
-		{
-			// To avoid `AirportBound=yes` aircraft with ammo at low altitudes cannot correctly receive stop command and queue Mission::Guard with a `Destination`.
-			if (pAircraft->Ammo)
-				pTechno->SetDestination(nullptr, true);
-
-			// To avoid `AirportBound=yes` aircraft pausing in the air and let they returning to air base immediately.
-			if (!pAircraft->DockNowHeadingTo || (pAircraft->DockNowHeadingTo != pAircraft->GetNthLink())) // If the aircraft have no valid dock, try to find a new one
-				pAircraft->EnterIdleMode(false, true);
-		}
-		else if (pAircraft->Ammo)
-		{
-			// To avoid `AirportBound=no` aircraft ignoring the stop task or directly return to the airport.
-			if (pAircraft->Destination && static_cast<int>(CellClass::Coord2Cell(pAircraft->Destination->GetCoords()).DistanceFromSquared(pAircraft->GetMapCoords())) > 2) // If the aircraft is moving, find the forward cell then stop in it
-				pAircraft->SetDestination(pAircraft->GetCell()->GetNeighbourCell(static_cast<FacingType>(pAircraft->PrimaryFacing.Current().GetValue<3>())), true);
-		}
-		else if (!pAircraft->DockNowHeadingTo || (pAircraft->DockNowHeadingTo != pAircraft->GetNthLink()))
-		{
-			pAircraft->EnterIdleMode(false, true);
-		}
-		// Otherwise landing or idling normally without answering the stop command
-	}
-	else
-	{
-		const auto pFoot = abstract_cast<FootClass*, true>(pTechno);
-
-		// Clear archive target for infantries and vehicles like receive a mega mission
-		if (pFoot && !pAircraft)
-			pTechno->SetArchiveTarget(nullptr);
-
-		// Only stop when it is not under the bridge (meeting the original conditions which has been skipped)
-		if (!pTechno->vt_entry_2B0() || pTechno->OnBridge || pTechno->IsInAir() || pTechno->GetCell()->SlopeIndex)
-		{
-			// To avoid foots stuck in Mission::Area_Guard
-			if (pTechno->CurrentMission == Mission::Area_Guard && !pTechno->GetTechnoType()->DefaultToGuardArea)
-				pTechno->QueueMission(Mission::Guard, true);
-
-			// Check Jumpjets
-			const auto pJumpjetLoco = pFoot ? locomotion_cast<JumpjetLocomotionClass*>(pFoot->Locomotor) : nullptr;
-
-			// To avoid jumpjets falling into a state of standing idly by
-			if (!pJumpjetLoco) // If is not jumpjet, clear the destination is enough
-				pTechno->SetDestination(nullptr, true);
-			else if (!pFoot->Destination) // When in attack move and have had a target, the destination will be cleaned up, enter the guard mission can prevent the jumpjets stuck in a status of standing idly by
-				pTechno->QueueMission(Mission::Guard, true);
-			else if (static_cast<int>(CellClass::Coord2Cell(pFoot->Destination->GetCoords()).DistanceFromSquared(pTechno->GetMapCoords())) > 2) // If the jumpjet is moving, find the forward cell then stop in it
-				pTechno->SetDestination(pTechno->GetCell()->GetNeighbourCell(static_cast<FacingType>(pJumpjetLoco->LocomotionFacing.Current().GetValue<3>())), true);
-			// Otherwise landing or idling normally without answering the stop command
-		}
-	}
+	TechnoExt::PreProcessStopCommand(pTechno, pAircraft, commonAircraft);
+	TechnoExt::ProcessStopCommand(pTechno, pAircraft, commonAircraft);
 
 	return SkipGameCode;
 }
