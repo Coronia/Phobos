@@ -182,6 +182,12 @@ public:
 
 		Valueable<AffectedTarget> AirstrikeTargets;
 
+		Valueable<bool> Taunt;
+		Valueable<AffectedHouse> Taunt_AffectsHouses;
+		Valueable<bool> Taunt_AffectsControlledAllies;
+		Valueable<bool> Taunt_AffectsBerserk;
+		Valueable<bool> Taunt_BreakMission;
+
 		Valueable<double> AffectsBelowPercent;
 		Valueable<double> AffectsAbovePercent;
 		Valueable<bool> AffectsNeutral;
@@ -367,6 +373,12 @@ public:
 
 			, AirstrikeTargets { AffectedTarget::All }
 
+			, Taunt { false }
+			, Taunt_AffectsHouses { AffectedHouse::Enemies }
+			, Taunt_AffectsControlledAllies { true }
+			, Taunt_AffectsBerserk { true }
+			, Taunt_BreakMission { false }
+
 			, AffectsBelowPercent { 1.0 }
 			, AffectsAbovePercent { 0.0 }
 			, AffectsNeutral { true }
@@ -431,6 +443,7 @@ public:
 		void ApplyShieldModifiers(TechnoClass* pTarget);
 		void ApplyAttachEffects(TechnoClass* pTarget, HouseClass* pInvokerHouse, TechnoClass* pInvoker);
 		void ApplyBuildingUndeploy(TechnoClass* pTarget);
+		void ApplyTaunt(HouseClass* pHouse, TechnoClass* pTarget, TechnoClass* pOwner);
 		double GetCritChance(TechnoClass* pFirer) const;
 	};
 

@@ -340,6 +340,8 @@ public:
 
 		Nullable<AffectedHouse> RadarInvisibleToHouse;
 
+		Valueable<bool> ImmuneToTaunt;
+
 		struct LaserTrailDataEntry
 		{
 			ValueableIdx<LaserTrailTypeClass> idxType;
@@ -744,6 +746,8 @@ public:
 			, DebrisMinimums {}
 
 			, EngineerRepairAmount { 0 }
+
+			, ImmuneToTaunt { false }
 
 			, AttackMove_Follow { false }
 			, AttackMove_Follow_IncludeAir { false }

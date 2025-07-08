@@ -291,6 +291,12 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->AirstrikeTargets.Read(exINI, pSection, "AirstrikeTargets");
 
+	this->Taunt.Read(exINI, pSection, "Taunt");
+	this->Taunt_AffectsHouses.Read(exINI, pSection, "Taunt.AffectsHouses");
+	this->Taunt_AffectsControlledAllies.Read(exINI, pSection, "Taunt.AffectsControlledAllies");
+	this->Taunt_AffectsBerserk.Read(exINI, pSection, "Taunt.AffectsBerserk");
+	this->Taunt_BreakMission.Read(exINI, pSection, "Taunt.BreakMission");
+
 	this->AffectsBelowPercent.Read(exINI, pSection, "AffectsBelowPercent");
 	this->AffectsAbovePercent.Read(exINI, pSection, "AffectsAbovePercent");
 	this->AffectsNeutral.Read(exINI, pSection, "AffectsNeutral");
@@ -354,6 +360,7 @@ void WarheadTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 		|| this->AttachEffects.RemoveGroups.size() > 0
 		|| this->BuildingSell
 		|| this->BuildingUndeploy
+		|| this->Taunt
 	);
 
 	char tempBuffer[32];
@@ -561,6 +568,12 @@ void WarheadTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->ElectricAssaultLevel)
 
 		.Process(this->AirstrikeTargets)
+
+		.Process(this->Taunt)
+		.Process(this->Taunt_AffectsHouses)
+		.Process(this->Taunt_AffectsControlledAllies)
+		.Process(this->Taunt_AffectsBerserk)
+		.Process(this->Taunt_BreakMission)
 
 		// Ares tags
 		.Process(this->AffectsEnemies)

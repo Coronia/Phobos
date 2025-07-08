@@ -894,6 +894,8 @@ void TechnoTypeExt::ExtData::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->EngineerRepairAmount.Read(exINI, pSection, "EngineerRepairAmount");
 
+	this->ImmuneToTaunt.Read(exINI, pSection, "ImmuneToTaunt");
+
 	this->DebrisTypes_Limit.Read(exINI, pSection, "DebrisTypes.Limit");
 	this->DebrisMinimums.Read(exINI, pSection, "DebrisMinimums");
 
@@ -1507,6 +1509,8 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->DebrisMinimums)
 
 		.Process(this->EngineerRepairAmount)
+
+		.Process(this->ImmuneToTaunt)
 
 		.Process(this->AttackMove_Follow)
 		.Process(this->AttackMove_Follow_IncludeAir)

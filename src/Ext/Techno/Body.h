@@ -252,6 +252,8 @@ public:
 	static void GetValuesForDisplay(TechnoClass* pThis, DisplayInfoType infoType, int& value, int& maxValue, int infoIndex);
 	static void GetDigitalDisplayFakeHealth(TechnoClass* pThis, int& value, int& maxValue);
 	static bool IsHealthInThreshold(TechnoClass* pObject, double min, double max);
+	static void PreProcessStopCommand(TechnoClass* pTechno, AircraftClass* pAircraft, bool commonAircraft);
+	static void ProcessStopCommand(TechnoClass* pTechno, AircraftClass* pAircraft, bool commonAircraft);
 
 	// WeaponHelpers.cpp
 	static int PickWeaponIndex(TechnoClass* pThis, TechnoClass* pTargetTechno, AbstractClass* pTarget, int weaponIndexOne, int weaponIndexTwo, bool allowFallback = true, bool allowAAFallback = true);
