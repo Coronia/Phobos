@@ -78,10 +78,10 @@ bool TActionExt::Execute(TActionClass* pThis, HouseClass* pHouse, ObjectClass* p
 	case PhobosTriggerAction::SetForceEnemy:
 		return TActionExt::SetForceEnemy(pThis, pHouse, pObject, pTrigger, location);
 
-	case PhobosTriggerAction::CreateBannerGlobal:
-		return TActionExt::CreateBannerGlobal(pThis, pHouse, pObject, pTrigger, location);
 	case PhobosTriggerAction::CreateBannerLocal:
 		return TActionExt::CreateBannerLocal(pThis, pHouse, pObject, pTrigger, location);
+	case PhobosTriggerAction::CreateBannerGlobal:
+		return TActionExt::CreateBannerGlobal(pThis, pHouse, pObject, pTrigger, location);
 	case PhobosTriggerAction::DeleteBanner:
 		return TActionExt::DeleteBanner(pThis, pHouse, pObject, pTrigger, location);
 
@@ -309,6 +309,8 @@ bool TActionExt::RunSuperWeaponAt(TActionClass* pThis, int X, int Y)
 		switch (pThis->Param4)
 		{
 		case -1:
+			housesList.reserve(HouseClass::Array.Count);
+
 			// Random non-neutral
 			for (auto pHouse : HouseClass::Array)
 			{
@@ -341,6 +343,8 @@ bool TActionExt::RunSuperWeaponAt(TActionClass* pThis, int X, int Y)
 			break;
 
 		case -3:
+			housesList.reserve(HouseClass::Array.Count);
+
 			// Random Human Player
 			for (auto pHouse : HouseClass::Array)
 			{
@@ -550,15 +554,15 @@ static void CreateOrReplaceBanner(TActionClass* pTAction, bool isGlobal)
 	}
 }
 
-bool TActionExt::CreateBannerGlobal(TActionClass* pThis, HouseClass* pHouse, ObjectClass* pObject, TriggerClass* pTrigger, CellStruct const& location)
-{
-	CreateOrReplaceBanner(pThis, true);
-	return true;
-}
-
 bool TActionExt::CreateBannerLocal(TActionClass* pThis, HouseClass* pHouse, ObjectClass* pObject, TriggerClass* pTrigger, CellStruct const& location)
 {
 	CreateOrReplaceBanner(pThis, false);
+	return true;
+}
+
+bool TActionExt::CreateBannerGlobal(TActionClass* pThis, HouseClass* pHouse, ObjectClass* pObject, TriggerClass* pTrigger, CellStruct const& location)
+{
+	CreateOrReplaceBanner(pThis, true);
 	return true;
 }
 
