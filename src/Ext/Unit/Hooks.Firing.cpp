@@ -6,7 +6,7 @@ DEFINE_JUMP(LJMP, 0x741406, 0x741427)
 DEFINE_HOOK(0x736F61, UnitClass_UpdateFiring_FireUp, 0x6)
 {
 	GET(UnitClass*, pThis, ESI);
-	GET(int, weaponIndex, EDI);
+	GET(const int, weaponIndex, EDI);
 	enum { SkipFiring = 0x736F73 };
 
 	const auto pType = pThis->Type;
@@ -43,11 +43,13 @@ DEFINE_HOOK(0x736F61, UnitClass_UpdateFiring_FireUp, 0x6)
 		int projectedDelay = 0;
 		auto const pWeaponExt = WeaponTypeExt::ExtMap.Find(pThis->GetWeapon(weaponIndex)->WeaponType);
 		const bool allowBurst = pWeaponExt && pWeaponExt->Burst_FireWithinSequence;
+		const int currentBurstIndex = pThis->CurrentBurstIndex;
+		auto& random = ScenarioClass::Instance->Random;
 
 		// Calculate cumulative burst delay as well cumulative delay after next shot (projected delay).
 		if (allowBurst)
 		{
-			for (int i = 0; i <= pThis->CurrentBurstIndex; i++)
+			for (int i = 0; i <= currentBurstIndex; i++)
 			{
 				const int burstDelay = pWeaponExt->GetBurstDelay(i);
 				int delay = 0;
@@ -55,7 +57,7 @@ DEFINE_HOOK(0x736F61, UnitClass_UpdateFiring_FireUp, 0x6)
 				if (burstDelay > -1)
 					delay = burstDelay;
 				else
-					delay = ScenarioClass::Instance->Random.RandomRanged(3, 5);
+					delay = random.RandomRanged(3, 5);
 
 				// Other than initial delay, treat 0 frame delays as 1 frame delay due to per-frame processing.
 				if (i != 0)
@@ -63,7 +65,7 @@ DEFINE_HOOK(0x736F61, UnitClass_UpdateFiring_FireUp, 0x6)
 
 				cumulativeDelay += delay;
 
-				if (i == pThis->CurrentBurstIndex)
+				if (i == currentBurstIndex)
 					projectedDelay = cumulativeDelay + delay;
 			}
 		}

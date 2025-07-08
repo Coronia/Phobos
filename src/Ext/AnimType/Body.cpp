@@ -17,30 +17,32 @@ void AnimTypeExt::ProcessDestroyAnims(UnitClass* pThis, TechnoClass* pKiller)
 	if (!pThis)
 		return;
 
-	if (pThis->Type->DestroyAnim.Count > 0)
+	auto const pType = pThis->Type;
+
+	if (pType->DestroyAnim.Count > 0)
 	{
 		auto const facing = pThis->PrimaryFacing.Current().GetDir();
 		AnimTypeClass* pAnimType = nullptr;
-		auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pThis->Type);
+		auto const pTypeExt = TechnoTypeExt::ExtMap.Find(pType);
 
 		if (!pTypeExt->DestroyAnim_Random.Get())
 		{
 			int idxAnim = 0;
 
-			if (pThis->Type->DestroyAnim.Count >= 8)
+			if (pType->DestroyAnim.Count >= 8)
 			{
-				idxAnim = pThis->Type->DestroyAnim.Count - 1;
-				if (pThis->Type->DestroyAnim.Count % 2 == 0)
+				idxAnim = pType->DestroyAnim.Count - 1;
+				if (pType->DestroyAnim.Count % 2 == 0)
 					idxAnim = static_cast<int>(static_cast<unsigned char>(facing) / 256.0 * idxAnim);
 			}
 
-			pAnimType = pThis->Type->DestroyAnim[idxAnim];
+			pAnimType = pType->DestroyAnim[idxAnim];
 		}
 		else
 		{
-			int const nIDx_Rand = pThis->Type->DestroyAnim.Count == 1 ?
-				0 : ScenarioClass::Instance->Random.RandomRanged(0, (pThis->Type->DestroyAnim.Count - 1));
-			pAnimType = pThis->Type->DestroyAnim[nIDx_Rand];
+			int const nIDx_Rand = pType->DestroyAnim.Count == 1 ?
+				0 : ScenarioClass::Instance->Random.RandomRanged(0, (pType->DestroyAnim.Count - 1));
+			pAnimType = pType->DestroyAnim[nIDx_Rand];
 
 		}
 
@@ -93,6 +95,7 @@ void AnimTypeExt::ExtData::LoadFromINIFile(CCINIClass* pINI)
 	this->Damage_Delay.Read(exINI, pID, "Damage.Delay");
 	this->Damage_DealtByInvoker.Read(exINI, pID, "Damage.DealtByInvoker");
 	this->Damage_ApplyOncePerLoop.Read(exINI, pID, "Damage.ApplyOncePerLoop");
+	this->Damage_ApplyFirepowerMult.Read(exINI, pID, "Damage.ApplyFirepowerMult");
 	this->ExplodeOnWater.Read(exINI, pID, "ExplodeOnWater");
 	this->Warhead_Detonate.Read(exINI, pID, "Warhead.Detonate");
 	this->WakeAnim.Read(exINI, pID, "WakeAnim");
@@ -151,6 +154,7 @@ void AnimTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->Damage_Delay)
 		.Process(this->Damage_DealtByInvoker)
 		.Process(this->Damage_ApplyOncePerLoop)
+		.Process(this->Damage_ApplyFirepowerMult)
 		.Process(this->ExplodeOnWater)
 		.Process(this->Warhead_Detonate)
 		.Process(this->WakeAnim)
@@ -235,7 +239,7 @@ DEFINE_HOOK(0x42898A, AnimTypeClass_Save_Suffix, 0x3)
 	return 0;
 }
 
-DEFINE_HOOK_AGAIN(0x4287E9, AnimTypeClass_LoadFromINI, 0xA)
+//DEFINE_HOOK_AGAIN(0x4287E9, AnimTypeClass_LoadFromINI, 0xA)// Section dont exist!
 DEFINE_HOOK(0x4287DC, AnimTypeClass_LoadFromINI, 0xA)
 {
 	GET(AnimTypeClass*, pItem, ESI);

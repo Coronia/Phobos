@@ -27,14 +27,15 @@ DEFINE_HOOK(0x520AD2, InfantryClass_FiringAI_NoTarget, 0x7)
 DEFINE_HOOK(0x5206D2, InfantryClass_FiringAI_SetContext, 0x6)
 {
 	GET(InfantryClass*, pThis, EBP);
-	GET(int, WeaponIndex, EDI);
+	GET(const int, WeaponIndex, EDI);
 	enum { SkipGameCode = 0x5209A6 };
 
 	auto const pWeapon = pThis->GetWeapon(WeaponIndex)->WeaponType;
+	auto const pType = pThis->Type;
 
 	if (!pWeapon)
 	{
-		if (pThis->Type->IsGattling)
+		if (pType->IsGattling)
 			pThis->GattlingRateDown(1);
 
 		R->AL(false);
@@ -44,7 +45,7 @@ DEFINE_HOOK(0x5206D2, InfantryClass_FiringAI_SetContext, 0x6)
 
 	const auto pTarget = pThis->Target;
 	FiringAITemp::weaponIndex = WeaponIndex;
-	FiringAITemp::isSecondary = TechnoTypeExt::ExtMap.Find(pThis->GetTechnoType())->IsSecondary(WeaponIndex);
+	FiringAITemp::isSecondary = TechnoTypeExt::ExtMap.Find(pType)->IsSecondary(WeaponIndex);
 	FiringAITemp::WeaponType = pWeapon;
 	FiringAITemp::fireError = pThis->GetFireError(pTarget, WeaponIndex, true);
 	FiringAITemp::canFire = true;

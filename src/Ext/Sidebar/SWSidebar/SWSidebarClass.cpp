@@ -193,6 +193,7 @@ void SWSidebarClass::SortButtons()
 			return BuildType::SortsBefore(AbstractType::Special, a->SuperIndex, AbstractType::Special, b->SuperIndex);
 		});
 
+	const auto pTopPCX = SideExt::ExtMap.Find(SideClass::Array.Items[ScenarioClass::Instance->PlayerSideIndex])->SuperWeaponSidebar_TopPCX.GetSurface();
 	const int buttonCount = static_cast<int>(vec_Buttons.size());
 	const int cameoWidth = 60, cameoHeight = 48;
 	const int firstColumn = Phobos::UI::SuperWeaponSidebar_Max;
@@ -206,10 +207,7 @@ void SWSidebarClass::SortButtons()
 		const auto column = columns[columnIdx];
 
 		if (rowIdx == 0)
-		{
-			const auto pTopPCX = SideExt::ExtMap.Find(SideClass::Array.Items[ScenarioClass::Instance->PlayerSideIndex])->SuperWeaponSidebar_TopPCX.GetSurface();
 			column->SetPosition(location.X - Phobos::UI::SuperWeaponSidebar_LeftOffset, location_Y - (pTopPCX ? pTopPCX->GetHeight() : 0));
-		}
 
 		column->Buttons.emplace_back(button);
 		button->SetColumn(columnIdx);
@@ -260,21 +258,24 @@ bool SWSidebarClass::IsEnabled()
 void SWSidebarClass::RecheckCameo()
 {
 	auto& sidebar = SWSidebarClass::Instance;
+	auto& super = HouseClass::CurrentPlayer->Supers;
+	bool& recheckTechTree = HouseClass::CurrentPlayer->RecheckTechTree;
 
 	for (const auto& column : sidebar.Columns)
 	{
 		std::vector<int> removeButtons;
+		removeButtons.reserve(column->Buttons.size());
 
 		for (const auto& button : column->Buttons)
 		{
-			if (HouseClass::CurrentPlayer->Supers[button->SuperIndex]->IsPresent)
+			if (super[button->SuperIndex]->IsPresent)
 				continue;
 
 			removeButtons.push_back(button->SuperIndex);
 		}
 
 		if (removeButtons.size())
-			HouseClass::CurrentPlayer->RecheckTechTree = true;
+			recheckTechTree = true;
 
 		for (const auto& index : removeButtons)
 			column->RemoveButton(index);
@@ -321,7 +322,7 @@ DEFINE_HOOK(0x6A6316, SidebarClass_AddCameo_SuperWeapon_SWSidebar, 0x6)
 	if (whatAmI != AbstractType::Special && whatAmI != AbstractType::SuperWeaponType && whatAmI != AbstractType::Super)
 		return 0;
 
-	GET_STACK(int, index, STACK_OFFSET(0x14, 0x8));
+	GET_STACK(const int, index, STACK_OFFSET(0x14, 0x8));
 
 	if (SWSidebarClass::Instance.AddButton(index))
 	{
