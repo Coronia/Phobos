@@ -80,7 +80,8 @@ void AnimTypeExt::ProcessDestroyAnims(UnitClass* pThis, TechnoClass* pKiller)
 
 void AnimTypeExt::ExtData::LoadFromINIFile(CCINIClass* pINI)
 {
-	const char* pID = this->OwnerObject()->ID;
+	const auto pType = this->OwnerObject();
+	const char* pID = pType->ID;
 
 	INI_EX exINI(pINI);
 
@@ -109,7 +110,7 @@ void AnimTypeExt::ExtData::LoadFromINIFile(CCINIClass* pINI)
 	this->RestrictVisibilityIfCloaked.Read(exINI, pID, "RestrictVisibilityIfCloaked");
 	this->DetachOnCloak.Read(exINI, pID, "DetachOnCloak");
 	this->ConstrainFireAnimsToCellSpots.Read(exINI, pID, "ConstrainFireAnimsToCellSpots");
-	this->FireAnimDisallowedLandTypes.Read(exINI, pID, "FireAnimDisallowedLandTypes");
+	this->FireAnimDisallowedLandTypes.Read(exINI, pID, "FireAnimDisallowedLandTypes", pType->Scorch ? LandTypeFlags::DefaultDisallowed : LandTypeFlags::None);
 	this->AttachFireAnimsToParent.Read(exINI, pID, "AttachFireAnimsToParent");
 	this->SmallFireCount.Read(exINI, pID, "SmallFireCount");
 	this->SmallFireAnims.Read(exINI, pID, "SmallFireAnims");
