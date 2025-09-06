@@ -20,7 +20,7 @@ public:
 	int ReceiveDamage(args_ReceiveDamage* args);
 	bool CanBeTargeted(WeaponTypeClass* pWeapon) const;
 	bool CanBePenetrated(WarheadTypeClass* pWarhead) const;
-	void BreakShield(AnimTypeClass* pBreakAnim = nullptr, WeaponTypeClass* pBreakWeapon = nullptr);
+	void BreakShield(const std::vector<AnimTypeClass*>& pBreakAnim, WeaponTypeClass* pBreakWeapon = nullptr);
 
 	void SetRespawn(int duration, double amount, int rate, bool resetTimer);
 	void SetSelfHealing(int duration, double amount, int rate, bool restartInCombat, int restartInCombatDelay, bool resetTimer);
@@ -44,10 +44,9 @@ public:
 	}
 	bool IsActive() const
 	{
-		return
-			this->Available &&
-			this->HP > 0 &&
-			this->Online;
+		return this->Available
+			&& this->HP > 0
+			&& this->Online;
 	}
 	bool IsAvailable() const
 	{
@@ -64,6 +63,7 @@ public:
 	ArmorType GetArmorType(TechnoTypeClass* pTechnoType = nullptr) const;
 	int GetFramesSinceLastBroken() const;
 	void SetAnimationVisibility(bool visible);
+	void UpdateTint(bool forceUpdate = false);
 
 	static void SyncShieldToAnother(TechnoClass* pFrom, TechnoClass* pTo);
 	static bool ShieldIsBrokenTEvent(ObjectClass* pAttached);
@@ -92,7 +92,7 @@ private:
 	void UpdateIdleAnim();
 	AnimTypeClass* GetIdleAnimType();
 
-	void WeaponNullifyAnim(AnimTypeClass* pHitAnim = nullptr);
+	void WeaponNullifyAnim(const std::vector<AnimTypeClass*>& pHitAnim);
 	void ResponseAttack();
 
 	void CloakCheck();
@@ -103,8 +103,6 @@ private:
 
 	int DrawShieldBar_Pip(const bool isBuilding) const;
 	int DrawShieldBar_PipAmount(const int length) const;
-
-	void UpdateTint();
 
 	/// Properties ///
 	TechnoClass* Techno;

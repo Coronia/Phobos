@@ -339,8 +339,8 @@ IdleAnimDamaged.ConditionYellow=            ; AnimationType
 IdleAnimDamaged.ConditionRed=               ; AnimationType
 IdleAnim.OfflineAction=Hides                ; AttachedAnimFlag (None, Hides, Temporal, Paused or PausedTemporal)
 IdleAnim.TemporalAction=Hides               ; AttachedAnimFlag (None, Hides, Temporal, Paused or PausedTemporal)
-BreakAnim=                                  ; AnimationType
-HitAnim=                                    ; AnimationType
+BreakAnim=                                  ; list of Animation
+HitAnim=                                    ; list of Animation
 HitFlash=false                              ; boolean
 HitFlash.FixedSize=                         ; integer
 HitFlash.Red=true                           ; boolean
@@ -365,8 +365,8 @@ ShieldType=SOMESHIELDTYPE                   ; ShieldType; none by default
 [SOMEWARHEAD]                               ; WarheadType
 Shield.Penetrate=false                      ; boolean
 Shield.Break=false                          ; boolean
-Shield.BreakAnim=                           ; AnimationType
-Shield.HitAnim=                             ; AnimationType
+Shield.BreakAnim=                           ; list of Animation
+Shield.HitAnim=                             ; list of Animation
 Shield.SkipHitAnim=false                    ; boolean
 Shield.HitFlash=true                        ; boolean
 Shield.BreakWeapon=                         ; WeaponType
@@ -426,8 +426,8 @@ Shield.InheritStateOnReplace=false          ; boolean
   - `Bouncer=true` and `IsMeteor=true` animations can exhibit irregular behaviour when used as `IdleAnim` and should be avoided.
 - `IdleAnim.OfflineAction` indicates what happens to the animation when the shield is in a low power state.
 - `IdleAnim.TemporalAction` indicates what happens to the animation when the shield is attacked by temporal weapons.
-- `BreakAnim`, if set, will be played when the shield has been broken.
-- `HitAnim`, if set, will be played when the shield is attacked, similar to `WeaponNullifyAnim` for Iron Curtain.
+- `BreakAnim`, if set, will be played when the shield has been broken. If more than one animation is listed, a random one is selected.
+- `HitAnim`, if set, will be played when the shield is attacked, similar to `WeaponNullifyAnim` for Iron Curtain. If more than one animation is listed, a random one is selected.
 - `HitFlash`, if set to true, makes it so that a light flash is generated when the shield is attacked by a Warhead unless it has `Shield.HitFlash=false`. Size of the flash is determined by damage dealt, unless `HitFlash.FixedSize` is set to a number, in which case that value is used instead (range of values that produces visible effect are increments of 4 from 81 to 252, anything higher or below does not have effect). Color can be customized via `HitFlash.Red/Green/Blue`. If `HitFlash.Black` is set to true, the generated flash will be black regardless of other color settings.
 - `BreakWeapon`, if set, will be fired at the TechnoType once the shield breaks.
 - `AbsorbPercent` controls the percentage of damage that will be absorbed by the shield. Defaults to 1.0, meaning full damage absorption.
@@ -449,8 +449,8 @@ Shield.InheritStateOnReplace=false          ; boolean
 - Warheads have new options that interact with shields. Note that all of these that do not by their very nature require ability to target the shield (such as modifiers like `Shield.Break` or removing / attaching) still require Warhead `Verses` to affect the target unless `EffectsRequireVerses` is set to false on the Warhead.
   - `Shield.Penetrate` allows the warhead ignore the shield and always deal full damage to the TechnoType itself. It also allows targeting the TechnoType as if shield doesn't exist.
   - `Shield.Break` allows the warhead to always break shields of TechnoTypes. This is done before damage is dealt.
-  - `Shield.BreakAnim` will be displayed instead of ShieldType `BreakAnim` if the shield is broken by the Warhead, either through damage or `Shield.Break`.
-  - `Shield.HitAnim` will be displayed instead of ShieldType `HitAnim` if set when Warhead hits the shield.
+  - `Shield.BreakAnim` will be displayed instead of ShieldType `BreakAnim` if the shield is broken by the Warhead, either through damage or `Shield.Break`. If more than one animation is listed, a random one is selected.
+  - `Shield.HitAnim` will be displayed instead of ShieldType `HitAnim` if set when Warhead hits the shield. If more than one animation is listed, a random one is selected.
   - If `Shield.SkipHitAnim` is set to true, no hit anim is shown when the Warhead damages the shield whatsoever.
   - `Shield.BreakWeapon` will be fired instead of ShieldType `BreakWeapon` if the shield is broken by the Warhead, either through damage or `Shield.Break`.
   - `Shield.AbsorbPercent` overrides the `AbsorbPercent` value set in the ShieldType that is being damaged.
@@ -469,6 +469,24 @@ Shield.InheritStateOnReplace=false          ; boolean
     - `Shield.MinimumReplaceDelay` can be used to control how long after the shield has been broken (in game frames) can it be replaced. If not enough frames have passed, it won't be replaced.
     - If `Shield.InheritStateOnReplace` is set, shields replaced via `Shield.ReplaceOnly` inherit the current strength (relative to ShieldType `Strength`) of the previous shield and whether or not the shield was currently broken. Self-healing and respawn timers are always reset.
 
+## Aircraft
+
+### Damaged aircraft image changes
+
+- When an aircraft is damaged (health points percentage is lower than `[AudioVisual] -> ConditionYellow` percentage), it now may use different image set by `Image.ConditionYellow` AircraftType.
+- Similar, `Image.ConditionRed` is used as image if aircraft health points percentage is lower than `[AudioVisual] -> ConditionRed` percentage.
+
+In `rulesmd.ini`:
+```ini
+[SOMEAIRCRAFT]                ; AircraftType
+Image.ConditionYellow=        ; AircraftType entry
+Image.ConditionRed=           ; AircraftType entry
+```
+
+```{warning}
+Note that the AircraftTypes had to be defined under [AircraftTypes].
+```
+
 ## Animations
 
 ### Anim-to-Unit
@@ -486,7 +504,7 @@ Shield.InheritStateOnReplace=false          ; boolean
   - `CreateUnit.AlwaysSpawnOnGround`, if set to true, ensures the unit will be created on the cell at ground level even if animation is in air. If set to false, jumpjet units spawned on ground will take off automatically after being spawned regardless.
   - `CreateUnit.SpawnParachutedInAir`, if set to true, makes it so that the unit is created with a parachute if it is spawned in air. Has no effect if `CreateUnit.AlwaysSpawnOnGround` is set to true.
   - `CreateUnit.ConsiderPathfinding`, if set to true, will consider whether or not the cell where the animation is located is occupied by other objects or impassable to the unit being created and will attempt to find a nearby cell that is not. Otherwise the unit will be created at the animation's location despite these obstacles if possible.
-  - `CreateUnit.SpawnAnim` can be used to play another animation at created unit's location after it has appeared. This animation has same owner and invoker as the parent animation.
+  - `CreateUnit.SpawnAnim` can be used to play another animation at created unit's location after it has appeared. This animation has same owner and invoker as the parent animation. If more than one animation is listed, a random one is selected.
   - `CreateUnit.SpawnHeight` can be set to override the animation's height when determining where to spawn the created unit if set to positive value. Has no effect if `CreateUnit.AlwaysSpawnOnGround` is set to true.
 
 In `artmd.ini`:
@@ -505,7 +523,7 @@ CreateUnit.InheritTurretFacings=false  ; boolean
 CreateUnit.AlwaysSpawnOnGround=false   ; boolean
 CreateUnit.SpawnParachutedInAir=false  ; boolean
 CreateUnit.ConsiderPathfinding=false   ; boolean
-CreateUnit.SpawnAnim=                  ; AnimationType
+CreateUnit.SpawnAnim=                  ; list of Animation
 CreateUnit.SpawnHeight=-1              ; integer, height in leptons
 ```
 
@@ -1278,7 +1296,7 @@ AttackMove.IgnoreWeaponCheck=false    ; boolean
 - If `Spawner.AttackImmediately` is set to true, spawned aircraft will assume attack mission immediately after being spawned instead of waiting for the remaining aircraft to spawn first.
 - `Spawner.UseTurretFacing`, if set, makes spawned aircraft face the same way as turret does upon being created if the spawner has a turret.
 - `Spawner.RecycleRange` defines the range (in cell) that the spawned is considered close enough to the spawner to be recycled.
-- `Spawner.RecycleAnim` can be used to play an anim on the spawned location when it is recycled.
+- `Spawner.RecycleAnim` can be used to play an anim on the spawned location when it is recycled. If more than one animation is listed, a random one is selected.
 - `Spawner.RecycleCoord` defines the relative position to the carrier that the spawned aircraft will head to.
   - `Spawner.RecycleOnTurret` defines if the FLH is relative to the turret rather than the body.
 
@@ -1291,7 +1309,7 @@ Spawner.DelayFrames=               ; integer, game frames
 Spawner.AttackImmediately=false    ; boolean
 Spawner.UseTurretFacing=false      ; boolean
 Spawner.RecycleRange=-1            ; float, range in cells
-Spawner.RecycleAnim=               ; Animation
+Spawner.RecycleAnim=               ; list of Animation
 Spawner.RecycleCoord=0,0,0         ; integer - Forward,Lateral,Height
 Spawner.RecycleOnTurret=false      ; boolean
 ```
@@ -1314,7 +1332,7 @@ If you set recycle FLH, it is best to set a recycle range of at least `0.5` at t
     - `PassengerDeletion.SoylentMultiplier` is a direct multiplier applied to the refunded amount of credits.
     - `PassengerDeletion.SoylentAllowedHouses` determines which houses passengers can belong to be eligible for refunding.
     - `PassengerDeletion.DisplaySoylent` can be set to true to display the amount of credits refunded on the transport. `PassengerDeletion.DisplaySoylentToHouses` determines which houses can see this and `PassengerDeletion.DisplaySoylentOffset` can be used to adjust the display offset.
-  - `PassengerDeletion.ReportSound` and `PassengerDeletion.Anim` can be used to specify a sound and animation to play when a passenger is erased, respectively.
+  - `PassengerDeletion.ReportSound` and `PassengerDeletion.Anim` can be used to specify a sound and animation to play when a passenger is erased, respectively. If more than one animation is listed, a random one is selected.
   - If `PassengerDeletion.UnderEMP` is set to true, the deletion will be processed when the transport is under EMP or deactivated.
 
 In `rulesmd.ini`:
@@ -1334,7 +1352,7 @@ PassengerDeletion.DisplaySoylent=false          ; boolean
 PassengerDeletion.DisplaySoylentToHouses=All    ; Affected House Enumeration (none|owner/self|allies/ally|team|enemies/enemy|all)
 PassengerDeletion.DisplaySoylentOffset=0,0      ; X,Y, pixels relative to default
 PassengerDeletion.ReportSound=                  ; Sound entry
-PassengerDeletion.Anim=                         ; AnimationType
+PassengerDeletion.Anim=                         ; list of Animation
 PassengerDeletion.UnderEMP=false                ; boolean
 ```
 
@@ -1625,14 +1643,14 @@ Both `InitialStrength` and `InitialStrength.Cloning` never surpass the type's `S
   - `kill`: The object will be destroyed normally.
   - `vanish`: The object will be directly removed from the game peacefully instead of actually getting killed.
   - `sell`: If the object is a **building** with buildup, it will be sold instead of destroyed.
-- If this option is not set, the self-destruction logic will not be enabled. `AutoDeath.VanishAnimation` can be set to animation to play at object's location if `vanish` behaviour is chosen.
+- If this option is not set, the self-destruction logic will not be enabled. `AutoDeath.VanishAnimation` can be set to animation to play at object's location if `vanish` behaviour is chosen. If more than one animation is listed, a random one is selected.
 - This logic also supports buildings delivered by [LimboDelivery](#limbodelivery). However in this case, all `AutoDeath.Behavior` values produce identical result where the building is simply deleted.
 
 In `rulesmd.ini`:
 ```ini
 [SOMETECHNO]                                   ; TechnoType
 AutoDeath.Behavior=                            ; enumeration (kill | vanish | sell), default not set
-AutoDeath.VanishAnimation                      ; AnimationType
+AutoDeath.VanishAnimation=                     ; list of Animation
 AutoDeath.OnAmmoDepletion=no                   ; boolean
 AutoDeath.AfterDelay=0                         ; positive integer
 AutoDeath.TechnosDontExist=                    ; List of TechnoTypes
@@ -1688,10 +1706,23 @@ MultiWeapon.IsSecondary=        ; List of integers
 MultiWeapon.SelectCount=2       ; integer
 ```
 
+### Multi VoiceAttack
+
+- Units can customize the attack voice that plays when using more weapons.
+  - If you need to assign an attack-voice to `Weapon1`, simply set `VoiceWeapon1Attack`. The same applies to other weapons.
+  - `VoiceEliteWeaponNAttack` can also be used to specify attack voices for `EliteWeaponN`. The default is `VoiceWeaponNAttack`.
+
+In `rulesmd.ini`:
+```ini
+[SOMETECHNO]                ; TechnoType
+VoiceWeaponNAttack=         ; Sound entry
+VoiceEliteWeaponNAttack=    ; Sound entry
+```
+
 ### No Manual Move
 
 - You can now specify whether a TechnoType is unable to receive move command.
-- Set this to `true` on a building with `UndeploysInto` set could prevent it from undeploying when setting the rally point.
+ - Set this to `true` on a building with `UndeploysInto` set could prevent it from undeploying when setting the rally point.
 
 In `rulesmd.ini`:
 ```ini
@@ -1754,19 +1785,19 @@ Promote.IncludeSpawns=false  ; boolean
 ### Promotion animation
 
 - You can now specify an animation on the unit or structure promotion.
-  - `Promote.VeteranAnimation` is used when unit or structure is promoted to veteran. If this is set for a TechnoType, it'll override the global setting in `[AudioVisual]`.
-  - `Promote.EliteAnimation` is used when unit or structure is promoted to elite. If this is set for a TechnoType, it'll override the global setting in `[AudioVisual]`.
+  - `Promote.VeteranAnimation` is used when unit or structure is promoted to veteran. If this is set for a TechnoType, it'll override the global setting in `[AudioVisual]`. If more than one animation is listed, a random one is selected.
+  - `Promote.EliteAnimation` is used when unit or structure is promoted to elite. If this is set for a TechnoType, it'll override the global setting in `[AudioVisual]`. If more than one animation is listed, a random one is selected.
   - If `Promote.EliteAnimation` is not defined, `Promote.VeteranAnimation` will play instead when unit or structure is promoted to elite.
 
 In `rulesmd.ini`:
 ```ini
 [AudioVisual]
-Promote.VeteranAnimation=         ; AnimationType
-Promote.EliteAnimation=           ; AnimationType
+Promote.VeteranAnimation=         ; list of Animation
+Promote.EliteAnimation=           ; list of Animation
 
-[SOMETECHNO]                      ; TechnoType
-Promote.VeteranAnimation=         ; AnimationType, default to Promote.VeteranAnimation in [AudioVisual]
-Promote.EliteAnimation=           ; AnimationType, default to Promote.EliteAnimation in [AudioVisual]
+[SOMETECHNO]
+Promote.VeteranAnimation=         ; list of Animation, default to Promote.VeteranAnimation in [AudioVisual]
+Promote.EliteAnimation=           ; list of Animation, default to Promote.EliteAnimation in [AudioVisual]
 ```
 
 ### Raise alert when technos are taking damage
@@ -1825,6 +1856,19 @@ RecountBurst=false  ; boolean
 
 [SOMETECHNO]        ; TechnoType
 RecountBurst=       ; boolean, default to [General] -> RecountBurst
+```
+
+### Reset MindControl after transformation
+
+- After the unit conversion is completed, its mind control can be reset.
+  - If all warheads don't have `MindControl=yes`, then `Convert.ResetMindControl=yes` will release all controlled units.
+  - If any warhead has `MindControl=yes`, then `Convert.ResetMindControl=yes` resets its maximum number of controls.
+  - If all weapons don't have `InfiniteMindControl=yes`, then `Convert.ResetMindControl=yes` release controlled units that exceed the limit.
+
+In `rulesmd.ini`:
+```ini
+[SOMETECHNO]                            ; TechnoType, before conversion
+Convert.ResetMindControl=false          ; boolean
 ```
 
 ### Revenge weapon
@@ -1932,29 +1976,17 @@ WarpInWeapon.UseDistanceAsDamage=false  ; boolean
 WarpOutWeapon=                          ; WeaponType
 ```
 
-### Reset MindControl after transformation
-
-- After the unit conversion is completed, its mind control can be reset.
-  - If all warheads don't have `MindControl=yes`, then `Convert.ResetMindControl=yes` will release all controlled units.
-  - If any warhead has `MindControl=yes`, then `Convert.ResetMindControl=yes` resets its maximum number of controls.
-  - If all weapons don't have `InfiniteMindControl=yes`, then `Convert.ResetMindControl=yes` release controlled units that exceed the limit.
-
-In `rulesmd.ini`:
-```ini
-[SOMETECHNO]                            ; TechnoType, before conversion
-Convert.ResetMindControl=false          ; boolean
-```
-
 ## Terrain
 
 ### Destroy animation & sound
 
 - You can now specify a destroy animation and sound for a TerrainType that are played when it is destroyed.
+  - If more than one animation is listed in `DestroyAnim`, a random one is selected.
 
 In `rulesmd.ini`:
 ```ini
 [SOMETERRAINTYPE]  ; TerrainType
-DestroyAnim=       ; AnimationType
+DestroyAnim=       ; list of Animation
 DestroySound=      ; Sound entry
 ```
 
@@ -1973,6 +2005,21 @@ AmphibiousUnload=false   ; boolean
 [SOMEVEHICLE]            ; VehicleType, transport
 AmphibiousEnter=         ; boolean, default to [General] -> AmphibiousEnter
 AmphibiousUnload=        ; boolean, default to [General] -> AmphibiousUnload
+```
+
+### Automatic deploy and blocking deploying based on ammo
+
+- It is now possible for deployable vehicles (`DeploysInto`, `DeployFire`, `IsSimpleDeployer` and those that have passengers) to automatically deploy or prevent deploying based on their current ammo.
+  - `Ammo.AutoDeployMinimumAmount` & `Ammo.AutoDeployMaximumAmount` determine minimum and maximum ammo the vehicle should have for it to automatically deploy. Negative values disable the check.
+  - `Ammo.DeployUnlockMinimumAmount` & `Ammo.AutoDeployMaximumAmount` determine minimum and maximum ammo the vehicle should have for deploying to be available in general. Negative values disable the check.
+
+In `rulesmd.ini`:
+```ini
+[SOMEVEHICLE]                      ; VehicleType
+Ammo.AutoDeployMinimumAmount=-1    ; integer
+Ammo.AutoDeployMaximumAmount=-1    ; integer
+Ammo.DeployUnlockMinimumAmount=-1  ; integer
+Ammo.DeployUnlockMaximumAmount=-1  ; integer
 ```
 
 ### Damaged unit image changes
@@ -2029,7 +2076,21 @@ JumpjetTilt.SidewaysRotationFactor=1.0  ; floating point value
 JumpjetTilt.SidewaysSpeedFactor=1.0     ; floating point value
 ```
 
+### Turret Response
+
+- When the vehicle loses its target, you can customize whether to align the turret direction with the vehicle body.
+  - When `Speed=0` or TechnoTypes cells cannot move due to `MovementRestrictedTo`, the default value is no; in other cases, it is yes.
+
+In `rulesmd.ini`:
+```ini
+[SOMEVEHICLE]       ; VehicleType
+TurretResponse=     ; boolean
+```
+
 ### Turretless Shape Vehicle FireUp
+
+![image](_static/images/vehiclefireup.gif)
+*Use the pre-firing animation effect for Shape vehicle-type mecha units in **Zero Boundary** by @[Stormsulfur](https://space.bilibili.com/11638715/lists/5358986)*
 
 - `Voxel=no` turretless vehicles now support the use of `FireUp`.
  - `FireUp.ResetInRetarget` determines whether a vehicle's FireUp count is reset when its target changes. Forced to be `yes` when there is no target.
@@ -2062,16 +2123,6 @@ In `rulesmd.ini`:
 ```ini
 [SOMEWARHEAD]            ; WarheadType
 RemoveMindControl=false  ; boolean
-```
-
-### Warhead that can not kill
-
-- Warheads can now damage the enemy without killing them (minimum health will be 1).
-
-In `rulesmd.ini`:
-```ini
-[SOMEWARHEAD]  ; WarheadType
-CanKill=true   ; boolean
 ```
 
 ### Chance-based extra damage or Warhead detonation / 'critical hits'
@@ -2110,7 +2161,7 @@ Crit.AnimList.CreateAll=                   ; boolean
 Crit.ActiveChanceAnims=                    ; List of AnimationTypes
 Crit.AnimOnAffectedTargets=false           ; boolean
 Crit.SuppressWhenIntercepted=false         ; boolean
-                                           
+
 [SOMETECHNO]                               ; TechnoType
 ImmuneToCrit=false                         ; boolean
 ```
@@ -2120,6 +2171,9 @@ If you set `Crit.Warhead` to the same Warhead it is defined on, or create a chai
 ```
 
 ### Convert TechnoType on impact
+
+![image](_static/images/convertwh.gif)
+*Vehicle version of Genetic Converter in [NanoStorm](https://www.bilibili.com/opus/896077937747427433)*
 
 - Warheads can now change TechnoTypes of affected units to other Types in the same category (infantry to infantry, vehicles to vehicles, aircraft to aircraft).
   - `ConvertN.From` (where N is 0, 1, 2...) specifies which TechnoTypes are valid for conversion. This entry can have many types listed, meanging that many types will be converted at once. When no types are included, conversion will affect all valid targets.
@@ -2173,29 +2227,32 @@ MindControl.Anim=                     ; Animation, defaults to [CombatDamage] ->
 In `rulesmd.ini`:
 ```ini
 [SOMEWARHEAD]                ; WarheadType
-SplashList=                  ; List of AnimationTypes
+SplashList=                  ; List of AnimationTypes, default to [CombatDamage] -> SplashList
 SplashList.PickRandom=false  ; boolean
 ```
 
 ### Damage multipliers
 
 - Warheads are now able to define the extra damage multiplier for owner house, ally houses and enemy houses.
+  - `DamageOwnerMultiplier.NotAffectsEnemies` and `DamageAlliesMultiplier.NotAffectsEnemies` is used as the default value if `AffectsEnemies=false` is set on the warhead.
 - An extra damage multiplier based on the firer or target's health percentage will be added to the total multiplier. To be elaborate: the damage multiplier will firstly increased by the firer's health percentage multiplies `DamageSourceHealthMultiplier`, then increased by the target's health percentage multiplies `DamageTargetHealthMultiplier`.
 - These multipliers will not affect damage with ignore defenses like `Suicide`.etc .
 
 In `rulesmd.ini`:
 ```ini
 [CombatDamage]
-DamageOwnerMultiplier=1.0           ; floating point value
-DamageAlliesMultiplier=1.0          ; floating point value
-DamageEnemiesMultiplier=1.0         ; floating point value
+DamageOwnerMultiplier=1.0                       ; floating point value
+DamageAlliesMultiplier=1.0                      ; floating point value
+DamageEnemiesMultiplier=1.0                     ; floating point value
+DamageOwnerMultiplier.NotAffectsEnemies=        ; floating point value, default to [CombatDamage] -> DamageOwnerMultiplier
+DamageAlliesMultiplier.NotAffectsEnemies=       ; floating point value, default to [CombatDamage] -> DamageAlliesMultiplier
 
-[SOMEWARHEAD]                       ; WarheadType
-DamageOwnerMultiplier=              ; floating point value, default to [CombatDamage] -> DamageOwnerMultiplier
-DamageAlliesMultiplier=             ; floating point value, default to [CombatDamage] -> DamageAlliesMultiplier
-DamageEnemiesMultiplier=            ; floating point value, default to [CombatDamage] -> DamageEnemiesMultiplier
-DamageSourceHealthMultiplier=0.0    ; floating point value
-DamageTargetHealthMultiplier=0.0    ; floating point value
+[SOMEWARHEAD]                                   ; WarheadType
+DamageOwnerMultiplier=                          ; floating point value, default to [CombatDamage] -> DamageOwnerMultiplier or [CombatDamage] -> DamageOwnerMultiplier.NotAffectsEnemies, depending on AffectsEnemies
+DamageAlliesMultiplier=                         ; floating point value, default to [CombatDamage] -> DamageAlliesMultiplier or [CombatDamage] -> DamageAlliesMultiplier.NotAffectsEnemies, depending on AffectsEnemies
+DamageEnemiesMultiplier=                        ; floating point value, default to [CombatDamage] -> DamageEnemiesMultiplier
+DamageSourceHealthMultiplier=0.0                ; floating point value
+DamageTargetHealthMultiplier=0.0                ; floating point value
 ```
 
 ```{note}
@@ -2347,6 +2404,20 @@ In `rulesmd.ini`:
 Reveal=0       ; integer - cell radius, negative values mean reveal the entire map
 ```
 
+### Reverse engineer warhead
+
+- Warheads can now uses the reverse-engineering logic *(Ares feature)* , the technology of the victim will be reversed.
+
+In `rulesmd.ini`:
+```ini
+[SOMEWARHEAD]          ; WarheadType
+ReverseEngineer=false  ; boolean
+```
+
+```{warning}
+This feature requires Ares 3.0 or higher to function!
+```
+
 ### Sell or undeploy building on impact
 
 - Warheads with `BuildingSell` can now sell buildings with build up image. It has a higher priority than `BuildingUndeploy`.
@@ -2398,6 +2469,16 @@ In `rulesmd.ini`:
 NotHuman.DeathSequence=  ; integer (1 to 5)
 ```
 
+### Warhead that can not kill
+
+- Warheads can now damage the enemy without killing them (minimum health will be 1).
+
+In `rulesmd.ini`:
+```ini
+[SOMEWARHEAD]  ; WarheadType
+CanKill=true   ; boolean
+```
+
 ## Weapons
 
 ### AreaFire target customization
@@ -2427,6 +2508,53 @@ In `rulesmd.ini`:
 [SOMEWEAPON]                    ; WeaponType
 Burst.Delays=-1                 ; integer - burst delays (comma-separated) for shots in order from first to last.
 Burst.FireWithinSequence=false  ; boolean
+```
+
+### Burst without delay
+
+- In vanilla, vehicles and infantries will only fire once in one frame, even if their `ROF` or `BurstDelay` is set to 0. Now you can force units to fire all bursts in one frame by setting the `Burst.NoDelay` to true.
+
+In `rulesmd.ini`:
+```ini
+[SOMEWEAPON]          ; WeaponType
+Burst.NoDelay=false   ; boolean
+```
+
+```{note}
+- This is useless for buildings and aircraft.
+- This will ignore `Burst.Delays` setting.
+```
+
+### Delayed firing
+
+- It is possible to have any weapon fire with a delay by setting `DelayedFire.Duration` on a WeaponType - it supports a single integer or two comma-separated ones for a random range to pick value from.
+  - If `DelayedFire.SkipInTransport` is set to true and firer is in a transport, no delay is applied to firing.
+  - `DelayedFire.Animation` can be used to define animation to create when the delay timer starts. `DelayedFire.OpenToppedAnimation` is used instead if set if the firer is in a transport.
+    - If `DelayedFire.AnimIsAttached` is set to true, the animation is attached to the firing TechnoType. If `DelayedFire.RemoveAnimOnNoDelay` is also set to true the animation is removed when the duration expires or firing is interrupted regardless of its remaining lifetime.
+    - `DelayedFire.AnimOffset` can be used to override the weapon's firing coordinates / FLH for the animation's position.
+    - `DelayedFire.AnimOnTurret` determines whether or not the animation's position is calculated relative to firer's body or turret (only if it has one).
+    - If `DelayedFire.CenterAnimOnFirer` is set the animation is created at the firer's center rather than at the firing coordinates.
+  - If the weapon was fired by InfantryType and `DelayedFire.PauseFiringSequence` is set to true, the infantry's firing sequence animation is paused when it hits the firing frame defined by `FireUp/Prone` or `SecondaryFire/Prone` in its `artmd.ini` entry until the delay timer has expired.
+  - If the weapon has `Burst` > 1 and `DelayedFire.OnlyOnInitialBurst` set to true, the delay occurs only before the initial burst shot. Note that if using Ares, `Burst` index does not reset if firing is interrupted or the firer loses target, meaning it will be able to resume firing without waiting for the delay.
+
+In `rulesmd.ini`:
+```ini
+[SOMEWEAPON]                           ; WeaponType
+DelayedFire.Duration=                  ; integer - single or comma-sep. range (game frames)
+DelayedFire.SkipInTransport=false      ; boolean
+DelayedFire.Animation=                 ; Animation
+DelayedFire.OpenToppedAnimation=       ; Animation
+DelayedFire.AnimIsAttached=true        ; boolean
+DelayedFire.AnimOffset=                ; integer - Forward,Lateral,Height
+DelayedFire.AnimOnTurret=true          ; boolean
+DelayedFire.CenterAnimOnFirer=false    ; boolean
+DelayedFire.RemoveAnimOnNoDelay=false  ; boolean
+DelayedFire.PauseFiringSequence=false  ; boolean
+DelayedFire.OnlyOnInitialBurst=false   ; boolean
+```
+
+```{note}
+AircraftTypes, due to their different attack patterns, will not wait for the delay to expire before attempting to fire and will instead continue without firing if the delay is too long.
 ```
 
 ### Extra warhead detonations
@@ -2466,13 +2594,19 @@ FeedbackWeapon=  ; WeaponType
   - `KeepRange` controls how long the distance to maintain when the techno's ROF timer is ticking. What is actually read is its absolute value. If it is a positive value, it will be stayed outside this distance, just like it has a special `MinimumRange` after firing. If it is a negative value, it will be kept as close as possible to this distance, just like it has a special `Range` after firing. In addition, if the effective range section is too small, it will be considered unable to fire. It is best to have an effective range of 1.0, and 2.0 is best for Infantry.
     - `KeepRange.AllowAI` controls whether this function is effective for computer.
     - `KeepRange.AllowPlayer` controls whether this function is effective for human.
+    - The function won't take effect if the techno's rearm time left is shorter than `KeepRange.EarlyStopFrame`.
+
+```{note}
+That is to say, the total duration of executing KeepRange equals the value of weapon `ROF` minus the value of `KeepRange.EarlyStopFrame`.
+```
 
 In `rulesmd.ini`:
 ```ini
-[SOMEWEAPON]                 ; WeaponType
-KeepRange=0                  ; floating point value
-KeepRange.AllowAI=false      ; boolean
-KeepRange.AllowPlayer=false  ; boolean
+[SOMEWEAPON]                  ; WeaponType
+KeepRange=0                   ; floating point value
+KeepRange.AllowAI=false       ; boolean
+KeepRange.AllowPlayer=false   ; boolean
+KeepRange.EarlyStopFrame=0    ; integer
 ```
 
 ### Make units try turning to target when firing with `OmniFire=yes`
@@ -2500,6 +2634,7 @@ OmniFire.TurnToTarget=no  ; boolean
   - `Strafing.Shots` controls the number of times the weapon is fired during a single strafe run, defaults to 5 if not set. `Ammo` is only deducted at the end of the strafe run, regardless of the number of shots fired.
   - `Strafing.SimulateBurst` controls whether or not the shots fired during strafing simulate behavior of `Burst`, allowing for alternating firing offset. Only takes effect if weapon has `Burst` set to 1 or undefined.
   - `Strafing.UseAmmoPerShot`, if set to `true` overrides the usual behaviour of only deducting ammo after a strafing run and instead doing it after each individual shot.
+  - `Strafing.TargetCell` controls whether the aircraft will change the target of this round to the ground after firing the first shot, to ensure that all `Strafing.Shots` can be dropped. That is, the `Strafing` will not be interrupted by the premature death of the target.
   - `Strafing.EndDelay` can be used to override the delay after firing last shot in strafing run before aircraft resumes another strafing run or returns to base. Defaults to (Weapon `Range` * 256 + 1024) / Aircraft `Speed`. Note that using a short delay with aircraft that can do multiple strafing runs with their ammo can cause undesired behaviour like dancing around or facing weird way depending on other factors like ROF and/or movement speed.
 - There is a special case for aircraft spawned by `Type=SpyPlane` superweapons on `SpyPlane Approach` or `SpyPlane Overfly` mission where `Strafing.Shots` only if explicitly set on its primary weapon, determines the maximum number of times the map revealing effect can activate irregardless of other factors.
 
@@ -2510,6 +2645,7 @@ Strafing=                      ; boolean
 Strafing.Shots=                ; integer
 Strafing.SimulateBurst=false   ; boolean
 Strafing.UseAmmoPerShot=false  ; boolean
+Strafing.TargetCell=false      ; boolean
 Strafing.EndDelay=             ; integer, game frames
 ```
 

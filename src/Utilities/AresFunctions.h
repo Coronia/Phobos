@@ -1,7 +1,7 @@
 #pragma once
 #include <functional>
 #include "Constructs.h"
- 
+
 class TechnoClass;
 class TechnoTypeClass;
 class EBolt;
@@ -31,6 +31,8 @@ public:
 	static EBolt* (__stdcall* CreateAresEBolt)(WeaponTypeClass* pWeapon);
 
 	static void(__stdcall* SpawnSurvivors)(FootClass* pThis, TechnoClass* pKiller, bool Select, bool IgnoreDefenses);
+
+	static bool(__thiscall* ReverseEngineer)(void* pAresHouseExt, TechnoTypeClass* pType);
 
 	static bool(__thiscall* IsTargetConstraintsEligible)(void*, HouseClass*, bool);
 
