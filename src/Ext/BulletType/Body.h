@@ -27,6 +27,8 @@ public:
 		Valueable<WeaponTypeClass*> Interceptable_WeaponOverride;
 		ValueableIdxVector<LaserTrailTypeClass> LaserTrail_Types;
 		Nullable<double> Gravity;
+		Valueable<bool> Vertical_AircraftFix;
+		Nullable<bool> VerticalInitialFacing;
 
 		TrajectoryTypePointer TrajectoryType;
 
@@ -70,6 +72,8 @@ public:
 		Nullable<int> Parachuted_MaxFallRate;
 		Nullable<AnimTypeClass*> BombParachute;
 
+		Valueable<bool> AU;
+
 		// Ares 0.7
 		Nullable<Leptons> BallisticScatter_Min;
 		Nullable<Leptons> BallisticScatter_Max;
@@ -81,6 +85,8 @@ public:
 			, Interceptable_WeaponOverride {}
 			, LaserTrail_Types {}
 			, Gravity {}
+			, Vertical_AircraftFix { true }
+			, VerticalInitialFacing {}
 			, TrajectoryType { }
 			, Shrapnel_AffectsGround { false }
 			, Shrapnel_AffectsBuildings { false }
@@ -118,6 +124,7 @@ public:
 			, Parachuted_FallRate { 1 }
 			, Parachuted_MaxFallRate {}
 			, BombParachute {}
+			, AU { false }
 		{ }
 
 		virtual ~ExtData() = default;
