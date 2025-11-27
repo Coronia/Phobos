@@ -102,6 +102,9 @@ public:
 
 		Valueable<bool> UndeploysInto_Sellable;
 
+		Nullable<int> SpyInfantryVeterancy;
+		Nullable<int> SpyUnitsVeterancy;
+
 		// Ares 0.2
 		Valueable<bool> CloningFacility;
 
@@ -172,6 +175,8 @@ public:
 			, Refinery_UseNormalActiveAnim { false }
 			, HasPowerUpAnim {}
 			, UndeploysInto_Sellable { false }
+			, SpyInfantryVeterancy {}
+			, SpyUnitsVeterancy {}
 
 			// Ares 0.2
 			, CloningFacility { false }

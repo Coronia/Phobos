@@ -377,7 +377,7 @@ DEFINE_HOOK(0x4FD77C, HouseClass_ExpertAI_Superweapons, 0x5)
 	return 0;
 }
 
-DEFINE_HOOK(0x4F9038, HouseClass_AI_Superweapons, 0x5)
+DEFINE_HOOK(0x4F9038, HouseClass_AI, 0x5)
 {
 	GET(HouseClass*, pThis, ESI);
 
@@ -385,11 +385,10 @@ DEFINE_HOOK(0x4F9038, HouseClass_AI_Superweapons, 0x5)
 		return 0;
 
 	const int delay = RulesExt::Global()->AISuperWeaponDelay.Get();
+	const auto pExt = HouseExt::ExtMap.Find(pThis);
 
 	if (delay > 0)
 	{
-		auto const pExt = HouseExt::ExtMap.Find(pThis);
-
 		if (pExt->AISuperWeaponDelayTimer.HasTimeLeft())
 			return 0;
 
@@ -398,6 +397,36 @@ DEFINE_HOOK(0x4F9038, HouseClass_AI_Superweapons, 0x5)
 
 	if (!SessionClass::IsCampaign() || pThis->IQLevel2 >= RulesClass::Instance->SuperWeapons)
 		pThis->AI_TryFireSW();
+
+	if (!pExt->BarracksInfiltratedTimer.IsTicking())
+	{
+		pExt->BarracksInfiltratedTimer.Stop();
+		pThis->BarracksInfiltrated = false;
+		pThis->RecheckTechTree = true;
+		
+		if (pThis->IsCurrentPlayer())
+		{
+			MessageListClass::Instance.PrintMessage(RulesExt::Global()->Message_SpyInfantryVeterancy.Get(), RulesClass::Instance->MessageDelay, HouseClass::CurrentPlayer->ColorSchemeIndex, true);
+
+			if (RulesExt::Global()->EVA_SpyInfantryVeterancy.isset())
+				VoxClass::PlayIndex(RulesExt::Global()->EVA_SpyInfantryVeterancy.Get());
+		}
+	}
+
+	if (!pExt->WarFactoryInfiltratedTimer.IsTicking())
+	{
+		pExt->WarFactoryInfiltratedTimer.Stop();
+		pThis->WarFactoryInfiltrated = false;
+		pThis->RecheckTechTree = true;
+
+		if (pThis->IsCurrentPlayer())
+		{
+			MessageListClass::Instance.PrintMessage(RulesExt::Global()->Message_SpyUnitsVeterancy.Get(), RulesClass::Instance->MessageDelay, HouseClass::CurrentPlayer->ColorSchemeIndex, true);
+
+			if (RulesExt::Global()->EVA_SpyUnitsVeterancy.isset())
+				VoxClass::PlayIndex(RulesExt::Global()->EVA_SpyUnitsVeterancy.Get());
+		}
+	}
 
 	return 0;
 }

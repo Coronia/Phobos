@@ -2,6 +2,8 @@
 
 #include <BitFont.h>
 
+#include <Ext/House/Body.h>
+
 #include <Utilities/EnumFunctions.h>
 
 BuildingExt::ExtContainer BuildingExt::ExtMap;
@@ -326,7 +328,34 @@ bool BuildingExt::ExtData::HandleInfiltrate(HouseClass* pInfiltratorHouse, int m
 	}
 
 	if (!pTypeExt->SpyEffect_Custom)
+	{
+		const auto pFactoryType = pThis->Type->Factory;
+
+		if (pFactoryType == AbstractType::InfantryType)
+		{
+			if (pInfiltratorHouse->BarracksInfiltrated)
+			{
+				const auto pHouseExt = HouseExt::ExtMap.Find(pInfiltratorHouse);
+				const int timer = pTypeExt->SpyInfantryVeterancy.Get(RulesExt::Global()->SpyInfantryVeterancy);
+
+				if (timer > pHouseExt->BarracksInfiltratedTimer.GetTimeLeft())
+					pHouseExt->BarracksInfiltratedTimer.Start(timer);
+			}
+		}
+		else if (pFactoryType == AbstractType::UnitType)
+		{
+			if (pInfiltratorHouse->WarFactoryInfiltrated)
+			{
+				const auto pHouseExt = HouseExt::ExtMap.Find(pInfiltratorHouse);
+				const int timer = pTypeExt->SpyUnitsVeterancy.Get(RulesExt::Global()->SpyUnitsVeterancy);
+
+				if (timer > pHouseExt->WarFactoryInfiltratedTimer.GetTimeLeft())
+					pHouseExt->WarFactoryInfiltratedTimer.Start(timer);
+			}
+		}
+
 		return false;
+	}
 
 	if (pInfiltratorHouse != pVictimHouse)
 	{

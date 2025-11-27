@@ -653,6 +653,8 @@ void HouseExt::ExtData::Serialize(T& Stm)
 		.Process(this->SuspendedEMPulseSWs)
 		.Process(this->SuperExts)
 		.Process(this->ForceEnemyIndex)
+		.Process(this->BarracksInfiltratedTimer)
+		.Process(this->WarFactoryInfiltratedTimer)
 		;
 }
 

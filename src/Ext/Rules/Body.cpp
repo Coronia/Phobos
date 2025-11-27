@@ -336,6 +336,13 @@ void RulesExt::ExtData::LoadBeforeTypeData(RulesClass* pThis, CCINIClass* pINI)
 
 	this->SortCameoByName.Read(exINI, GameStrings::General, "SortCameoByName");
 
+	this->SpyInfantryVeterancy.Read(exINI, GameStrings::General, "SpyInfantryVeterancy");
+	this->Message_SpyInfantryVeterancy.Read(exINI, GameStrings::AudioVisual, "Message.SpyInfantryVeterancy");
+	this->EVA_SpyInfantryVeterancy.Read(exINI, GameStrings::AudioVisual, "EVA.SpyInfantryVeterancy");
+	this->SpyUnitsVeterancy.Read(exINI, GameStrings::General, "SpyUnitsVeterancy");
+	this->Message_SpyUnitsVeterancy.Read(exINI, GameStrings::AudioVisual, "Message.SpyUnitsVeterancy");
+	this->EVA_SpyUnitsVeterancy.Read(exINI, GameStrings::AudioVisual, "EVA.SpyUnitsVeterancy");
+
 	// Section AITargetTypes
 	int itemsCount = pINI->GetKeyCount("AITargetTypes");
 	for (int i = 0; i < itemsCount; ++i)
@@ -611,6 +618,12 @@ void RulesExt::ExtData::Serialize(T& Stm)
 		.Process(this->FallingDownTargetingFix)
 		.Process(this->AIAirTargetingFix)
 		.Process(this->SortCameoByName)
+		.Process(this->SpyInfantryVeterancy)
+		.Process(this->Message_SpyInfantryVeterancy)
+		.Process(this->EVA_SpyInfantryVeterancy)
+		.Process(this->SpyUnitsVeterancy)
+		.Process(this->Message_SpyUnitsVeterancy)
+		.Process(this->EVA_SpyUnitsVeterancy)
 		;
 }
 

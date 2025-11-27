@@ -284,6 +284,13 @@ public:
 		Valueable<bool> AIAirTargetingFix;
 
 		Valueable<bool> SortCameoByName;
+
+		Valueable<int> SpyInfantryVeterancy;
+		Valueable<CSFText> Message_SpyInfantryVeterancy;
+		NullableIdx<VoxClass> EVA_SpyInfantryVeterancy;
+		Valueable<int> SpyUnitsVeterancy;
+		Valueable<CSFText> Message_SpyUnitsVeterancy;
+		NullableIdx<VoxClass> EVA_SpyUnitsVeterancy;
 		
 		ExtData(RulesClass* OwnerObject) : Extension<RulesClass>(OwnerObject)
 			, Storage_TiberiumIndex { -1 }
@@ -508,6 +515,13 @@ public:
 			, AIAirTargetingFix { false }
 
 			, SortCameoByName { false }
+
+			, SpyInfantryVeterancy { -1 }
+			, Message_SpyInfantryVeterancy {}
+			, EVA_SpyInfantryVeterancy {}
+			, SpyUnitsVeterancy { -1 }
+			, Message_SpyUnitsVeterancy {}
+			, EVA_SpyUnitsVeterancy {}
 		{ }
 
 		virtual ~ExtData() = default;

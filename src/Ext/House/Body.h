@@ -39,6 +39,8 @@ public:
 		CDTimerClass CombatAlertTimer;
 		CDTimerClass AISuperWeaponDelayTimer;
 		CDTimerClass AIFireSaleDelayTimer;
+		CDTimerClass BarracksInfiltratedTimer;
+		CDTimerClass WarFactoryInfiltratedTimer;
 
 		//Read from INI
 		Nullable<bool> RepairBaseNodes[3];
@@ -95,6 +97,8 @@ public:
 			, SuspendedEMPulseSWs {}
 			, SuperExts(SuperWeaponTypeClass::Array.Count)
 			, ForceEnemyIndex(-1)
+			, BarracksInfiltratedTimer {}
+			, WarFactoryInfiltratedTimer {}
 		{ }
 
 		bool OwnsLimboDeliveredBuilding(BuildingClass* pBuilding);
