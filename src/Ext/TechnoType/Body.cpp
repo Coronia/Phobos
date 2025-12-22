@@ -10,11 +10,13 @@
 #include <Ext/Anim/Body.h>
 #include <Ext/BuildingType/Body.h>
 #include <Ext/BulletType/Body.h>
+#include <Ext/House/Body.h>
 #include <Ext/Techno/Body.h>
 #include <New/Type/InsigniaTypeClass.h>
 
 #include <Utilities/GeneralUtils.h>
 #include <Utilities/AresHelper.h>
+#include <Utilities/EnumFunctions.h>
 
 TechnoTypeExt::ExtContainer TechnoTypeExt::ExtMap;
 bool TechnoTypeExt::SelectWeaponMutex = false;
@@ -258,6 +260,70 @@ int TechnoTypeExt::ExtData::SelectMultiWeapon(TechnoClass* const pThis, Abstract
 	}
 
 	return 0;
+}
+
+bool TechnoTypeExt::ExtData::CheckAutoDeathForHouse(HouseClass* pOwner)
+{
+	auto it = std::find_if(this->AutoDeathCheckList.begin(), this->AutoDeathCheckList.end(), [pOwner](TechnoTypeExt::AutoDeathCheck const& item) { return item.House == pOwner; });
+
+	if (it == this->AutoDeathCheckList.end()) // this house is not existed in the list
+	{
+		this->AutoDeathCheckList.emplace_back(pOwner, Unsorted::CurrentFrame, false);
+		it = std::prev(this->AutoDeathCheckList.end());
+	}
+	else if (it->CheckFrame == Unsorted::CurrentFrame) // this house has been checked in this frame
+	{
+		return it->Result;
+	}
+	else // this house is existed but hasn't been checked in this frame
+	{
+		it->CheckFrame = Unsorted::CurrentFrame;
+	}
+
+	auto existTechnoTypes = [pOwner](const ValueableVector<TechnoTypeClass*>& vTypes, AffectedHouse affectedHouse, bool any, bool allowLimbo)
+		{
+			auto existSingleType = [pOwner, affectedHouse, allowLimbo](TechnoTypeClass* pType)
+				{
+					if (affectedHouse == AffectedHouse::Owner)
+						return allowLimbo ? HouseExt::ExtMap.Find(pOwner)->CountOwnedPresentAndLimboed(pType) > 0 : pOwner->CountOwnedAndPresent(pType) > 0;
+
+					for (auto const pHouse : HouseClass::Array)
+					{
+						if (EnumFunctions::CanTargetHouse(affectedHouse, pOwner, pHouse)
+							&& (allowLimbo ? HouseExt::ExtMap.Find(pHouse)->CountOwnedPresentAndLimboed(pType) > 0 : pHouse->CountOwnedAndPresent(pType) > 0))
+							return true;
+					}
+
+					return false;
+				};
+
+			return any
+				? std::any_of(vTypes.begin(), vTypes.end(), existSingleType)
+				: std::all_of(vTypes.begin(), vTypes.end(), existSingleType);
+		};
+
+	// death if listed technos don't exist
+	if (!this->AutoDeath_TechnosDontExist.empty())
+	{
+		if (!existTechnoTypes(this->AutoDeath_TechnosDontExist, this->AutoDeath_TechnosDontExist_Houses, !this->AutoDeath_TechnosDontExist_Any, this->AutoDeath_TechnosDontExist_AllowLimboed))
+		{
+			it->Result = true;
+			return true;
+		}
+	}
+
+	// death if listed technos exist
+	if (!this->AutoDeath_TechnosExist.empty())
+	{
+		if (existTechnoTypes(this->AutoDeath_TechnosExist, this->AutoDeath_TechnosExist_Houses, this->AutoDeath_TechnosExist_Any, this->AutoDeath_TechnosExist_AllowLimboed))
+		{
+			it->Result = true;
+			return true;
+		}
+	}
+
+	it->Result = false;
+	return false;
 }
 
 // Ares 0.A source
@@ -691,6 +757,27 @@ WeaponTypeClass* TechnoTypeExt::GetWeaponType(TechnoTypeClass* pThis, int weapon
 	const auto pWeaponStruct = pThis->GetWeapon(weaponIndex);
 
 	return pWeaponStruct ? pWeaponStruct->WeaponType : nullptr;
+}
+
+// AutoDeathCheck
+bool TechnoTypeExt::AutoDeathCheck::Load(PhobosStreamReader& stm, bool registerForChange)
+{
+	return this->Serialize(stm);
+}
+
+bool TechnoTypeExt::AutoDeathCheck::Save(PhobosStreamWriter& stm) const
+{
+	return const_cast<TechnoTypeExt::AutoDeathCheck*>(this)->Serialize(stm);
+}
+
+template <typename T>
+bool TechnoTypeExt::AutoDeathCheck::Serialize(T& stm)
+{
+	return stm
+		.Process(this->House)
+		.Process(this->CheckFrame)
+		.Process(this->Result)
+		.Success();
 }
 
 // =============================
@@ -1441,6 +1528,7 @@ void TechnoTypeExt::ExtData::Serialize(T& Stm)
 		.Process(this->AutoDeath_TechnosExist_Any)
 		.Process(this->AutoDeath_TechnosExist_AllowLimboed)
 		.Process(this->AutoDeath_TechnosExist_Houses)
+		.Process(this->AutoDeathCheckList)
 
 		.Process(this->Slaved_OwnerWhenMasterKilled)
 		.Process(this->SlavesFreeSound)

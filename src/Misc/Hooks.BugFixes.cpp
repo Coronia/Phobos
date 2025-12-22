@@ -2900,3 +2900,22 @@ DEFINE_HOOK(0x4440B0, BuildingClass_KickOutUnit_CloningFacility, 0x6)
 
 	return ContinueIn;
 }
+
+DEFINE_HOOK(0x7410F9, UnitClass_GetObjectActivityState_WeaponSanityCheck, 0x5)
+{
+	enum { CantFire = 0x740FE3, TargetCheck = 0x741106, SkipCheck = 0x741149 };
+
+	GET(WeaponTypeClass*, pWeapon, EBX);
+	GET(UnitClass*, pUnit, ECX);
+
+	if (!pWeapon)
+	{
+		R->EAX(FireError::CANT);
+		return CantFire;
+	}
+
+	if (pUnit->CombatDamage(-1) < 0)
+		return TargetCheck;
+
+	return SkipCheck;
+}

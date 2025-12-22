@@ -26,6 +26,24 @@ public:
 	static constexpr DWORD Canary = 0x11111111;
 	static constexpr size_t ExtPointerOffset = 0xDF4;
 
+	struct AutoDeathCheck
+	{
+		HouseClass* House { nullptr };
+		int CheckFrame { 0 };
+		bool Result { false };
+
+		AutoDeathCheck() = default;
+		AutoDeathCheck(HouseClass* pHouse, int checkFrame, bool result) : House(pHouse), CheckFrame(checkFrame), Result(result)
+		{ }
+
+		bool Load(PhobosStreamReader& stm, bool registerForChange);
+		bool Save(PhobosStreamWriter& stm) const;
+
+	private:
+		template <typename T>
+		bool Serialize(T& stm);
+	};
+
 	class ExtData final : public Extension<TechnoTypeClass>
 	{
 	public:
@@ -101,6 +119,7 @@ public:
 		Valueable<bool> AutoDeath_TechnosExist_Any;
 		Valueable<bool> AutoDeath_TechnosExist_AllowLimboed;
 		Valueable<AffectedHouse> AutoDeath_TechnosExist_Houses;
+		std::vector<AutoDeathCheck> AutoDeathCheckList;
 
 		Valueable<SlaveChangeOwnerType> Slaved_OwnerWhenMasterKilled;
 		NullableIdx<VocClass> SlavesFreeSound;
@@ -577,6 +596,7 @@ public:
 			, AutoDeath_TechnosExist_Any { true }
 			, AutoDeath_TechnosExist_AllowLimboed { true }
 			, AutoDeath_TechnosExist_Houses { AffectedHouse::Owner }
+			, AutoDeathCheckList {}
 
 			, Slaved_OwnerWhenMasterKilled { SlaveChangeOwnerType::Killer }
 			, SlavesFreeSound {}
@@ -867,6 +887,8 @@ public:
 		int SelectMultiWeapon(TechnoClass* const pThis, AbstractClass* const pTarget) const;
 
 		void UpdateAdditionalAttributes();
+
+		bool CheckAutoDeathForHouse(HouseClass* pOwner);
 
 		// Ares 0.2
 		bool CameoIsVeteran(HouseClass* pHouse) const;
