@@ -101,6 +101,7 @@ public:
 	bool HasCumulativeAnim;
 	bool ShouldBeDiscarded;
 	bool NeedsRecalculateStat;
+	CDTimerClass TimedWeaponTimer;
 };
 
 // Container for TechnoClass-specific AttachEffect fields.

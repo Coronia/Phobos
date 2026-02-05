@@ -1848,12 +1848,60 @@ void TechnoExt::ExtData::UpdateAttachEffects()
 			attachEffect->NeedsRecalculateStat = false;
 		}
 
+		auto const pType = attachEffect->GetType();
+		const auto pInvoker = attachEffect->GetInvoker();
+
+		if (pType->TimedWeapon && attachEffect->TimedWeaponTimer.Completed())
+		{
+			const auto pWeapon = pType->TimedWeapon;
+			const auto pFirer = pType->TimedWeapon_FromInvoker ? pInvoker : pThis;
+			const auto pTarget = pType->TimedWeapon_ToInvoker ? pInvoker : pThis;
+			const auto pOwner = pType->TimedWeapon_UseInvokerAsOwner ? pInvoker : pThis;
+
+			if (pFirer && pTarget && pOwner)
+			{
+				bool canFire = true;
+
+				if (pFirer != pTarget && pType->TimedWeapon_Range.Get() > 0)
+				{
+					int range = pType->TimedWeapon_Range.Get();
+
+					if (pType->TimedWeapon_ApplyRangeModifiers)
+						range = WeaponTypeExt::GetRangeWithModifiers(pWeapon, pTarget, range);
+
+					if (range > pFirer->DistanceFrom(pTarget))
+						canFire = false;
+				}
+
+				if (canFire)
+				{
+					int damage = pWeapon->Damage;
+
+					if (pType->TimedWeapon_ApplyFirepowerMult)
+						damage = static_cast<int>(damage * TechnoExt::GetCurrentFirepowerMultiplier(pOwner));
+
+					if (pFirer == pTarget)
+					{
+						WeaponTypeExt::DetonateAt(pWeapon, pTarget, pOwner);
+					}
+					else if (auto const pBullet = pWeapon->Projectile->CreateBullet(pTarget, pOwner,
+						damage, pWeapon->Warhead, pWeapon->Speed, pWeapon->Bright))
+					{
+						const auto pHouse = pOwner->Owner;
+						BulletExt::SimulatedFiringUnlimbo(pBullet, pHouse, pWeapon, pFirer->Location, false);
+						BulletExt::SimulatedFiringEffects(pBullet, pHouse, nullptr, false, true);
+					}
+
+					attachEffect->TimedWeaponTimer.Start(pType->TimedWeapon_Delay);
+				}
+			}
+		}
+
 		const bool hasExpired = attachEffect->HasExpired();
 		const bool shouldDiscard = attachEffect->IsActiveIgnorePowered() && attachEffect->ShouldBeDiscardedNow();
 
 		if (hasExpired || shouldDiscard)
 		{
-			auto const pType = attachEffect->GetType();
 			attachEffect->ShouldBeDiscarded = false;
 
 			if (pType->HasTint())
@@ -1868,14 +1916,9 @@ void TechnoExt::ExtData::UpdateAttachEffects()
 				if (!pType->Cumulative || !pType->ExpireWeapon_CumulativeOnlyOnce || this->GetAttachedEffectCumulativeCount(pType) < 1)
 				{
 					if (pType->ExpireWeapon_UseInvokerAsOwner)
-					{
-						if (auto const pInvoker = attachEffect->GetInvoker())
-							expireWeapons.push_back(std::make_pair(pType->ExpireWeapon, pInvoker));
-					}
+						expireWeapons.push_back(std::make_pair(pType->ExpireWeapon, pInvoker));
 					else
-					{
 						expireWeapons.push_back(std::make_pair(pType->ExpireWeapon, pThis));
-					}
 				}
 			}
 

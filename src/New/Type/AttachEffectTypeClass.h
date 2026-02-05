@@ -97,6 +97,15 @@ public:
 	Valueable<double> ReflectDamage_Chance;
 	Nullable<int> ReflectDamage_Override;
 	Valueable<bool> ReflectDamage_UseInvokerAsOwner;
+	Valueable<WeaponTypeClass*> TimedWeapon;
+	Valueable<bool> TimedWeapon_FromInvoker;
+	Valueable<bool> TimedWeapon_ToInvoker;
+	Valueable<bool> TimedWeapon_UseInvokerAsOwner;
+	Valueable<bool> TimedWeapon_Delay;
+	Valueable<bool> TimedWeapon_InitialDelay;
+	Valueable<Leptons> TimedWeapon_Range;
+	Valueable<bool> TimedWeapon_ApplyRangeModifiers;
+	Valueable<bool> TimedWeapon_ApplyFirepowerMult;
 	Valueable<bool> DisableWeapons;
 	Valueable<bool> Unkillable;
 	ValueableIdx<LaserTrailTypeClass> LaserTrail_Type;
@@ -160,6 +169,15 @@ public:
 		, ReflectDamage_Chance { 1.0 }
 		, ReflectDamage_Override {}
 		, ReflectDamage_UseInvokerAsOwner { false }
+		, TimedWeapon {}
+		, TimedWeapon_FromInvoker { false }
+		, TimedWeapon_ToInvoker { false }
+		, TimedWeapon_UseInvokerAsOwner { false }
+		, TimedWeapon_Delay { -1 }
+		, TimedWeapon_InitialDelay { 0 }
+		, TimedWeapon_Range { Leptons(0) }
+		, TimedWeapon_ApplyRangeModifiers { false }
+		, TimedWeapon_ApplyFirepowerMult { false }
 		, DisableWeapons { false }
 		, Unkillable { false }
 		, LaserTrail_Type { -1 }

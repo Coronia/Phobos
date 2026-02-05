@@ -74,6 +74,9 @@ AttachEffectClass::AttachEffectClass(AttachEffectTypeClass* pType, TechnoClass* 
 	if (pInvoker)
 		TechnoExt::ExtMap.Find(pInvoker)->AttachedEffectInvokerCount++;
 
+	if (pType->TimedWeapon && pType->TimedWeapon_InitialDelay > 0)
+		this->TimedWeaponTimer.Start(pType->TimedWeapon_InitialDelay);
+
 	AttachEffectClass::Array.emplace_back(this);
 }
 
@@ -148,6 +151,9 @@ void AttachEffectClass::PointerGotInvalid(void* ptr, bool removed)
 
 void AttachEffectClass::AI()
 {
+	if (auto const pInvoker = this->Invoker)
+		this->InvokerHouse = pInvoker->Owner;
+
 	auto const pTechno = this->Techno;
 
 	if (!pTechno || pTechno->InLimbo || pTechno->IsImmobilized || pTechno->Transporter)
