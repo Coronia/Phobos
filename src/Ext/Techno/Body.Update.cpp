@@ -1892,7 +1892,8 @@ void TechnoExt::ExtData::UpdateAttachEffects()
 						BulletExt::SimulatedFiringEffects(pBullet, pHouse, nullptr, false, true);
 					}
 
-					attachEffect->TimedWeaponTimer.Start(pType->TimedWeapon_Delay);
+					if (pType->TimedWeapon_Delay > 0)
+						attachEffect->TimedWeaponTimer.Start(pType->TimedWeapon_Delay);
 				}
 			}
 		}

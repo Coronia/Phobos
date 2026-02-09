@@ -159,6 +159,16 @@ void AttachEffectTypeClass::LoadFromINI(CCINIClass* pINI)
 	this->ReflectDamage_Override.Read(exINI, pSection, "ReflectDamage.Override");
 	this->ReflectDamage_UseInvokerAsOwner.Read(exINI, pSection, "ReflectDamage.UseInvokerAsOwner");
 
+	this->TimedWeapon.Read(exINI, pSection, "TimedWeapon");
+	this->TimedWeapon_FromInvoker.Read(exINI, pSection, "TimedWeapon.FromInvoker");
+	this->TimedWeapon_ToInvoker.Read(exINI, pSection, "TimedWeapon.ToInvoker");
+	this->TimedWeapon_UseInvokerAsOwner.Read(exINI, pSection, "TimedWeapon.UseInvokerAsOwner");
+	this->TimedWeapon_Delay.Read(exINI, pSection, "TimedWeapon.Delay");
+	this->TimedWeapon_InitialDelay.Read(exINI, pSection, "TimedWeapon.InitialDelay");
+	this->TimedWeapon_Range.Read(exINI, pSection, "TimedWeapon.Range");
+	this->TimedWeapon_ApplyRangeModifiers.Read(exINI, pSection, "TimedWeapon.ApplyRangeModifiers");
+	this->TimedWeapon_ApplyFirepowerMult.Read(exINI, pSection, "TimedWeapon.ApplyFirepowerMult");
+
 	this->DisableWeapons.Read(exINI, pSection, "DisableWeapons");
 	this->Unkillable.Read(exINI, pSection, "Unkillable");
 	this->LaserTrail_Type.Read(exINI, pSection, "LaserTrail.Type");
@@ -228,6 +238,15 @@ void AttachEffectTypeClass::Serialize(T& Stm)
 		.Process(this->ReflectDamage_Chance)
 		.Process(this->ReflectDamage_Override)
 		.Process(this->ReflectDamage_UseInvokerAsOwner)
+		.Process(this->TimedWeapon)
+		.Process(this->TimedWeapon_FromInvoker)
+		.Process(this->TimedWeapon_ToInvoker)
+		.Process(this->TimedWeapon_UseInvokerAsOwner)
+		.Process(this->TimedWeapon_Delay)
+		.Process(this->TimedWeapon_InitialDelay)
+		.Process(this->TimedWeapon_Range)
+		.Process(this->TimedWeapon_ApplyRangeModifiers)
+		.Process(this->TimedWeapon_ApplyFirepowerMult)
 		.Process(this->DisableWeapons)
 		.Process(this->Unkillable)
 		.Process(this->LaserTrail_Type)

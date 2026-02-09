@@ -101,8 +101,8 @@ public:
 	Valueable<bool> TimedWeapon_FromInvoker;
 	Valueable<bool> TimedWeapon_ToInvoker;
 	Valueable<bool> TimedWeapon_UseInvokerAsOwner;
-	Valueable<bool> TimedWeapon_Delay;
-	Valueable<bool> TimedWeapon_InitialDelay;
+	Valueable<int> TimedWeapon_Delay;
+	Valueable<int> TimedWeapon_InitialDelay;
 	Valueable<Leptons> TimedWeapon_Range;
 	Valueable<bool> TimedWeapon_ApplyRangeModifiers;
 	Valueable<bool> TimedWeapon_ApplyFirepowerMult;

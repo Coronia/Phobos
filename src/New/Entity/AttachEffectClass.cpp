@@ -1048,6 +1048,7 @@ bool AttachEffectClass::Serialize(T& Stm)
 		.Process(this->LastActiveStat)
 		.Process(this->LaserTrail)
 		.Process(this->NeedsRecalculateStat)
+		.Process(this->TimedWeaponTimer)
 		.Success();
 }
 
