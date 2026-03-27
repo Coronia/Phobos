@@ -55,6 +55,14 @@ This page describes all the engine features that are either new and introduced b
   - `ReflectDamage` can be set to true to have any positive damage dealt to the object the effect is attached to be reflected back to the attacker. `ReflectDamage.Warhead` determines which Warhead is used to deal the damage, defaults to `[CombatDamage] -> C4Warhead`. If `ReflectDamage.Warhead.Detonate` is set to true, the Warhead is fully detonated instead of used to simply deal damage. `ReflectDamage.Chance` determines the chance of reflection. `ReflectDamage.Multiplier` is a multiplier to the damage received and then reflected back, while `ReflectDamage.Override` directly overrides the damage. Already reflected damage cannot be further reflected back.
     - Warheads can prevent reflect damage from occuring by setting `SuppressReflectDamage` to true. `SuppressReflectDamage.Types` can control which AttachEffectTypes' reflect damage is suppressed, if none are listed then all of them are suppressed. `SuppressReflectDamage.Groups` does the same thing but for all AttachEffectTypes in the listed groups.
     - `ReflectDamage.UseInvokerAsOwner` can be used to set the house and TechnoType that created the effect (e.g firer of the weapon that applied it) as the reflected damage's owner & invoker instead of the object the effect is attached to.
+  - `TimedWeapon` can be used to fire a weapon periodically for duration of the effect.
+    - `TimedWeapon.FromInvoker` can be set to true to make the weapon fire from the TechnoType that created the effect (e.g firer of the weapon that applied it) if presented. Otherwise it'll fire from the attached object's location.
+    - `TimedWeapon.ToInvoker` can be set to true to make the weapon fire to the TechnoType that created the effect (e.g firer of the weapon that applied it) if presented. Otherwise it'll fire to the attached object's location. If it has the same value as `TimedWeapon.FromInvoker`, then the weapon will be made to directly detonate at the location of firer. Otherwise, it'll create a projectile from the firer's location and launch to the target.
+    - `TimedWeapon.UseInvokerAsOwner` can be used to set the house and TechnoType that created the effect (e.g firer of the weapon that applied it) as the timed weapon's owner & invoker instead of the object the effect is attached to.
+    - `TimedWeapon.Delay` determines the delay between 2 timed weapon's firing. -1 means the timed weapon will only fire once for this attached effect instance.
+    - `TimedWeapon.InitialDelay` determines the delay value for the first firing. If set to 0, a timed weapon will be fired as soon as the application of this attached effect.
+    - `TimedWeapon.Range` determines whether the weapon can't be fired if the attached object and the invoker has a distance greater than this value. 0 means no distance restriction. `TimedWeapon.ApplyRangeModifiers` determines whether this distance could be affected by range modifiers of the weapon's owner.
+    - `TimedWeapon.ApplyFirepowerMult` determines whether the damage of the timed weapon could be affected by firepower multipliers of the weapon's owner.
   - `DisableWeapons` can be used to disable ability to fire any and all weapons.
     - On TechnoTypes with `OpenTopped=true`, `OpenTopped.CheckTransportDisableWeapons` can be set to true to make passengers not be able to fire out if transport's weapons are disabled by `DisableWeapons`.
   - `Unkillable` can be used to prevent the techno from being killed by taken damage (minimum health will be 1).
@@ -147,6 +155,15 @@ ReflectDamage.AffectsHouse=all                     ; List of Affected House Enum
 ReflectDamage.Chance=1.0                           ; floating point value
 ReflectDamage.Override=                            ; integer
 ReflectDamage.UseInvokerAsOwner=false              ; boolean
+TimedWeapon=                                       ; WeaponType
+TimedWeapon.FromInvoker=false                      ; boolean
+TimedWeapon.ToInvoker=false                        ; boolean
+TimedWeapon.UseInvokerAsOwner=false                ; boolean
+TimedWeapon.Delay=-1                               ; integer
+TimedWeapon.InitialDelay=0                         ; integer
+TimedWeapon.Range=0.0                              ; floating point value, distance in cells
+TimedWeapon.ApplyRangeModifiers=false              ; boolean
+TimedWeapon.ApplyFirepowerMult=false               ; boolean
 DisableWeapons=false                               ; boolean
 Unkillable=false                                   ; boolean
 LaserTrail.Type=                                   ; LaserTrailType
