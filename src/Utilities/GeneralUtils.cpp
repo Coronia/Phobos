@@ -329,3 +329,21 @@ int GeneralUtils::SafeMultiply(int value, double mult)
 
 	return static_cast<int>(product);
 }
+
+#ifdef PROFILING
+std::pair<const char*, std::chrono::steady_clock::time_point> GeneralUtils::StartProfile(const char* name)
+{
+	return std::make_pair(name, std::chrono::high_resolution_clock::now());
+}
+
+void GeneralUtils::EndProfile(std::pair<const char*, std::chrono::steady_clock::time_point> record, const char* desc)
+{
+	auto const now = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double, std::milli> elapsed = now - record.second;
+
+	if (desc)
+		Debug::Log("%s (%s) - [%d]ms\n", record.first, desc, elapsed.count());
+	else
+		Debug::Log("%s - [%d]ms\n", record.first, elapsed.count());
+}
+#endif

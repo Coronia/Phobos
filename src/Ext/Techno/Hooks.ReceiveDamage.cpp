@@ -14,6 +14,9 @@ namespace ReceiveDamageTemp
 // #issue 88 : shield logic
 DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 {
+#ifdef PROFILING
+	std::pair<const char*, std::chrono::steady_clock::time_point> record = GeneralUtils::StartProfile("TechnoClass_ReceiveDamage_Shield");
+#endif
 	GET(TechnoClass*, pThis, ECX);
 	LEA_STACK(args_ReceiveDamage*, args, 0x4);
 
@@ -28,6 +31,9 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 	|| !pWHExt->IsInvokerAllowed(pThis, args->Attacker))
 	{
 		damage = 0;
+#ifdef PROFILING
+		GeneralUtils::EndProfile(record, "0 damage");
+#endif
 		return 0;
 	}
 
@@ -176,7 +182,9 @@ DEFINE_HOOK(0x701900, TechnoClass_ReceiveDamage_Shield, 0x6)
 			ReceiveDamageTemp::SkipLowDamageCheck = true;
 		}
 	}
-
+#ifdef PROFILING
+	GeneralUtils::EndProfile(record);
+#endif
 	return 0;
 }
 

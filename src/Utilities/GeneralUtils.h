@@ -12,6 +12,7 @@
 #include <iterator>
 #include <vector>
 #include <string>
+#include <chrono>
 
 #include "Template.h"
 
@@ -43,6 +44,10 @@ public:
 	static int SafeMultiply(int value, int mult);
 	static int SafeMultiply(int value, double mult);
 	static DynamicVectorClass<ColorScheme*>* BuildPalette(const char* paletteFileName);
+#ifdef PROFILING
+	static std::pair<const char*, std::chrono::steady_clock::time_point> StartProfile(const char* name);
+	static void EndProfile(std::pair<const char*, std::chrono::steady_clock::time_point> record, const char* desc = nullptr);
+#endif
 
 	template<typename T>
 	static constexpr T FastPow(T x, size_t n)

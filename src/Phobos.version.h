@@ -110,6 +110,7 @@
 	#endif
 	#define FILE_VERSION_STR VERSION_LONG_STR
 	#define PRODUCT_VERSION VERSION_PREFIX FILE_VERSION_STR GIT_COMMIT_SUFFIX GIT_REF_SUFFIX
+	#define PROFILING
 #endif
 
 // A testing build carries the on-screen "please test the build before shipping" warning and the
