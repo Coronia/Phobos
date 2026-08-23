@@ -12,6 +12,7 @@
 #include "Utilities/Parser.h"
 
 #include <Ext/Rules/Body.h>
+#include <Ext/Scenario/Body.h>
 
 #ifdef TESTING_BUILD
 bool HideWarning = false;
@@ -283,6 +284,19 @@ DEFINE_NAKED_HOOK(0x7CD8EA, _ExeTerminate)
 	__asm {jmp ebx};
 }
 #endif
+
+DEFINE_HOOK(0x7CBDDC, ExeTerminate_PrintGlobalVariables, 0x8)
+{
+	const auto& globalVariables = ScenarioExt::Global()->Variables[true];
+
+	for (auto var : globalVariables)
+	{
+		Debug::Log("Global variable [%d][%s]: [%d]\n", var.first, var.second.Name, var.second.Value);
+	}
+
+	return 0;
+}
+
 DEFINE_HOOK(0x52F639, _YR_CmdLineParse, 0x5)
 {
 	GET(char**, ppArgs, ESI);
