@@ -426,13 +426,14 @@ DEFINE_HOOK(0x75AC93, WalkLocomotionClass_Process_Wake, 0x6)
 {
 	GET(ILocomotion* const, pThis, ESI);
 	const auto pLinkedTo = static_cast<LocomotionClass*>(pThis)->LinkedTo;
+	const auto pExt = TechnoExt::Fetch(pLinkedTo);
 
-	if (!TechnoExt::Fetch(pLinkedTo)->TypeExtData->MakesWake.Get(RulesExt::Global()->WalkLocomotorMakesWake))
+	if (!pExt->TypeExtData->MakesWake.Get(RulesExt::Global()->WalkLocomotorMakesWake))
 		return 0;
 
-	if (pThis->Is_Really_Moving_Now() && !(Unsorted::CurrentFrame % 10) && !pLinkedTo->OnBridge && pLinkedTo->GetCell()->LandType == LandType::Water)
+	if (pThis->Is_Really_Moving_Now() && !((Unsorted::CurrentFrame + pExt->RandomFactor) % 10) && !pLinkedTo->OnBridge && pLinkedTo->GetCell()->LandType == LandType::Water)
 	{
-		const auto pAnimType = TechnoExt::Fetch(pLinkedTo)->TypeExtData->Wake.Get(RulesClass::Instance->Wake);
+		const auto pAnimType = pExt->TypeExtData->Wake.Get(RulesClass::Instance->Wake);
 		auto location = pLinkedTo->GetCoords();
 		GameCreate<AnimClass>(pAnimType, location, 0, 1, 0x600u, false);
 	}

@@ -34,7 +34,7 @@ void TechnoExt::ApplyInterceptor()
 	const auto pTypeExt = this->TypeExtData;
 	const auto pInterceptorType = pTypeExt->InterceptorType.get();
 
-	if (!pInterceptorType || Unsorted::CurrentFrame % pInterceptorType->TargetingDelay != 0)
+	if (!pInterceptorType || (Unsorted::CurrentFrame + this->RandomFactor) % pInterceptorType->TargetingDelay != 0)
 		return;
 
 	const auto pThis = this->OwnerObject();
@@ -593,7 +593,8 @@ void TechnoExt::ApplyGainedSelfHeal(TechnoClass* pThis)
 	if (!RulesExt::Global()->GainSelfHealAllowMultiplayPassive && pThis->Owner->Type->MultiplayPassive)
 		return;
 
-	auto const pTypeExt = TechnoExt::Fetch(pThis)->TypeExtData;
+	auto const pExt = TechnoExt::Fetch(pThis);
+	auto const pTypeExt = pExt->TypeExtData;
 	auto const pType = pTypeExt->OwnerObject();
 	const int healthDeficit = pType->Strength - pThis->Health;
 
@@ -613,8 +614,8 @@ void TechnoExt::ApplyGainedSelfHeal(TechnoClass* pThis)
 			return;
 
 		if ((selfHealType == SelfHealGainType::Infantry)
-			? (Unsorted::CurrentFrame % RulesClass::Instance->SelfHealInfantryFrames)
-			: (Unsorted::CurrentFrame % RulesClass::Instance->SelfHealUnitFrames))
+			? ((Unsorted::CurrentFrame + pExt->RandomFactor) % RulesClass::Instance->SelfHealInfantryFrames)
+			: ((Unsorted::CurrentFrame + pExt->RandomFactor) % RulesClass::Instance->SelfHealUnitFrames))
 		{
 			return;
 		}

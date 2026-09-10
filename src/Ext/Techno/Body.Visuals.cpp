@@ -9,7 +9,8 @@ void TechnoExt::DrawSelfHealPips(TechnoClass* pThis, Point2D* pLocation, Rectang
 	if (!RulesExt::Global()->GainSelfHealAllowMultiplayPassive && pThis->Owner->Type->MultiplayPassive)
 		return;
 
-	auto const pTypeExt = TechnoExt::Fetch(pThis)->TypeExtData;
+	auto const pExt = TechnoExt::Fetch(pThis);
+	auto const pTypeExt = pExt->TypeExtData;
 
 	if (pTypeExt->SelfHealGainType.isset() && pTypeExt->SelfHealGainType.Get() == SelfHealGainType::NoHeal)
 		return;
@@ -79,7 +80,7 @@ void TechnoExt::DrawSelfHealPips(TechnoClass* pThis, Point2D* pLocation, Rectang
 		int xOffset = 0;
 		int yOffset = 0;
 
-		if (Unsorted::CurrentFrame % selfHealFrames <= 5
+		if ((Unsorted::CurrentFrame + pExt->RandomFactor) % selfHealFrames <= 5
 			&& pThis->Health < pType->Strength)
 		{
 			isSelfHealFrame = true;

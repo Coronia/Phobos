@@ -2,6 +2,7 @@
 
 #include <Ext/Bullet/Body.h>
 #include <Ext/Rules/Body.h>
+#include <Ext/Techno/Body.h>
 #include <Ext/WeaponType/Body.h>
 #include <Ext/WarheadType/Body.h>
 #include <Ext/Cell/Body.h>
@@ -112,11 +113,13 @@ DEFINE_HOOK(0x43FB23, BuildingClass_AI_Radiation, 0x5)
 	if (pBuilding->Type->ImmuneToRadiation || pBuilding->InLimbo || pBuilding->BeingWarpedOut || pBuilding->TemporalTargetingMe)
 		return 0;
 
+	const int frame = Unsorted::CurrentFrame + TechnoExt::Fetch(pBuilding)->RandomFactor;
+
 	if (RulesExt::Global()->UseGlobalRadApplicationDelay)
 	{
 		const int delay = RulesExt::Global()->RadApplicationDelay_Building;
 
-		if (delay == 0 || Unsorted::CurrentFrame % delay)
+		if (delay == 0 || frame % delay)
 			return 0;
 	}
 
@@ -154,7 +157,7 @@ DEFINE_HOOK(0x43FB23, BuildingClass_AI_Radiation, 0x5)
 			{
 				const int delay = pRadType->GetBuildingApplicationDelay();
 
-				if (delay == 0 || Unsorted::CurrentFrame % delay)
+				if (delay == 0 || frame % delay)
 					continue;
 			}
 
@@ -210,9 +213,11 @@ DEFINE_HOOK(0x4DA59F, FootClass_AI_Radiation, 0x0)
 
 	GET(FootClass* const, pFoot, ESI);
 
+	const int frame = Unsorted::CurrentFrame + TechnoExt::Fetch(pFoot)->RandomFactor;
+
 	if (pFoot->IsInPlayfield && !pFoot->TemporalTargetingMe
 		&& (!RulesExt::Global()->UseGlobalRadApplicationDelay
-			|| Unsorted::CurrentFrame % RulesClass::Instance->RadApplicationDelay == 0))
+			|| frame % RulesClass::Instance->RadApplicationDelay == 0))
 	{
 		const auto pCell = pFoot->GetCell();
 		const auto pCellExt = CellExt::Fetch(pCell);
@@ -234,7 +239,7 @@ DEFINE_HOOK(0x4DA59F, FootClass_AI_Radiation, 0x0)
 			{
 				const int delay = pRadType->GetApplicationDelay();
 
-				if (delay == 0 || Unsorted::CurrentFrame % delay)
+				if (delay == 0 || frame % delay)
 					continue;
 			}
 
