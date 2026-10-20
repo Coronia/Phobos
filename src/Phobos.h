@@ -117,6 +117,7 @@ public:
 		static bool ShowGameTime;
 		static int ShowGameTime_BoardOpacity;
 		static bool CycleTypeSelectionPrintSummary;
+		static int PlanningNodeCap;
 		// Hotkeys
 		static bool NextIdleHarvesterCommand;
 		static bool QuickSaveCommand;

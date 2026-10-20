@@ -76,6 +76,7 @@ int Phobos::Config::SuperWeaponSidebar_RequiredSignificance = 0;
 bool Phobos::Config::ShowGameTime = false;
 int Phobos::Config::ShowGameTime_BoardOpacity = 40;
 bool Phobos::Config::CycleTypeSelectionPrintSummary = true;
+int Phobos::Config::PlanningNodeCap = 16;
 // Hotkeys
 bool Phobos::Config::NextIdleHarvesterCommand = true;
 bool Phobos::Config::QuickSaveCommand = true;
@@ -306,6 +307,7 @@ DEFINE_HOOK(0x52D21F, InitRules_ThingsThatShouldntBeSerailized, 0x6)
 	Phobos::Config::SaveVariablesOnScenarioEnd = pINI_RULESMD->ReadBool(GameStrings::General, "SaveVariablesOnScenarioEnd", false);
 	Phobos::Config::ShowPlanningPath = pINI_RULESMD->ReadBool("GlobalControls", "DebugPlanningPaths", Phobos::Config::ShowPlanningPath);
 	Phobos::Config::CycleTypeSelectionPrintSummary = pINI_RULESMD->ReadBool("GlobalControls", "CycleTypeSelectionPrintSummary", Phobos::Config::CycleTypeSelectionPrintSummary);
+	Phobos::Config::PlanningNodeCap = pINI_RULESMD->ReadInteger("GlobalControls", "PlanningNodeCap", Phobos::Config::PlanningNodeCap);
 
 	// Hotkeys
 	Phobos::Config::NextIdleHarvesterCommand = pINI_RULESMD->ReadBool("GlobalControls", "NextIdleHarvesterKeyEnabled", Phobos::Config::NextIdleHarvesterCommand);

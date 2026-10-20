@@ -21,6 +21,7 @@
   <!-- Compiled files -->
   <ItemGroup>
     <!-- src/ -->
+    <ClCompile Include="src\Ext\Event\Hooks.cpp" />
     <ClCompile Include="src\Phobos.COM.cpp" />
     <ClCompile Include="src\Phobos.cpp" />
     <ClCompile Include="src\Phobos.CRT.cpp" />
@@ -100,7 +101,7 @@
     <ClCompile Include="src\Ext\Event\Body.cpp" />
     <!-- src\Ext\Foot -->
     <ClCompile Include="src\Ext\Foot\Body.cpp" />
-    <ClCompile Include="src\Ext\Foot\Hooks.DisallowMoving.cpp" />	
+    <ClCompile Include="src\Ext\Foot\Hooks.DisallowMoving.cpp" />
     <!-- src\Ext\House -->
     <ClCompile Include="src\Ext\House\Body.cpp" />
     <ClCompile Include="src\Ext\House\Hooks.AINavalProduction.cpp" />
