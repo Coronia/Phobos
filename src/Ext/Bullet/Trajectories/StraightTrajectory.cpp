@@ -151,14 +151,14 @@ void StraightTrajectory::OnUnlimbo(BulletClass* pBullet, CoordStruct* pCoord, Bu
 		this->AttenuationRange = pWeapon->Range;
 		this->CountOfBurst = pWeapon->Burst;
 
-		if (pType->ApplyRangeModifiers && pFirer)
+		if (pFirer)
 		{
 			if (this->DetonationDistance >= 0)
-				this->DetonationDistance = Leptons(WeaponTypeExt::GetRangeWithModifiers(pWeapon, pFirer, this->DetonationDistance));
+				this->DetonationDistance = Leptons(WeaponTypeExt::GetRangeWithModifiers(pWeapon, pFirer, this->DetonationDistance, pBullet->Target, pType->ApplyRangeModifiers));
 			else
-				this->DetonationDistance = Leptons(-WeaponTypeExt::GetRangeWithModifiers(pWeapon, pFirer, -this->DetonationDistance));
+				this->DetonationDistance = Leptons(-WeaponTypeExt::GetRangeWithModifiers(pWeapon, pFirer, -this->DetonationDistance, pBullet->Target, pType->ApplyRangeModifiers));
 
-			this->AttenuationRange = WeaponTypeExt::GetRangeWithModifiers(pWeapon, pFirer);
+			this->AttenuationRange = WeaponTypeExt::GetRangeWithModifiers(pWeapon, pFirer, pBullet->Target);
 		}
 	}
 

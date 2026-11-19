@@ -1289,6 +1289,8 @@ void TechnoTypeExt::LoadFromINIFile(CCINIClass* const pINI)
 
 	this->Parasite_AllowWaterExit.Read(exINI, pSection, "Parasite.AllowWaterExit");
 
+	this->WaterRangeBonus.Read(exINI, pSection, "WaterRangeBonus");
+
 	// Airstrike tint color
 	this->TintColorAirstrike = GeneralUtils::GetColorFromColorAdd(this->LaserTargetColor.Get(RulesClass::Instance->LaserTargetColor));
 
@@ -1868,6 +1870,7 @@ void TechnoTypeExt::Serialize(T& Stm)
 		.Process(this->AI_Power)
 		.Process(this->AI_Power_AffectedByEnhancers)
 		.Process(this->Parasite_AllowWaterExit)
+		.Process(this->WaterRangeBonus)
 
 		// Ares 0.2
 		.Process(this->RadarJamRadius)

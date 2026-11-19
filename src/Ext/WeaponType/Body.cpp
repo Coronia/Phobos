@@ -401,7 +401,7 @@ void WeaponTypeExt::DetonateAt(WeaponTypeClass* pThis, const CoordStruct& coords
 	BulletExt::Detonate(coords, pOwner, damage, pFiringHouse, pTarget, pThis->Bright, pThis, pThis->Warhead);
 }
 
-int WeaponTypeExt::GetRangeWithModifiers(WeaponTypeClass* pThis, TechnoClass* pFirer)
+int WeaponTypeExt::GetRangeWithModifiers(WeaponTypeClass* pThis, TechnoClass* pFirer, AbstractClass* pTarget)
 {
 	int range = 0;
 
@@ -417,27 +417,38 @@ int WeaponTypeExt::GetRangeWithModifiers(WeaponTypeClass* pThis, TechnoClass* pF
 	if (range == -512)
 		return range;
 
-	return WeaponTypeExt::GetRangeWithModifiers(pThis, pFirer, range);
+	return WeaponTypeExt::GetRangeWithModifiers(pThis, pFirer, range, pTarget);
 }
 
-int WeaponTypeExt::GetRangeWithModifiers(WeaponTypeClass* pThis, TechnoClass* pFirer, int range)
+int WeaponTypeExt::GetRangeWithModifiers(WeaponTypeClass* pThis, TechnoClass* pFirer, int range, AbstractClass* pTarget, bool applyModifier)
 {
 	auto pTechno = pFirer;
 
 	if (auto const pTransport = pTechno->Transporter)
 	{
-		auto const pTypeExt = TechnoExt::Fetch(pTransport)->TypeExtData;
+		auto const pTransportTypeExt = TechnoExt::Fetch(pTransport)->TypeExtData;
 
-		if (pTypeExt->OpenTopped_UseTransportRangeModifiers.Get(RulesExt::Global()->OpenTopped_UseTransportRangeModifiers) && pTypeExt->OwnerObject()->OpenTopped)
+		if (pTransportTypeExt->OpenTopped_UseTransportRangeModifiers.Get(RulesExt::Global()->OpenTopped_UseTransportRangeModifiers) && pTransportTypeExt->OwnerObject()->OpenTopped)
 			pTechno = pTransport;
 	}
 
 	auto const pTechnoExt = TechnoExt::Fetch(pTechno);
+	auto const pTypeExt = pTechnoExt->TypeExtData;
+	const int waterRangeBonus = pTypeExt->WaterRangeBonus.Get();
+
+	if (waterRangeBonus != 0)
+	{
+		if (auto const pTargetTechno = abstract_cast<TechnoClass*>(pTarget))
+		{
+			if (pTargetTechno->GetCell()->LandType == LandType::Water && !pTargetTechno->OnBridge)
+				range += waterRangeBonus;
+		}
+	}
 
 	if (TechnoExt::HasAdditionalAbility(pTechno, AdditionalAbility::Range))
-		range = GeneralUtils::SafeMultiply(range, Math::max(pTechnoExt->TypeExtData->VeteranRange.Get(RulesExt::Global()->VeteranRange), 0.0));
+		range = GeneralUtils::SafeMultiply(range, Math::max(pTypeExt->VeteranRange.Get(RulesExt::Global()->VeteranRange), 0.0));
 
-	if (!pTechnoExt->AE.HasRangeModifier)
+	if (!applyModifier || !pTechnoExt->AE.HasRangeModifier)
 		return range;
 
 	double extraRange = 0.0;

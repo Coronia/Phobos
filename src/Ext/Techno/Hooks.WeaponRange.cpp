@@ -144,7 +144,7 @@ DEFINE_HOOK(0x6F7248, TechnoClass_InRange_WeaponRange, 0x6)
 	}
 	else
 	{
-		range = WeaponTypeExt::GetRangeWithModifiers(pWeapon, pThis);
+		range = WeaponTypeExt::GetRangeWithModifiers(pWeapon, pThis, pTarget);
 
 		if (range != -512)
 		{

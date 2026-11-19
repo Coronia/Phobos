@@ -755,6 +755,7 @@ bool AttachEffectClass::ShouldBeDiscardedNow()
 		if (inRange || outOfRange)
 		{
 			int distance = -1;
+			const auto pTarget = pTechno->Target;
 
 			if (pType->DiscardOn_RangeOverride.isset())
 			{
@@ -762,14 +763,14 @@ bool AttachEffectClass::ShouldBeDiscardedNow()
 			}
 			else
 			{
-				const int weaponIndex = pTechno->SelectWeapon(pTechno->Target);
+				const int weaponIndex = pTechno->SelectWeapon(pTarget);
 				auto const pWeapon = pTechno->GetWeapon(weaponIndex)->WeaponType;
 
 				if (pWeapon)
-					distance = WeaponTypeExt::GetRangeWithModifiers(pWeapon, pTechno);
+					distance = WeaponTypeExt::GetRangeWithModifiers(pWeapon, pTechno, pTarget);
 			}
 
-			const int distanceFromTgt = pTechno->DistanceFrom(pTechno->Target);
+			const int distanceFromTgt = pTechno->DistanceFrom(pTarget);
 
 			if ((inRange && distanceFromTgt <= distance) || (outOfRange && distanceFromTgt >= distance))
 			{

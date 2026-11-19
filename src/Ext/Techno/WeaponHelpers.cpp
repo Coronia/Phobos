@@ -329,9 +329,7 @@ int TechnoExt::ApplyForceWeaponInRange(AbstractClass* pTarget)
 			{
 				auto const pWeapon = weaponIndices[i] == defaultWeaponIndex ? pDefaultWeapon : pThis->GetWeapon(weaponIndices[i])->WeaponType;
 				range = range > 0 ? range : pWeapon->Range;
-
-				if (applyRangeModifiers)
-					range = WeaponTypeExt::GetRangeWithModifiers(pWeapon, pThis, range);
+				range = WeaponTypeExt::GetRangeWithModifiers(pWeapon, pThis, range, pTarget, applyRangeModifiers);
 			}
 
 			if (currentDistance <= range)
@@ -345,9 +343,7 @@ int TechnoExt::ApplyForceWeaponInRange(AbstractClass* pTarget)
 			if (range > 0 || applyRangeModifiers)
 			{
 				range = range > 0 ? range : pDefaultWeapon->Range;
-
-				if (applyRangeModifiers)
-					range = WeaponTypeExt::GetRangeWithModifiers(pDefaultWeapon, pThis, range);
+				range = WeaponTypeExt::GetRangeWithModifiers(pDefaultWeapon, pThis, range, pTarget, applyRangeModifiers);
 			}
 
 			// Don't force weapon if range satisfied

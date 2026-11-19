@@ -820,13 +820,13 @@ bool ScriptExt::EvaluateObjectWithMask(TechnoClass* pTechno, int mask, int attac
 
 					if (const auto pWeapon = TechnoExt::GetCurrentWeapon(pTechno, pTechnoType))
 					{
-						if (distanceToTarget <= (WeaponTypeExt::GetRangeWithModifiers(pWeapon, pTechno) * 4))
+						if (distanceToTarget <= (WeaponTypeExt::GetRangeWithModifiers(pWeapon, pTechno, pTarget) * 4))
 							return true;
 					}
 
 					if (const auto pWeapon = TechnoExt::GetCurrentWeapon(pTechno, pTechnoType, true))
 					{
-						if (distanceToTarget <= (WeaponTypeExt::GetRangeWithModifiers(pWeapon, pTechno) * 4))
+						if (distanceToTarget <= (WeaponTypeExt::GetRangeWithModifiers(pWeapon, pTechno, pTarget) * 4))
 							return true;
 					}
 

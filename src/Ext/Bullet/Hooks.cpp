@@ -697,10 +697,10 @@ DEFINE_HOOK(0x467B8E, BulletClass_AI_Ranged, 0x6)
 		pExt->DistanceTraveled += Game::F2I(coordNew.DistanceFrom(pThis->GetCoords()));
 		int maxRange = pThis->Range;
 
-		if (maxRange > 0 && pThis->WeaponType && pThis->Owner
-			&& WeaponTypeExt::Fetch(pThis->WeaponType)->ProjectileRange_ApplyModifiers.Get(RulesExt::Global()->ProjectileRange_ApplyModifiers))
+		if (maxRange > 0 && pThis->WeaponType && pThis->Owner)
 		{
-			maxRange = WeaponTypeExt::GetRangeWithModifiers(pThis->WeaponType, pThis->Owner, maxRange);
+			const bool applyModifier = WeaponTypeExt::Fetch(pThis->WeaponType)->ProjectileRange_ApplyModifiers.Get(RulesExt::Global()->ProjectileRange_ApplyModifiers);
+			maxRange = WeaponTypeExt::GetRangeWithModifiers(pThis->WeaponType, pThis->Owner, maxRange, pThis->Target, applyModifier);
 		}
 
 		shouldExplode |= pExt->DistanceTraveled >= maxRange;

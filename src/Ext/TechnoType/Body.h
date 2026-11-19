@@ -524,6 +524,7 @@ public:
 	Nullable<bool> AI_Power_AffectedByEnhancers;
 
 	Nullable<bool> Parasite_AllowWaterExit;
+	Valueable<Leptons> WaterRangeBonus;
 
 	// Ares 0.2
 	Valueable<int> RadarJamRadius;
@@ -961,6 +962,8 @@ public:
 		, AI_Power_AffectedByEnhancers {}
 
 		, Parasite_AllowWaterExit {}
+
+		, WaterRangeBonus { Leptons(0) }
 
 		// Ares 0.2
 		, RadarJamRadius { 0 }
